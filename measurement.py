@@ -1,7 +1,7 @@
+import numpy as np
+import matplotlib.pyplot as plt
 
-
-
-def measurement(ax, points_interest, T_space):
+def main(ax, points_interest, T_space):
     ''' Calculates the length and draws the lines for length
     of the butterfly wings.
 
