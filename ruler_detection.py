@@ -10,6 +10,8 @@ RULER_TOP = 0.7
 RULER_LEFT = 0.2
 RULER_RIGHT = 0.4
 FIRST_INDEX_THRESHOLD = 0.9
+HEIGHT_FOCUS = 400
+LINE_WIDTH = 40
 
 """
     Converts image to binary
@@ -64,28 +66,30 @@ def main(img):
     up_focus = up_rectangle + offset + 60
     left_focus = int(binary.shape[1]*0.1)
     right_focus = int(binary.shape[1]*0.9)
-    height_focus = 200
-    focus = ~binary[up_focus: up_focus + height_focus, left_focus: right_focus]
+    focus = ~binary[up_focus: up_focus + HEIGHT_FOCUS, left_focus: right_focus]
 
-    sums = np.sum(focus, axis=0)/float(height_focus)
+    sums = np.sum(focus, axis=0)/float(HEIGHT_FOCUS)
 
     first_index = np.argmax(sums > FIRST_INDEX_THRESHOLD)
 
-    t_space = fourier(sums)
+    t_space = abs(fourier(sums))
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(200, 50))
     ax.imshow(img)
-    ax.plot([left_focus + first_index, left_focus + first_index + t_space], [up_focus, up_focus],  color='red', linewidth=20, markersize=12)
-    ax.plot([left_focus + first_index, left_focus + first_index + t_space*10], [up_focus-30, up_focus-30],  color='blue', linewidth=20, markersize=12)
+
+    x_single = [left_focus + first_index, left_focus + first_index + t_space]
+    y = np.array([up_focus, up_focus])
+    ax.fill_between(x_single, y, y+LINE_WIDTH, color='red')
+
+    x_mult = [left_focus + first_index, left_focus + first_index + t_space*10]
+    ax.fill_between(x_mult, y-LINE_WIDTH, y, color='blue')
     return t_space, ax
 
 # if __name__ == '__main__':
-#     name = "BMNHE_500606.JPG"
+#     name = "BMNHE_502320.JPG"
 #     image_name = "./pictures/"+name
 #     img = imread(image_name)
-#     fig, ax = plt.subplots(ncols = 2, figsize=(200, 50))
-#     plt.suptitle(image_name)
-#     t_space = main(img, ax)
+#     t_space, ax = main(img)
 #     print "T: ", t_space
 #     plt.savefig("./output/"+name)
 #     plt.close()
