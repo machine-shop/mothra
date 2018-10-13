@@ -135,11 +135,24 @@ def detect_top_junction(smooth_boundary_y, side):
 
 def split_picture(closed):
 	means = np.mean(closed, 0)
-	diff = np.diff(means, 5)
-	thresholded = diff > 0.1
-	left_margin = np.argmax(thresholded)
-	right_margin = np.argmax(np.flip(thresholded, 0))
-	return int((len(thresholded) - right_margin -left_margin)/2)
+	diff = np.diff(means, 1)
+	kernel_size = 50
+	kernel_neg_ones = -np.ones(kernel_size//2)
+	kernel_ones = np.ones(kernel_size//2)
+	kernel = np.concatenate((kernel_ones, kernel_neg_ones))
+	convolution = np.convolve(means, kernel, 'same')
+	crop_amount = 0.5
+	crop_lower = int(len(means)*crop_amount/2)
+	crop_upper = int(len(means)*(1-crop_amount/2))
+	cropped_convolution = convolution[crop_lower:crop_upper]
+	plt.plot(cropped_convolution)
+	body_lower = np.argmax(cropped_convolution) + crop_lower
+	body_upper = np.argmin(cropped_convolution) + crop_lower
+	return (body_lower + body_upper) // 2
+	# thresholded = diff > 0.1
+	# left_margin = np.argmax(thresholded)
+	# right_margin = np.argmax(np.flip(thresholded, 0))
+	# return int((len(thresholded) - right_margin -left_margin)/2)
 
 
 @click.command()
@@ -203,7 +216,7 @@ def main(input, output, stage):
             sums = np.sum(focus, axis=0)/float(height_focus)
 
             first_index = np.argmax(sums > 0.9)
-            print(first_index)
+            # print(first_index)
 
             x = range(len(sums))
 
@@ -216,15 +229,16 @@ def main(input, output, stage):
             idx_max = np.argmax(mod[1:]) + 1
             f_space = freq[idx_max] # nb patterns per pixel
             T_space = 1/f_space
-            print("TSPACE: " , T_space)
+            # print("TSPACE: " , T_space)
             ax[0].plot([left_focus + first_index - 18, left_focus + first_index + T_space - 18], [up_focus, up_focus],  color='red', linewidth=20, markersize=12)
             ax[0].plot([left_focus + first_index - 18, left_focus + first_index + T_space*10 - 18], [up_focus-30, up_focus-30],  color='blue', linewidth=20, markersize=12)
 
             # Butterfly binarization
             bfly_rgb = image_rgb[:up_rectangle - 60, :3500] # /!\ Magic number here
-            bfly_hed = color.rgb2hsv(bfly_rgb)[:, :, 1]
-            rescaled = rescale_intensity(bfly_hed, out_range=(0, 255))
+            bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
+            rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
             tresh = threshold_otsu(rescaled)
+            print("Thresh:", thresh)
             bfly_bin = rescaled > thresh
 
             ax[1].set_title('binary')
