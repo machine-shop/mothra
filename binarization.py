@@ -64,9 +64,13 @@ def main(image_rgb):
     bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
     rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
     tresh = threshold_otsu(rescaled)
-    butterfly_binary = rescaled > thresh
+    bfly_bin = rescaled > thresh
 
-    return butterfly_binary
+    fig, ax = plt.subplots()
+    ax.set_title('binary')
+    ax.imshow(bfly_bin)
+
+    return bfly_bin, ax
 
 
 # image_rgb = imread('../data/Measured_images_Data_H.comma/BMNHE_502326.JPG')

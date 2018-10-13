@@ -46,7 +46,7 @@ def fourier(sums):
     t_space = 1/f_space
     return t_space
 
-def main(img, ax):
+def main(img):
     binary = grayscale(img)
 
     up_rectangle = int(binary.shape[0] * RULER_TOP)
@@ -73,18 +73,19 @@ def main(img, ax):
 
     t_space = fourier(sums)
 
-    ax[0].imshow(img)
-    ax[0].plot([left_focus + first_index, left_focus + first_index + t_space], [up_focus, up_focus],  color='red', linewidth=20, markersize=12)
-    ax[0].plot([left_focus + first_index, left_focus + first_index + t_space*10], [up_focus-30, up_focus-30],  color='blue', linewidth=20, markersize=12)
-    return t_space
+    fig, ax = plt.subplots()
+    ax.imshow(img)
+    ax.plot([left_focus + first_index, left_focus + first_index + t_space], [up_focus, up_focus],  color='red', linewidth=20, markersize=12)
+    ax.plot([left_focus + first_index, left_focus + first_index + t_space*10], [up_focus-30, up_focus-30],  color='blue', linewidth=20, markersize=12)
+    return t_space, ax
 
-if __name__ == '__main__':
-    name = "BMNHE_500606.JPG"
-    image_name = "./pictures/"+name
-    img = imread(image_name)
-    fig, ax = plt.subplots(ncols = 2, figsize=(200, 50))
-    plt.suptitle(image_name)
-    t_space = main(img, ax)
-    print "T: ", t_space
-    plt.savefig("./output/"+name)
-    plt.close()
+# if __name__ == '__main__':
+#     name = "BMNHE_500606.JPG"
+#     image_name = "./pictures/"+name
+#     img = imread(image_name)
+#     fig, ax = plt.subplots(ncols = 2, figsize=(200, 50))
+#     plt.suptitle(image_name)
+#     t_space = main(img, ax)
+#     print "T: ", t_space
+#     plt.savefig("./output/"+name)
+#     plt.close()

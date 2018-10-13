@@ -49,7 +49,7 @@ def boundary_tracing(region):
 
 
         if (np.all(current==start) and np.all(backtrack==backtrack_start)):
-            print('iterations :', counter)
+            # print('iterations :', counter)
             break
     return np.array(boundary)
 
@@ -131,7 +131,7 @@ def split_picture(closed):
 	return int((len(thresholded) - right_margin -left_margin)/2)
 
 
-def tracing(binary):
+def main(binary):
     half = split_picture(binary)
 
     divided = np.copy(binary)
@@ -197,6 +197,8 @@ def tracing(binary):
     # print(points_interest)
     ax.scatter(points_interest[:, 1], points_interest[:, 0], color='r')
 
-    return pix_out_l, pix_in_l, pix_in_r, pix_out_r, ax
+    wing_coordinates = pix_out_l, pix_in_l, pix_out_r, pix_in_r
+
+    return wing_coordinates, ax
 
 
