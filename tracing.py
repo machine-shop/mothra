@@ -2,7 +2,6 @@ import numpy as np
 from scipy import ndimage as ndi
 from cmath import exp, polar, pi
 from skimage.measure import regionprops
-import matplotlib.pyplot as plt
 
 
 def moore_neighborhood(current, backtrack): #y, x
@@ -131,7 +130,7 @@ def split_picture(closed):
 	return int((len(thresholded) - right_margin -left_margin)/2)
 
 
-def main(binary):
+def main(binary, ax):
     half = split_picture(binary)
 
     divided = np.copy(binary)
@@ -188,17 +187,18 @@ def main(binary):
     idx_out_r = np.argmin(coords_r[:, 0])
     pix_out_r = list(coords_r[idx_out_r])
     pix_in_r = [smoothed_y_r[idx_in_r], smoothed_x_r[idx_in_r]]
-    fig, ax = plt.subplots()
-    ax.set_title('eroded and Fourier filter')
-    ax.imshow(divided)
-    ax.scatter(smoothed_x_l, smoothed_y_l, color='b')
-    ax.scatter(smoothed_x_r, smoothed_y_r, color='g')
-    points_interest = np.array([pix_out_l, pix_in_l, pix_out_r, pix_in_r])
-    # print(points_interest)
-    ax.scatter(points_interest[:, 1], points_interest[:, 0], color='r')
 
-    wing_coordinates = pix_out_l, pix_in_l, pix_out_r, pix_in_r
+    points_interest = pix_out_l, pix_in_l, pix_out_r, pix_in_r
 
-    return wing_coordinates, ax
+    if ax :
+        ax.set_title('Tracing')
+        ax.imshow(divided)
+        ax.scatter(smoothed_x_l, smoothed_y_l, color='b')
+        ax.scatter(smoothed_x_r, smoothed_y_r, color='g')
+        points_interest = np.array([pix_out_l, pix_in_l, pix_out_r, pix_in_r])
+        ax.scatter(points_interest[:, 1], points_interest[:, 0], color='r')
+
+
+    return points_interest 
 
 

@@ -1,4 +1,3 @@
-from skimage.io import imread
 from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
 import numpy as np
@@ -48,7 +47,7 @@ def fourier(sums):
     t_space = 1/f_space
     return t_space
 
-def main(img):
+def main(img, ax):
     binary = grayscale(img)
 
     up_rectangle = int(binary.shape[0] * RULER_TOP)
@@ -74,16 +73,17 @@ def main(img):
 
     t_space = abs(fourier(sums))
 
-    fig, ax = plt.subplots(figsize=(200, 50))
-    ax.imshow(img)
+    # fig, ax = plt.subplots(figsize=(200, 50))
+    if ax:
+        ax.imshow(img)
 
-    x_single = [left_focus + first_index, left_focus + first_index + t_space]
-    y = np.array([up_focus, up_focus])
-    ax.fill_between(x_single, y, y+LINE_WIDTH, color='red')
+        x_single = [left_focus + first_index, left_focus + first_index + t_space]
+        y = np.array([up_focus, up_focus])
+        ax.fill_between(x_single, y, y+LINE_WIDTH, color='red')
 
-    x_mult = [left_focus + first_index, left_focus + first_index + t_space*10]
-    ax.fill_between(x_mult, y-LINE_WIDTH, y, color='blue')
-    return t_space, ax
+        x_mult = [left_focus + first_index, left_focus + first_index + t_space*10]
+        ax.fill_between(x_mult, y-LINE_WIDTH, y, color='blue')
+    return t_space
 
 # if __name__ == '__main__':
 #     name = "BMNHE_502320.JPG"

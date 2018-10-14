@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def main(ax, points_interest, T_space):
+def main(points_interest, T_space, ax):
     ''' Calculates the length and draws the lines for length
     of the butterfly wings.
 
@@ -49,18 +49,18 @@ def main(ax, points_interest, T_space):
 
     dst_pix = (dist_l_pix, dist_r_pix)
     dst_mm = (dist_l_mm, dist_r_mm)
+    if ax:
+        ax.set_title('final image')
+        # ax.imshow(image)
+        ax.plot([pix_out_l[1], pix_in_l[1]], [pix_out_l[0], pix_in_l[0]], color='r')
+        ax.plot([pix_out_r[1], pix_in_r[1]], [pix_out_r[0], pix_in_r[0]], color='r')
+        ax.text(int((pix_out_l[1] + pix_in_l[1] ) /2) +50,
+                   int((pix_out_l[0] + pix_in_l[0]) / 2) - 50,
+                   'dist_left = ' + str(round(dist_l_mm, 2)) + ' mm',
+                   color='r')
+        ax.text(int((pix_out_r[1] + pix_in_r[1]) / 2) + 50,
+                   int((pix_out_r[0] + pix_in_r[0]) / 2) + 50,
+                   'dist_right = ' + str(round(dist_r_mm, 2)) + ' mm',
+                   color='r')
 
-    ax.set_title('final image')
-    # ax.imshow(image)
-    ax.plot([pix_out_l[1], pix_in_l[1]], [pix_out_l[0], pix_in_l[0]], color='r')
-    ax.plot([pix_out_r[1], pix_in_r[1]], [pix_out_r[0], pix_in_r[0]], color='r')
-    ax.text(int((pix_out_l[1] + pix_in_l[1] ) /2) +50,
-               int((pix_out_l[0] + pix_in_l[0]) / 2) - 50,
-               'dist_left = ' + str(round(dist_l_mm, 2)) + ' mm',
-               color='r')
-    ax.text(int((pix_out_r[1] + pix_in_r[1]) / 2) + 50,
-               int((pix_out_r[0] + pix_in_r[0]) / 2) + 50,
-               'dist_right = ' + str(round(dist_r_mm, 2)) + ' mm',
-               color='r')
-
-    return ax, dst_pix, dst_mm
+    return dst_pix, dst_mm

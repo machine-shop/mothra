@@ -47,7 +47,7 @@ def find_label_edge(binary, focus):
 	return crop_right
 
 
-def main(image_rgb):
+def main(image_rgb, ax):
 
 	# find top of ruler
     image_gray = image_rgb[:, :, 0]
@@ -66,11 +66,12 @@ def main(image_rgb):
     tresh = threshold_otsu(rescaled)
     bfly_bin = rescaled > thresh
 
-    fig, ax = plt.subplots()
-    ax.set_title('binary')
-    ax.imshow(bfly_bin)
+    # fig, ax = plt.subplots()
+    if ax:
+        ax.set_title('binary')
+        ax.imshow(bfly_bin)
 
-    return bfly_bin, ax
+    return bfly_bin
 
 
 # image_rgb = imread('../data/Measured_images_Data_H.comma/BMNHE_502326.JPG')
