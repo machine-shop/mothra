@@ -1,6 +1,4 @@
 import numpy as np
-from skimage.io import imread
-import matplotlib.pyplot as plt
 from skimage.filters import threshold_otsu
 from scipy import ndimage as ndi
 from skimage.measure import regionprops

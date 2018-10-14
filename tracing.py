@@ -124,7 +124,7 @@ def detect_top_junction(smooth_boundary_y, side):
 def split_picture(closed):
 	means = np.mean(closed, 0)
 	diff = np.diff(means, 5)
-	thresholded = diff > 0.1
+	thresholded = diff > 0.01
 	left_margin = np.argmax(thresholded)
 	right_margin = np.argmax(np.flip(thresholded, 0))
 	return int((len(thresholded) - right_margin -left_margin)/2)
@@ -132,6 +132,7 @@ def split_picture(closed):
 
 def main(binary, ax):
     half = split_picture(binary)
+    print(half)
 
     divided = np.copy(binary)
     divided[:, half:half+5] = 0

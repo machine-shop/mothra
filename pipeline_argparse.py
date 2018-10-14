@@ -9,10 +9,11 @@ from skimage.io import imread
 import shutil
 
 """
-Docstring
+Example :
+    $ python pipeline_argparse.py --stage 4 --plot -dpi 400
 """
 def main():
-     # Assign description to the help doc
+    # Assign description to the help doc
     parser = argparse.ArgumentParser(
         description='Description here')
     # Add arguments
@@ -21,7 +22,7 @@ def main():
         action='store_true',
         help='If entered images are plotted to the output folder')
     # Input path
-    parser.add_argument('-r', '--raw_image', 
+    parser.add_argument('-r', '--raw_images', 
         type=str, 
         help='The input path for raw images', 
         required=False, 
@@ -40,7 +41,7 @@ def main():
     # Dots per inch
     parser.add_argument('-dpi',  
         type=int,
-        help='Dots per pixel of the saved figures', 
+        help='Dots per inche of the saved figures', 
         default=300)
 
     args = parser.parse_args()
@@ -54,22 +55,23 @@ def main():
     if not args.stage in [1, 2, 3, 4]:
         print('ERROR : Stage can only be 1, 2, 3 or 4')
         return 0
-    raw_image_path = args.raw_image
+    raw_image_path = args.raw_images
     
     stages = ['ruler_detection', 'binarization', 'tracing', 'measurement']
     pipeline_process = stages[:args.stage]
 
     image_names = os.listdir(raw_image_path)
-    ax = [None, None, None]
-    if args.plot:
-        ncols = min(len(pipeline_process), 3)
-        fig, ax = plt.subplots(ncols = ncols, figsize=(20, 5))
-
+    
     # For testing purpose, the pipeline is only applied to the first 3 images
     for image_name in image_names[:3]:
         print(image_name)
         image_path = os.path.normpath(raw_image_path + '/' + image_name)
         image_rgb = imread(image_path)
+        ax = [None, None, None]
+        if args.plot:
+            ncols = min(len(pipeline_process), 3)
+            fig, ax = plt.subplots(ncols = ncols, figsize=(20, 5))
+
         for step in pipeline_process:
             if step == 'ruler_detection': 
                 ax0 = ax

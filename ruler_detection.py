@@ -3,7 +3,6 @@ from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
 import cmath
-import matplotlib.pyplot as plt
 
 RULER_TOP = 0.7
 RULER_LEFT = 0.2

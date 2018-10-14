@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 def main(points_interest, T_space, ax):
     ''' Calculates the length and draws the lines for length
