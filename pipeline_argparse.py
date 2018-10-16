@@ -1,10 +1,7 @@
 import os
 import argparse
-import ruler_detection
+from butterfly import (ruler_detection, tracing, measurement, binarization)
 import matplotlib.pyplot as plt
-import tracing
-import measurement
-import binarization
 from skimage.io import imread
 import shutil
 
