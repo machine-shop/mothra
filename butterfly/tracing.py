@@ -103,6 +103,9 @@ def inv_fourier(descriptors, n_points = 1000):
     return y, x
 
 def detect_top_junction(smooth_boundary_y, side):
+    """This function needs documentation
+
+    """
     if side=='r':
         coeff = -1
     elif side == 'l':
@@ -121,16 +124,38 @@ def detect_top_junction(smooth_boundary_y, side):
         iterations += 1
         current_idx = next_idx
 
+
 def split_picture(closed):
-	means = np.mean(closed, 0)
-	diff = np.diff(means, 5)
-	thresholded = diff > 0.01
-	left_margin = np.argmax(thresholded)
-	right_margin = np.argmax(np.flip(thresholded, 0))
-	return int((len(thresholded) - right_margin -left_margin)/2)
+    """Calculate the middle of the butterfly.
+
+    Parameters
+    ----------
+    closed : ndarray of bool
+        Binary butterfly mask.
+
+    Returns
+    -------
+    midpoint : int
+        Horizontal coordinate for middle of butterfly.
+
+    Notes
+    -----
+    Currently, this is calculated by finding the extent of the
+    butterfly, and splitting that in half.
+
+    """
+    means = np.mean(closed, 0)
+    diff = np.diff(means, 5)
+    thresholded = diff > 0.01
+    left_margin = np.argmax(thresholded)
+    right_margin = np.argmax(np.flip(thresholded, 0))
+    return int((len(thresholded) + right_margin - left_margin)/2)
 
 
 def main(binary, ax):
+    """This function needs documentation
+
+    """
     half = split_picture(binary)
     print(half)
 
