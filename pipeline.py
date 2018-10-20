@@ -32,7 +32,7 @@ def main():
         default='outputs')
     # Stage
     parser.add_argument('-s', '--stage', 
-        type=int,
+        type=str,
         help='Stage number', 
         required=True)
     # Dots per inch
@@ -48,19 +48,21 @@ def main():
         shutil.rmtree(args.output_folder)
     os.mkdir(args.output_folder)
 
+    stages = ['ruler_detection', 'binarization', 'tracing', 'measurements']
 
-    if not args.stage in [1, 2, 3, 4]:
-        print('ERROR : Stage can only be 1, 2, 3 or 4')
+    if not args.stage in stages:
+        print("ERROR : Stage can only be 'ruler_detection', 'binarization', 'tracing' or 'measurements'")
         return 0
     raw_image_path = args.raw_images
     
-    stages = ['ruler_detection', 'binarization', 'tracing', 'measurement']
-    pipeline_process = stages[:args.stage]
+    
+    stage_idx = stages.index(args.stage)
+    pipeline_process = stages[:stage_idx + 1]
 
     image_names = os.listdir(raw_image_path)
     
     # For testing purpose, the pipeline is only applied to the first 3 images
-    for image_name in image_names[:3]:
+    for image_name in image_names[:10]:
         print(image_name)
         image_path = os.path.normpath(raw_image_path + '/' + image_name)
         image_rgb = imread(image_path)
@@ -83,9 +85,9 @@ def main():
                dst_pix, dst_mm = measurement.main(points_interest, T_space, ax[0]) 
 
         if args.plot:
-            fig.show()
             output_path = os.path.normpath(args.output_folder + '/' + image_name)
             plt.savefig(output_path, dpi=args.dpi)
+            plt.close()
 
 if __name__ == "__main__":
     main()

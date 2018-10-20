@@ -2,7 +2,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from cmath import exp, polar, pi
 from skimage.measure import regionprops
-
+# import matplotlib.pyplot as plt
 
 def moore_neighborhood(current, backtrack): #y, x
     operations = np.array([[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]])
@@ -59,6 +59,7 @@ def symetric_list(n):
             output.append(-i/2)
         else:
             output.append((i+1)/2)
+
     return np.array(output).astype(int)
 
 
@@ -102,27 +103,49 @@ def inv_fourier(descriptors, n_points = 1000):
 
     return y, x
 
-def detect_top_junction(smooth_boundary_y, side):
+def detect_points_interest(smooth_boundary, side, width_cropped):
     """This function needs documentation
 
     """
-    if side=='r':
-        coeff = -1
-    elif side == 'l':
-        coeff = 1
-    start_idx = 50
-    current_idx = coeff*start_idx
+    if side == 'r':
+        corner  = np.array([0, width_cropped])
+    else:
+        corner = np.array([0,0])
+
+    # we look for the boundary closest point to the top right/ left corner
+    # as our starting point
+    distances = np.linalg.norm(smooth_boundary - corner, axis=1)
+    idx_start = np.argmin(distances)
+    outer_pixel = smooth_boundary[idx_start]
+    if side == 'r':
+        ordered_boundary = np.concatenate((smooth_boundary[idx_start+1:],
+                                           smooth_boundary[:idx_start+1]),
+                                          axis=0)
+        ordered_boundary = np.flip(ordered_boundary, axis=0)
+    else:
+        ordered_boundary = np.concatenate((smooth_boundary[idx_start:],
+                                           smooth_boundary[:idx_start]),
+                                           axis=0)
+
+    current_idx = 50
     step = 1
     iterations = 1
+    if side=='r':
+        coeff = 1
+    else : 
+        coeff = -1
     while True:
-        current_pixel_y = smooth_boundary_y[current_idx]
-        next_idx = current_idx + coeff*step
-        next_pixel_y = smooth_boundary_y[next_idx]
-        if current_pixel_y > next_pixel_y:
+        current_pixel = ordered_boundary[current_idx]
+        next_idx = current_idx + step
+        next_pixel = ordered_boundary[next_idx]
+        if current_pixel[0] > next_pixel[0] or coeff*current_pixel[1] < coeff*next_pixel[1]:
             print('iterations :', iterations)
-            return next_idx
+            inner_pixel = next_pixel
+            break
         iterations += 1
         current_idx = next_idx
+    return outer_pixel, inner_pixel
+    
 
 
 def split_picture(closed):
@@ -140,16 +163,16 @@ def split_picture(closed):
 
     Notes
     -----
-    Currently, this is calculated by finding the extent of the
-    butterfly, and splitting that in half.
-
+    Currently, this is calculated by finding the center
+    of gravity of the butterfly.
     """
+    
     means = np.mean(closed, 0)
-    diff = np.diff(means, 5)
-    thresholded = diff > 0.01
-    left_margin = np.argmax(thresholded)
-    right_margin = np.argmax(np.flip(thresholded, 0))
-    return int((len(thresholded) + right_margin - left_margin)/2)
+    normalized = means/np.sum(means)
+    sum_values = 0
+    for i, value in enumerate(normalized):
+        sum_values += i*value
+    return int(sum_values)
 
 
 def main(binary, ax):
@@ -197,31 +220,39 @@ def main(binary, ax):
     descriptors_r = fourier_descriptors(boundary_r, 45)
     smoothed_y_l, smoothed_x_l = inv_fourier(descriptors_l, 1500)
     smoothed_y_r, smoothed_x_r = inv_fourier(descriptors_r, 1500)
+    smoothed_l = np.concatenate((smoothed_y_l.reshape(-1, 1),
+                                 smoothed_x_l.reshape(-1, 1)),
+                                 axis=1)
+    smoothed_r = np.concatenate((smoothed_y_r.reshape(-1, 1),
+                                 smoothed_x_r.reshape(-1, 1)),
+                                 axis=1)
 
-    # Detecting top of the junctions
-    idx_in_l = detect_top_junction(smoothed_y_l, 'l')
-    idx_in_r = detect_top_junction(smoothed_y_r, 'r')
+
+    # Detecting points of interest
+    outer_pix_l, inner_pix_l = detect_points_interest(smoothed_l, 'l', binary.shape[1])
+    outer_pix_r, inner_pix_r = detect_points_interest(smoothed_r, 'r', binary.shape[1])
+
 
     # Points of interest
-    coords_l = region_l.coords
-    coords_r = region_r.coords
+    # coords_l = region_l.coords
+    # coords_r = region_r.coords
 
-    idx_out_l = np.argmin(coords_l[:, 0])
-    pix_out_l = list(coords_l[idx_out_l])
-    pix_in_l = [smoothed_y_l[idx_in_l], smoothed_x_l[idx_in_l]]
+    # idx_out_l = np.argmin(coords_l[:, 0])
+    # pix_out_l = list(coords_l[idx_out_l])
+    # pix_in_l = [smoothed_y_l[idx_in_l], smoothed_x_l[idx_in_l]]
 
-    idx_out_r = np.argmin(coords_r[:, 0])
-    pix_out_r = list(coords_r[idx_out_r])
-    pix_in_r = [smoothed_y_r[idx_in_r], smoothed_x_r[idx_in_r]]
+    # idx_out_r = np.argmin(coords_r[:, 0])
+    # pix_out_r = list(coords_r[idx_out_r])
+    # pix_in_r = [smoothed_y_r[idx_in_r], smoothed_x_r[idx_in_r]]
 
-    points_interest = pix_out_l, pix_in_l, pix_out_r, pix_in_r
+    points_interest = np.array([outer_pix_l, inner_pix_l, outer_pix_r, inner_pix_r])
+    print(points_interest)
 
     if ax :
         ax.set_title('Tracing')
         ax.imshow(divided)
         ax.scatter(smoothed_x_l, smoothed_y_l, color='b')
         ax.scatter(smoothed_x_r, smoothed_y_r, color='g')
-        points_interest = np.array([pix_out_l, pix_in_l, pix_out_r, pix_in_r])
         ax.scatter(points_interest[:, 1], points_interest[:, 0], color='r')
 
 
