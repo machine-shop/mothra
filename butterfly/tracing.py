@@ -104,8 +104,24 @@ def inv_fourier(descriptors, n_points = 1000):
     return y, x
 
 def detect_points_interest(smooth_boundary, side, width_cropped):
-    """This function needs documentation
+    """Calculate the outer and inner points of interest of the wing
 
+    Arguments
+    ---------
+    smooth_boundary : 2D numpy array [[y1, x1], [y2, x2] .. ]
+        Clockwise coordinates of the smoothed boundary, starting
+        with the highest pixel.
+    side : str 'l' or 'r'
+        'left' or 'right' wing
+    width_cropped : int
+        width og the cropped butterfly in pixels
+
+    Returns
+    -------
+    outer_pixel : 1D numpy array [y, x]
+        Coordinates of the boundary closest point to the top right/left corner
+    inner_pixel : 1D numpy array [y, x]
+        Coordinates of the top of the junction between body and wing
     """
     if side == 'r':
         corner  = np.array([0, width_cropped])
