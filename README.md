@@ -4,10 +4,10 @@ The pipeline is set to process the 10 first images of the input folder, just to 
 ## Usage
 
 ```
-$ python pipeline_argparse.py -s <stage> [OPTION]
+$ python pipeline.py -s <stage> [OPTION]
 ```
 ## Description :
-* -s, --stage : integer in ['ruler_detection', 'binarization', 'tracing', 'measurements']
+* -s, --stage : string in ['ruler_detection', 'binarization', 'tracing', 'measurements']
 * -p, --plot : if entered, figures are plot to the output folder
 * -r, --raw_image : path of the input folder (default: 'raw_images')
 * -o, --output_folder : path of the output folder (default: 'outputs')

@@ -192,25 +192,39 @@ def split_picture(closed):
 
 
 def main(binary, ax):
-    """This function needs documentation
+    """Find and retunrs the coordinates of the 4 points of interest
+
+    Arguments
+    ---------
+    binary : 2D array
+        Binarized and and cropped version of the butterfly
+    ax : obj
+        If any is provided, POI, smoothed wings boundaries and binary will
+        be plotted on it 
+
+    Returns
+    -------
+    points_interest : 2D array
+        array of coordinates of the points of interest in the form [y, x]
+        [outer_pix_l, inner_pix_l, outer_pix_r, inner_pix_r]
+    
+    Notes
+    -----
+    This satge can be split in 4 different parts :
+    1. Split the butterfly to separate the two wings
+    2. Find the boundaries of each wing
+    3. Smooth those boundaries with Fourier transformation
+    4. Detect the points of interest from the smoothed boundaries
 
     """
+
+    # 1. Split the butterfly 
     half = split_picture(binary)
-    print(half)
+    # print(half)
 
     divided = np.copy(binary)
     divided[:, half:half+5] = 0
-
-    # dilated = bfly_bin
-    # for i in range(10):
-    #     eroded = binary_erosion(dilated, iterations = 7)
-    #     dilated = binary_dilation(eroded, iterations=7)
-
-    # Splitting the image in two
-    # divided = np.copy(dilated)
-    # half = int(divided.shape[1]/2)
-    # divided[:, half] = 0
-
+    
     # Detecting the wing regions
     markers_divided, _ = ndi.label(divided,
                            structure=ndi.generate_binary_structure(2,1))
@@ -229,9 +243,11 @@ def main(binary, ax):
     else:
         region_l, region_r = regions[idx_2], regions[idx_1]
 
-    # Smoothed boundaries
+    # 2. Find boundaries
     boundary_l = boundary_tracing(region_l)
     boundary_r = boundary_tracing(region_r)
+
+    # 3. Smooth boundaries
     descriptors_l = fourier_descriptors(boundary_l, 45)
     descriptors_r = fourier_descriptors(boundary_r, 45)
     smoothed_y_l, smoothed_x_l = inv_fourier(descriptors_l, 1500)
@@ -244,33 +260,18 @@ def main(binary, ax):
                                  axis=1)
 
 
-    # Detecting points of interest
+    # 4. Detecting points of interest
     outer_pix_l, inner_pix_l = detect_points_interest(smoothed_l, 'l', binary.shape[1])
     outer_pix_r, inner_pix_r = detect_points_interest(smoothed_r, 'r', binary.shape[1])
 
-
-    # Points of interest
-    # coords_l = region_l.coords
-    # coords_r = region_r.coords
-
-    # idx_out_l = np.argmin(coords_l[:, 0])
-    # pix_out_l = list(coords_l[idx_out_l])
-    # pix_in_l = [smoothed_y_l[idx_in_l], smoothed_x_l[idx_in_l]]
-
-    # idx_out_r = np.argmin(coords_r[:, 0])
-    # pix_out_r = list(coords_r[idx_out_r])
-    # pix_in_r = [smoothed_y_r[idx_in_r], smoothed_x_r[idx_in_r]]
-
     points_interest = np.array([outer_pix_l, inner_pix_l, outer_pix_r, inner_pix_r])
-    print(points_interest)
 
     if ax :
         ax.set_title('Tracing')
         ax.imshow(divided)
-        ax.scatter(smoothed_x_l, smoothed_y_l, color='b')
-        ax.scatter(smoothed_x_r, smoothed_y_r, color='g')
-        ax.scatter(points_interest[:, 1], points_interest[:, 0], color='r')
-
+        ax.scatter(smoothed_x_l, smoothed_y_l, color='white', s=4)
+        ax.scatter(smoothed_x_r, smoothed_y_r, color='cyan', s=4)
+        ax.scatter(points_interest[:, 1], points_interest[:, 0], color='r', s=10)
 
     return points_interest 
 
