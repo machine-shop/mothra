@@ -57,7 +57,6 @@ def main():
         print("ERROR : Stage can only be 'ruler_detection', 'binarization', 'tracing' or 'measurements'")
         return 0
 
-
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
 

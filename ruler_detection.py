@@ -3,6 +3,12 @@ from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
 import cmath
+from skimage.io import imread
+import os
+
+
+
+import matplotlib.pyplot as plt
 
 RULER_TOP = 0.7
 RULER_LEFT = 0.2
@@ -49,6 +55,13 @@ def fourier(sums):
 def main(img, ax=None):
     binary = grayscale(img)
 
+    fig, temp_ax = plt.subplots(ncols = 2, figsize=(20, 5))
+    temp_ax[0].imshow(img)
+    temp_ax[1].imshow(binary)
+    output_path = os.path.normpath("output/test")
+    plt.savefig(output_path)
+    plt.close()
+
     up_rectangle = int(binary.shape[0] * RULER_TOP)
     rectangle_binary = binarize_rect(up_rectangle, binary)
     markers, nb_labels = ndi.label(rectangle_binary, structure=ndi.generate_binary_structure(2,1))
@@ -71,9 +84,8 @@ def main(img, ax=None):
     first_index = np.argmax(sums > FIRST_INDEX_THRESHOLD)
 
     t_space = abs(fourier(sums))
-
     # fig, ax = plt.subplots(figsize=(200, 50))
-    if ax:
+    if ax is not None:
         ax.imshow(img)
 
         x_single = [left_focus + first_index, left_focus + first_index + t_space]
@@ -84,11 +96,12 @@ def main(img, ax=None):
         ax.fill_between(x_mult, y-LINE_WIDTH, y, color='blue')
     return t_space
 
-# if __name__ == '__main__':
-#     name = "BMNHE_502320.JPG"
-#     image_name = "./pictures/"+name
-#     img = imread(image_name)
-#     t_space, ax = main(img)
-#     print "T: ", t_space
-#     plt.savefig("./output/"+name)
-#     plt.close()
+if __name__ == '__main__':
+    name = "BMNHE_500606.JPG"
+    image_name = "./pictures/"+name
+    fig, ax = plt.subplots(ncols = 2, figsize=(20, 5))
+    img = imread(image_name)
+    t_space = main(img, ax[0])
+    print("T: ", t_space)
+    plt.savefig("./output/"+name)
+    plt.close()
