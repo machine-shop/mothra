@@ -59,7 +59,7 @@ def main():
     if not args.stage in stages:
         print("ERROR : Stage can only be 'ruler_detection', 'binarization', 'tracing' or 'measurements'")
         return 0
-    raw_image_path = args.raw_images
+    raw_image_path = args.input
 
 
     stage_idx = stages.index(args.stage)
