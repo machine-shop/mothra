@@ -59,6 +59,7 @@ def main(img, ax):
     idx_max = np.argmax(areas)
     coords = regions[idx_max].coords
     offset = np.min(coords[:, 0])
+    top_ruler = up_rectangle + offset
 
     # Focusing on the ticks
     up_focus = up_rectangle + offset + 60
@@ -82,7 +83,7 @@ def main(img, ax):
 
         x_mult = [left_focus + first_index, left_focus + first_index + t_space*10]
         ax.fill_between(x_mult, y-LINE_WIDTH, y, color='blue')
-    return t_space
+    return t_space, top_ruler
 
 # if __name__ == '__main__':
 #     name = "BMNHE_502320.JPG"

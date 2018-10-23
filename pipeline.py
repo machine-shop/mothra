@@ -46,8 +46,11 @@ def main():
 
     # Initialization
     if os.path.exists(args.output_folder):
-        shutil.rmtree(args.output_folder)
-    os.mkdir(args.output_folder)
+        oldList = os.listdir(args.output_folder)
+        for oldFile in oldList:
+            os.remove(args.output_folder+"/"+oldFile)
+    else:
+        os.mkdir(args.output_folder)
 
     stages = ['ruler_detection', 'binarization', 'tracing', 'measurements']
 
@@ -77,9 +80,9 @@ def main():
                 ax0 = ax
                 if len(pipeline_process) > 1:
                     ax0 = ax[0]
-                T_space  = ruler_detection.main(image_rgb, ax0)
+                T_space, top_ruler  = ruler_detection.main(image_rgb, ax0)
             elif step == 'binarization':  
-                binary = binarization.main(image_rgb, ax[1]) 
+                binary = binarization.main(image_rgb, top_ruler, ax[1]) 
             elif step == 'tracing':
                 points_interest = tracing.main(binary, ax[2])
             else :
