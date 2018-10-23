@@ -15,31 +15,33 @@ def main():
         description='Script to automate butterfly wings measurment')
     # Add arguments
     # Plotting
-    parser.add_argument('-p', '--plot', 
+    parser.add_argument('-p', '--plot',
                         action='store_true',
                         help='If entered images are plotted to the output folder')
+
     # Input path
-    parser.add_argument('-r', '--raw_images', 
-                        type=str, 
-                        help='Input path for raw images', 
-                        required=False, 
+    parser.add_argument('-i', '--input',
+                        type=str,
+                        help='Input path for raw images folder or single image',
+                        required=False,
                         default='raw_images')
+
     # Output path
-    parser.add_argument('-o', '--output_folder', 
-                        type=str, 
-                        help='Output path for raw image', 
-                        required=False, 
+    parser.add_argument('-o', '--output_folder',
+                        type=str,
+                        help='Output path for raw image',
+                        required=False,
                         default='outputs')
     # Stage
-    parser.add_argument('-s', '--stage', 
+    parser.add_argument('-s', '--stage',
                         type=str,
                         help="Stage name: 'ruler_detection', 'binarization',\
-                        'tracing', 'measurements", 
+                        'tracing', 'measurements",
                         required=True)
     # Dots per inch
-    parser.add_argument('-dpi',  
+    parser.add_argument('-dpi',
                         type=int,
-                        help='Dots per inch of the saved figures', 
+                        help='Dots per inch of the saved figures',
                         default=300)
 
     args = parser.parse_args()
@@ -54,17 +56,20 @@ def main():
     if not args.stage in stages:
         print("ERROR : Stage can only be 'ruler_detection', 'binarization', 'tracing' or 'measurements'")
         return 0
-    raw_image_path = args.raw_images
-    
-    
+
+
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
 
-    image_names = os.listdir(raw_image_path)
-    
+    raw_image_path = args.input
+    if(os.path.isdir(raw_image_path)):
+        image_names = os.listdir(raw_image_path)
+    else:
+        image_names = [""]
+
     # For testing purpose, the pipeline is only applied to the first 10 images
     for image_name in image_names[:10]:
-        print(image_name)
+        print(raw_image_path + '/' + image_name)
         image_path = os.path.normpath(raw_image_path + '/' + image_name)
         image_rgb = imread(image_path)
         ax = [None, None, None]
@@ -73,17 +78,17 @@ def main():
             fig, ax = plt.subplots(ncols = ncols, figsize=(20, 5))
 
         for step in pipeline_process:
-            if step == 'ruler_detection': 
+            if step == 'ruler_detection':
                 ax0 = ax
                 if len(pipeline_process) > 1:
                     ax0 = ax[0]
                 T_space  = ruler_detection.main(image_rgb, ax0)
-            elif step == 'binarization':  
-                binary = binarization.main(image_rgb, ax[1]) 
+            elif step == 'binarization':
+                binary = binarization.main(image_rgb, ax[1])
             elif step == 'tracing':
                 points_interest = tracing.main(binary, ax[2])
             else :
-               dst_pix, dst_mm = measurement.main(points_interest, T_space, ax[0]) 
+               dst_pix, dst_mm = measurement.main(points_interest, T_space, ax[0])
 
         if args.plot:
             output_path = os.path.normpath(args.output_folder + '/' + image_name)
