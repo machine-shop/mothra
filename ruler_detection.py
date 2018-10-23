@@ -3,6 +3,12 @@ from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
 import cmath
+from skimage.io import imread
+import os
+
+
+
+import matplotlib.pyplot as plt
 
 RULER_TOP = 0.7
 RULER_LEFT = 0.2
@@ -11,20 +17,10 @@ FIRST_INDEX_THRESHOLD = 0.9
 HEIGHT_FOCUS = 400
 LINE_WIDTH = 40
 
-
+"""
+    Converts image to binary
+"""
 def grayscale(img):
-    ''' Returns a grayscale version of the image.
-
-    Parameters
-    ----------
-    img : array
-        array that represents the image
-
-    Returns
-    -------
-    binary : array
-        array that represents the binarized image
-    '''
     image_gray = img[:, :, 0]
     thresh = threshold_otsu(image_gray, nbins = 60)
     binary = image_gray > thresh
@@ -34,20 +30,6 @@ def grayscale(img):
     Returns binary rectangle of segment of ruler were interested in
 """
 def binarize_rect(up_rectangle, binary):
-    '''Returns binary rectangle of segment of ruler were interested in
-
-    Parameters
-    ----------
-    up_rectangle : integer
-        This is the height of the rectangle we are fetching.
-    binary : array
-        array that represents the binarized image
-
-    Returns
-    -------
-    rectangle_binary : array
-        array that represents just the rectangle area of the image we want
-    '''
     left_rectangle = int(binary.shape[1] * RULER_LEFT)
     right_rectangle = int(binary.shape[1] * RULER_RIGHT)
 
@@ -61,18 +43,6 @@ def binarize_rect(up_rectangle, binary):
     Performs a fourier transform to find the frequency and t space
 """
 def fourier(sums):
-    '''Performs a fourier transform to find the frequency and t space
-
-    Parameters
-    ----------
-    sums : array
-        array representing the sums (SUMS OF WHAT)???
-
-    Returns
-    -------
-    t_space : float
-        distance in pixels between two ticks (.5 mm)
-    '''
     fourier = np.fft.fft(sums)
     mod = [cmath.polar(el)[0] for el in fourier]
     freq = np.fft.fftfreq(len(sums))
@@ -82,23 +52,15 @@ def fourier(sums):
     t_space = 1/f_space
     return t_space
 
-
 def main(img, ax=None):
-    '''Finds the distance between ticks
-
-    Parameters
-    ----------
-    img : array
-        array representing the image
-    ax : array
-        array of Axes that show subplots
-
-    Returns
-    -------
-    t_space : float
-        distance between two ticks (.5 mm)
-    '''
     binary = grayscale(img)
+
+    fig, temp_ax = plt.subplots(ncols = 2, figsize=(20, 5))
+    temp_ax[0].imshow(img)
+    temp_ax[1].imshow(binary)
+    output_path = os.path.normpath("output/test")
+    plt.savefig(output_path)
+    plt.close()
 
     up_rectangle = int(binary.shape[0] * RULER_TOP)
     rectangle_binary = binarize_rect(up_rectangle, binary)
@@ -122,9 +84,8 @@ def main(img, ax=None):
     first_index = np.argmax(sums > FIRST_INDEX_THRESHOLD)
 
     t_space = abs(fourier(sums))
-
     # fig, ax = plt.subplots(figsize=(200, 50))
-    if ax:
+    if ax is not None:
         ax.imshow(img)
 
         x_single = [left_focus + first_index, left_focus + first_index + t_space]
@@ -135,11 +96,12 @@ def main(img, ax=None):
         ax.fill_between(x_mult, y-LINE_WIDTH, y, color='blue')
     return t_space
 
-# if __name__ == '__main__':
-#     name = "BMNHE_502320.JPG"
-#     image_name = "./pictures/"+name
-#     img = imread(image_name)
-#     t_space, ax = main(img)
-#     print "T: ", t_space
-#     plt.savefig("./output/"+name)
-#     plt.close()
+if __name__ == '__main__':
+    name = "BMNHE_500606.JPG"
+    image_name = "./pictures/"+name
+    fig, ax = plt.subplots(ncols = 2, figsize=(20, 5))
+    img = imread(image_name)
+    t_space = main(img, ax[0])
+    print("T: ", t_space)
+    plt.savefig("./output/"+name)
+    plt.close()

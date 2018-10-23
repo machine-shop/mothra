@@ -61,7 +61,6 @@ def main():
         return 0
     raw_image_path = args.input
 
-
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
 
