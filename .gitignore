@@ -1,3 +1,6 @@
 pictures/
+__pycache__
+butterfly/__pycache__
 raw_images/
 figures/
+outputs/

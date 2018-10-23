@@ -1,6 +1,6 @@
 import numpy as np
 
-def main(points_interest, T_space, ax=None):
+def main(points_interest, T_space, ax):
     ''' Calculates the length and draws the lines for length
     of the butterfly wings.
 

@@ -30,24 +30,22 @@ def grayscale(img):
     binary = image_gray > thresh
     return binary
 
-"""
-    Returns binary rectangle of segment of ruler were interested in
-"""
+
 def binarize_rect(up_rectangle, binary):
     '''Returns binary rectangle of segment of ruler were interested in
 
-    Parameters
-    ----------
-    up_rectangle : integer
-        This is the height of the rectangle we are fetching.
-    binary : array
-        array that represents the binarized image
+        Parameters
+        ----------
+        up_rectangle : integer
+            This is the height of the rectangle we are fetching.
+        binary : array
+            array that represents the binarized image
 
-    Returns
-    -------
-    rectangle_binary : array
-        array that represents just the rectangle area of the image we want
-    '''
+        Returns
+        -------
+        rectangle_binary : array
+            array that represents just the rectangle area of the image we want
+        '''
     left_rectangle = int(binary.shape[1] * RULER_LEFT)
     right_rectangle = int(binary.shape[1] * RULER_RIGHT)
 
@@ -57,9 +55,7 @@ def binarize_rect(up_rectangle, binary):
     rectangle_binary = binary[up_rectangle:, left_rectangle: right_rectangle]
     return rectangle_binary
 
-"""
-    Performs a fourier transform to find the frequency and t space
-"""
+
 def fourier(sums):
     '''Performs a fourier transform to find the frequency and t space
 
@@ -82,8 +78,7 @@ def fourier(sums):
     t_space = 1/f_space
     return t_space
 
-
-def main(img, ax=None):
+def main(img, ax):
     '''Finds the distance between ticks
 
     Parameters

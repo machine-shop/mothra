@@ -37,7 +37,7 @@ def find_ruler_edge(binary):
 
 
 def find_label_edge(binary, focus):
-	
+
 	markers = ndi.label(focus, structure=ndi.generate_binary_structure(2,1))[0]
 	regions = regionprops(markers)
 	areas = [region.area for region in regions]
@@ -45,14 +45,14 @@ def find_label_edge(binary, focus):
 	filtered_regions = []
 	for i, area in enumerate(areas):
 	    if area > area_min:
-	        filtered_regions.append(regions[i])       
+	        filtered_regions.append(regions[i])
 	left_pixels = [np.min(region.coords[:, 1]) for region in filtered_regions]
 	crop_right = int(0.5*binary.shape[1] + np.min(left_pixels))
 
 	return crop_right
 
 
-def main(image_rgb, ax):
+def main(image_rgb, ax=None):
 
 	# find top of ruler
     image_gray = image_rgb[:, :, 0]
