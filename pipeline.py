@@ -11,8 +11,8 @@ import tracing
 import measurement
 
 @click.command()
-@click.option('--input',  help='Input directory of images')
-@click.option('--output', help='Output directory of images')
+@click.option('--input', default='pictures/', help='Input directory of images')
+@click.option('--output', default='output_figures/', help='Output directory of images')
 @click.option('--stage', default=3, help='Stage of processing to run to')
 def main(input, output, stage):
     

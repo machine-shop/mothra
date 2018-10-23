@@ -8,6 +8,13 @@ from skimage.exposure import rescale_intensity
 
 
 def find_ruler_edge(binary):
+    ''' Returns the pixel
+    binary : array
+        array that represents the binarized image
+
+
+    :return:
+    '''
 
     up_rectangle = int(binary.shape[0]*0.7)
     left_rectangle = int(binary.shape[1]*0.2)

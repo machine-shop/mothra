@@ -11,10 +11,20 @@ FIRST_INDEX_THRESHOLD = 0.9
 HEIGHT_FOCUS = 400
 LINE_WIDTH = 40
 
-"""
-    Converts image to binary
-"""
+
 def grayscale(img):
+    ''' Returns a grayscale version of the image.
+
+    Parameters
+    ----------
+    img : array
+        array that represents the image
+
+    Returns
+    -------
+    binary : array
+        array that represents the binarized image
+    '''
     image_gray = img[:, :, 0]
     thresh = threshold_otsu(image_gray, nbins = 60)
     binary = image_gray > thresh
@@ -24,6 +34,20 @@ def grayscale(img):
     Returns binary rectangle of segment of ruler were interested in
 """
 def binarize_rect(up_rectangle, binary):
+    '''Returns binary rectangle of segment of ruler were interested in
+
+    Parameters
+    ----------
+    up_rectangle : integer
+        This is the height of the rectangle we are fetching.
+    binary : array
+        array that represents the binarized image
+
+    Returns
+    -------
+    rectangle_binary : array
+        array that represents just the rectangle area of the image we want
+    '''
     left_rectangle = int(binary.shape[1] * RULER_LEFT)
     right_rectangle = int(binary.shape[1] * RULER_RIGHT)
 
@@ -37,6 +61,18 @@ def binarize_rect(up_rectangle, binary):
     Performs a fourier transform to find the frequency and t space
 """
 def fourier(sums):
+    '''Performs a fourier transform to find the frequency and t space
+
+    Parameters
+    ----------
+    sums : array
+        array representing the sums (SUMS OF WHAT)???
+
+    Returns
+    -------
+    t_space : float
+        distance in pixels between two ticks (.5 mm)
+    '''
     fourier = np.fft.fft(sums)
     mod = [cmath.polar(el)[0] for el in fourier]
     freq = np.fft.fftfreq(len(sums))
@@ -47,6 +83,20 @@ def fourier(sums):
     return t_space
 
 def main(img, ax):
+    '''Finds the distance between ticks
+
+    Parameters
+    ----------
+    img : array
+        array representing the image
+    ax : array
+        array of Axes that show subplots
+
+    Returns
+    -------
+    t_space : float
+        distance between two tikcs (.5 mm)
+    '''
     binary = grayscale(img)
 
     up_rectangle = int(binary.shape[0] * RULER_TOP)
