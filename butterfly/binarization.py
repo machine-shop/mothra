@@ -6,7 +6,7 @@ import skimage.color as color
 from skimage.exposure import rescale_intensity
 
 
-def find_tags_edge(binary, focus):
+def find_tags_edge(binary, top_ruler):
     """Find the edge between the tag area on the right and the butterfly area
     and returns the corresponding x coordinate of that vertical line
 
@@ -14,8 +14,8 @@ def find_tags_edge(binary, focus):
     ---------
     binary : 2D array
         Binarized image of the entire RGB image
-    focus : 2D array
-        Subset of binary, including the tags area
+    top_ruler : int
+        Y-coordinate of the top of the ruler
 
     Returns
     -------
@@ -24,6 +24,7 @@ def find_tags_edge(binary, focus):
         butterfly area
     """
 
+    focus = binary[:top_ruler, int(binary.shape[1]* 0.5):]
 	
     markers = ndi.label(focus, structure=ndi.generate_binary_structure(2,1))[0]
     regions = regionprops(markers)
@@ -39,7 +40,7 @@ def find_tags_edge(binary, focus):
     return crop_right
 
 
-def main(image_rgb, top_ruler, ax):
+def main(image_rgb, top_ruler, ax=None):
     """Binarizes and crops properly image_rgb
     
     Arguments
@@ -64,9 +65,7 @@ def main(image_rgb, top_ruler, ax):
     thresh_rgb = threshold_otsu(image_gray, nbins = 60)
     binary = image_gray > thresh_rgb
 
-    focus = binary[:top_ruler, int(binary.shape[1]* 0.5):]
-
-    label_edge = find_tags_edge(binary, focus)
+    label_edge = find_tags_edge(binary, top_ruler)
 
     bfly_rgb = image_rgb[:top_ruler, :label_edge]
     bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
