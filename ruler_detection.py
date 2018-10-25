@@ -5,16 +5,13 @@ from scipy import ndimage as ndi
 import cmath
 from skimage.io import imread
 import os
-
-
-
 import matplotlib.pyplot as plt
 
 RULER_TOP = 0.7
 RULER_LEFT = 0.2
 RULER_RIGHT = 0.4
 FIRST_INDEX_THRESHOLD = 0.9
-HEIGHT_FOCUS = 400
+HEIGHT_FOCUS = 900
 LINE_WIDTH = 40
 
 """
@@ -54,16 +51,9 @@ def fourier(sums):
 
 def main(img, ax=None):
     binary = grayscale(img)
-
-    fig, temp_ax = plt.subplots(ncols = 2, figsize=(20, 5))
-    temp_ax[0].imshow(img)
-    temp_ax[1].imshow(binary)
-    output_path = os.path.normpath("output/test")
-    plt.savefig(output_path)
-    plt.close()
-
     up_rectangle = int(binary.shape[0] * RULER_TOP)
     rectangle_binary = binarize_rect(up_rectangle, binary)
+
     markers, nb_labels = ndi.label(rectangle_binary, structure=ndi.generate_binary_structure(2,1))
 
     regions = regionprops(markers)
@@ -74,19 +64,25 @@ def main(img, ax=None):
     offset = np.min(coords[:, 0])
 
     # Focusing on the ticks
-    up_focus = up_rectangle + offset + 60
+    up_focus = up_rectangle + offset + 100
     left_focus = int(binary.shape[1]*0.1)
     right_focus = int(binary.shape[1]*0.9)
     focus = ~binary[up_focus: up_focus + HEIGHT_FOCUS, left_focus: right_focus]
 
+    # img_crop = ~img[up_focus: up_focus + HEIGHT_FOCUS, :, :]
+    # print(img_crop.shape)
+    # print(img_crop)
+    # with open('data.txt', 'w') as outfile:
+    #     for slice_2d in img_crop:
+    #         np.savetxt(outfile, slice_2d, fmt='%d')
+
     sums = np.sum(focus, axis=0)/float(HEIGHT_FOCUS)
 
     first_index = np.argmax(sums > FIRST_INDEX_THRESHOLD)
-
     t_space = abs(fourier(sums))
     # fig, ax = plt.subplots(figsize=(200, 50))
     if ax is not None:
-        ax.imshow(img)
+        ax.imshow(img_crop)
 
         x_single = [left_focus + first_index, left_focus + first_index + t_space]
         y = np.array([up_focus, up_focus])
@@ -99,7 +95,7 @@ def main(img, ax=None):
 if __name__ == '__main__':
     name = "BMNHE_500606.JPG"
     image_name = "./pictures/"+name
-    fig, ax = plt.subplots(ncols = 2, figsize=(20, 5))
+    fig, ax = plt.subplots(ncols = 2, figsize=(50, 10))
     img = imread(image_name)
     t_space = main(img, ax[0])
     print("T: ", t_space)
