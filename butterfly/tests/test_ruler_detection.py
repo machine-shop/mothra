@@ -1,4 +1,4 @@
-import ruler_detection as rd
+from butterfly import ruler_detection as rd
 import numpy as np
 from numpy import testing as nt
 
@@ -10,7 +10,6 @@ def test_grayscale():
                       [2, 2, 2]],
                      [[1, 1, 1],
                       [1, 1, 1]]])
-    print(input.shape)
     output = np.array([[False, True], [False, True], [False, False]])
     nt.assert_equal(rd.grayscale(input), output)
 
@@ -34,9 +33,7 @@ def test_fourier():
 
 
 def test_main_ruler_detection():
-    arr = np.loadtxt('data.txt', dtype=int)
-    input_data = arr.reshape((815, 5184, 3))
-    zeroes = np.full((2641, 5184, 3), 255.0)
-    data = np.concatenate((zeroes, input_data), axis=0)
-    t_space = rd.main(data)
-    nt.assert_almost_equal(t_space, 94.25, decimal=0)
+    data = np.ones((500, 500))
+    data[350:500, 0:500:10] = 0
+    t_space, top_space = rd.main(data, None)
+    nt.assert_almost_equal(t_space, 10, decimal=0)
