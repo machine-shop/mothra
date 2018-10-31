@@ -1,14 +1,17 @@
 import os
 import argparse
+import csv
 from butterfly import (ruler_detection, tracing, measurement, binarization)
 import matplotlib.pyplot as plt
 from skimage.io import imread
-import shutil
+
 
 """
 Example :
     $ python pipeline_argparse.py --stage tracing --plot -dpi 400
 """
+
+
 def main():
     # Assign description to the help doc
     parser = argparse.ArgumentParser(
@@ -17,12 +20,13 @@ def main():
     # Plotting
     parser.add_argument('-p', '--plot',
                         action='store_true',
-                        help='If entered images are plotted to the output folder')
+                        help='If entered images are plotted to the output\
+                        folder')
 
     # Input path
     parser.add_argument('-i', '--input',
                         type=str,
-                        help='Input path for raw images folder or single image',
+                        help='Input path for folder or single image',
                         required=False,
                         default='raw_images')
 
@@ -43,6 +47,10 @@ def main():
                         type=int,
                         help='Dots per inch of the saved figures',
                         default=300)
+    parser.add_argument('-csv', '--path_csv',
+                        type=str,
+                        help='Path of the resulting csv file',
+                        default='results.csv')
 
     args = parser.parse_args()
 
@@ -56,9 +64,19 @@ def main():
 
     stages = ['ruler_detection', 'binarization', 'tracing', 'measurements']
 
-    if not args.stage in stages:
-        print("ERROR : Stage can only be 'ruler_detection', 'binarization', 'tracing' or 'measurements'")
+    if args.stage not in stages:
+        print("ERROR : Stage can only be 'ruler_detection', 'binarization',\
+              'tracing' or 'measurements'")
         return 0
+
+    # Initializing the csv file
+    if args.stage == 'measurements':
+        if os.path.exists(args.path_csv):
+            os.remove(args.path_csv)
+        with open(args.path_csv, 'w') as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerow(['image_id', 'left_wing (mm)', 'right_wing (mm)'])
+
     raw_image_path = args.input
 
     stage_idx = stages.index(args.stage)
@@ -78,25 +96,32 @@ def main():
         ax = [None, None, None]
         if args.plot:
             ncols = min(len(pipeline_process), 3)
-            fig, ax = plt.subplots(ncols = ncols, figsize=(20, 5))
+            fig, ax = plt.subplots(ncols=ncols, figsize=(20, 5))
 
         for step in pipeline_process:
             if step == 'ruler_detection':
                 ax0 = ax
                 if len(pipeline_process) > 1:
                     ax0 = ax[0]
-                T_space, top_ruler  = ruler_detection.main(image_rgb, ax0)
-            elif step == 'binarization':  
-                binary = binarization.main(image_rgb, top_ruler, ax[1]) 
+                T_space, top_ruler = ruler_detection.main(image_rgb, ax0)
+            elif step == 'binarization':
+                binary = binarization.main(image_rgb, top_ruler, ax[1])
             elif step == 'tracing':
                 points_interest = tracing.main(binary, ax[2])
-            else :
-               dst_pix, dst_mm = measurement.main(points_interest, T_space, ax[0])
+            else:
+                dst_pix, dst_mm = measurement.main(points_interest,
+                                                   T_space,
+                                                   ax[0])
+                with open(args.path_csv, 'a') as csv_file:
+                    writer = csv.writer(csv_file)
+                    writer.writerow([image_name, dst_mm[0], dst_mm[1]])
 
         if args.plot:
-            output_path = os.path.normpath(args.output_folder + '/' + image_name)
+            filename = args.output_folder + '/' + image_name
+            output_path = os.path.normpath(filename)
             plt.savefig(output_path, dpi=args.dpi)
             plt.close()
+
 
 if __name__ == "__main__":
     main()

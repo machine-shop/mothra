@@ -5,3 +5,4 @@ pictures/
 raw_images/
 figures/
 outputs/
+*.csv
