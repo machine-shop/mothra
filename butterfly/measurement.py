@@ -50,7 +50,7 @@ def main(points_interest, T_space, ax=None):
 
     dst_pix = (dist_l_pix, dist_r_pix)
     dst_mm = (dist_l_mm, dist_r_mm)
-    if ax:
+    if ax is not None:
         ax[0].set_title('final image')
         # ax.imshow(image)
         ax[0].plot([pix_out_l[1], pix_in_l[1]],
