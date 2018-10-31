@@ -1,6 +1,7 @@
+.pytest_cache
+*~
 pictures/
-__pycache__
-butterfly/__pycache__
+**/__pycache__
 raw_images/
 figures/
 outputs/
