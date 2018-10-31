@@ -26,7 +26,7 @@ def grayscale(img):
         array that represents the binarized image
     '''
     image_gray = img[:, :, 0]
-    thresh = threshold_otsu(image_gray, nbins = 60)
+    thresh = threshold_otsu(image_gray, nbins=60)
     binary = image_gray > thresh
     return binary
 
@@ -74,9 +74,10 @@ def fourier(sums):
     freq = np.fft.fftfreq(len(sums))
 
     idx_max = np.argmax(mod[1:]) + 1
-    f_space = freq[idx_max] # nb patterns per pixel
+    f_space = freq[idx_max]  # nb patterns per pixel
     t_space = 1/f_space
     return t_space
+
 
 def main(img, ax):
     '''Finds the distance between ticks
@@ -97,7 +98,8 @@ def main(img, ax):
 
     up_rectangle = int(binary.shape[0] * RULER_TOP)
     rectangle_binary = binarize_rect(up_rectangle, binary)
-    markers, nb_labels = ndi.label(rectangle_binary, structure=ndi.generate_binary_structure(2,1))
+    markers, nb_labels = ndi.label(rectangle_binary,
+                                   ndi.generate_binary_structure(2, 1))
 
     regions = regionprops(markers)
     areas = [region.area for region in regions]
@@ -123,11 +125,13 @@ def main(img, ax):
     if ax:
         ax.imshow(img)
 
-        x_single = [left_focus + first_index, left_focus + first_index + t_space]
+        x_single = [left_focus + first_index, left_focus + first_index +
+                    t_space]
         y = np.array([up_focus, up_focus])
         ax.fill_between(x_single, y, y+LINE_WIDTH, color='red')
 
-        x_mult = [left_focus + first_index, left_focus + first_index + t_space*10]
+        x_mult = [left_focus + first_index, left_focus + first_index +
+                  t_space*10]
         ax.fill_between(x_mult, y-LINE_WIDTH, y, color='blue')
     return t_space, top_ruler
 
