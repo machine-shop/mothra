@@ -29,13 +29,13 @@ def find_tags_edge(binary, top_ruler):
                         structure=ndi.generate_binary_structure(2, 1))[0]
     regions = regionprops(markers)
     areas = [region.area for region in regions]
-    area_min = 0.01*binary.shape[0]*binary.shape[1]
+    area_min = 0.01 * binary.shape[0] * binary.shape[1]
     filtered_regions = []
     for i, area in enumerate(areas):
         if area > area_min:
             filtered_regions.append(regions[i])
     left_pixels = [np.min(region.coords[:, 1]) for region in filtered_regions]
-    crop_right = int(0.5*binary.shape[1] + np.min(left_pixels))
+    crop_right = int(0.5 * binary.shape[1] + np.min(left_pixels))
 
     return crop_right
 

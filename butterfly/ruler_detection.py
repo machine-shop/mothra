@@ -75,7 +75,7 @@ def fourier(sums):
 
     idx_max = np.argmax(mod[1:]) + 1
     f_space = freq[idx_max]  # nb patterns per pixel
-    t_space = 1/f_space
+    t_space = 1 / f_space
     return t_space
 
 
@@ -111,11 +111,11 @@ def main(img, ax):
 
     # Focusing on the ticks
     up_focus = up_rectangle + offset + 60
-    left_focus = int(binary.shape[1]*0.1)
-    right_focus = int(binary.shape[1]*0.9)
+    left_focus = int(binary.shape[1] * 0.1)
+    right_focus = int(binary.shape[1] * 0.9)
     focus = ~binary[up_focus: up_focus + HEIGHT_FOCUS, left_focus: right_focus]
 
-    sums = np.sum(focus, axis=0)/float(HEIGHT_FOCUS)
+    sums = np.sum(focus, axis=0) / float(HEIGHT_FOCUS)
 
     first_index = np.argmax(sums > FIRST_INDEX_THRESHOLD)
 
@@ -128,11 +128,11 @@ def main(img, ax):
         x_single = [left_focus + first_index, left_focus + first_index +
                     t_space]
         y = np.array([up_focus, up_focus])
-        ax.fill_between(x_single, y, y+LINE_WIDTH, color='red')
+        ax.fill_between(x_single, y, y + LINE_WIDTH, color='red')
 
         x_mult = [left_focus + first_index, left_focus + first_index +
-                  t_space*10]
-        ax.fill_between(x_mult, y-LINE_WIDTH, y, color='blue')
+                  t_space * 10]
+        ax.fill_between(x_mult, y - LINE_WIDTH, y, color='blue')
     return t_space, top_ruler
 
 # if __name__ == '__main__':
