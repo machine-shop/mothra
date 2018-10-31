@@ -4,3 +4,4 @@ butterfly/__pycache__
 raw_images/
 figures/
 outputs/
+*.csv
