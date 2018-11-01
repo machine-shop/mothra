@@ -231,9 +231,8 @@ def main(binary, ax):
     divided[:, half:half + 5] = 0
 
     # Detecting the wing regions
-    # TODO: Does not fit flake8: line too long. Take out structure?
     markers_divided, _ = ndi.label(divided,
-                                   structure=ndi.generate_binary_structure(2, 1))
+                                   ndi.generate_binary_structure(2, 1))
     regions = regionprops(markers_divided)
     areas = [region.area for region in regions]
 

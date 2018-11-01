@@ -28,14 +28,8 @@ def fake_shape():
 
 
 def test_moore_neighborhood():
-    array = np.array([[10, 9],
-                      [9, 9],
-                      [9, 10],
-                      [9, 11],
-                      [10, 11],
-                      [11, 11],
-                      [11, 10],
-                      [11, 9]])
+    array = np.array([[10, 9], [9, 9], [9, 10], [9, 11],
+                      [10, 11], [11, 11], [11, 10], [11, 9]])
     assert np.all(tracing.moore_neighborhood([10, 10], [10, 9]) == array)
 
 
