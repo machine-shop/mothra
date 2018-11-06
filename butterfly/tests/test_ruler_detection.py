@@ -30,7 +30,7 @@ def test_fourier():
 
     arr256 = np.arange(256)
     x256 = rd.fourier(arr256)
-    nt.assert_equal(x256, -256)
+    nt.assert_equal(x256, 256)
 
     arr100 = np.arange(5, 100, 3)
     x100 = rd.fourier(arr100)
