@@ -3,6 +3,10 @@ from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
 import cmath
+from joblib import Memory
+
+location = './cachedir'
+memory = Memory(location, verbose=0)
 
 RULER_TOP = 0.7
 RULER_LEFT = 0.2
@@ -79,6 +83,7 @@ def fourier(sums):
     return t_space
 
 
+@memory.cache(ignore=['ax'])
 def main(img, ax):
     '''Finds the distance between ticks
 

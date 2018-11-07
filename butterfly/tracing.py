@@ -2,8 +2,10 @@ import numpy as np
 from scipy import ndimage as ndi
 from cmath import exp, polar, pi
 from skimage.measure import regionprops
+from joblib import Memory
 
-
+location = './cachedir'
+memory = Memory(location, verbose=0)
 # import matplotlib.pyplot as plt
 
 def moore_neighborhood(current, backtrack):  # y, x
@@ -196,6 +198,7 @@ def split_picture(closed):
     return int(sum_values)
 
 
+@memory.cache(ignore=['ax'])
 def main(binary, ax):
     """Find and retunrs the coordinates of the 4 points of interest
 

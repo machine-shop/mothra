@@ -1,6 +1,10 @@
 import numpy as np
+from joblib import Memory
 
+location = './cachedir'
+memory = Memory(location, verbose=0)
 
+@memory.cache(ignore=['ax'])
 def main(points_interest, T_space, ax=None):
     ''' Calculates the length and draws the lines for length
     of the butterfly wings.
