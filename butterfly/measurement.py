@@ -51,17 +51,17 @@ def main(points_interest, T_space, ax=None):
     dst_pix = (dist_l_pix, dist_r_pix)
     dst_mm = (dist_l_mm, dist_r_mm)
     if ax is not None:
-        ax[0].set_title('final image')
+        ax.set_title('final image')
         # ax.imshow(image)
-        ax[0].plot([pix_out_l[1], pix_in_l[1]],
+        ax.plot([pix_out_l[1], pix_in_l[1]],
                    [pix_out_l[0], pix_in_l[0]], color='r')
-        ax[0].plot([pix_out_r[1], pix_in_r[1]],
+        ax.plot([pix_out_r[1], pix_in_r[1]],
                    [pix_out_r[0], pix_in_r[0]], color='r')
-        ax[0].text(int((pix_out_l[1] + pix_in_l[1]) / 2) + 50,
+        ax.text(int((pix_out_l[1] + pix_in_l[1]) / 2) + 50,
                    int((pix_out_l[0] + pix_in_l[0]) / 2) - 50,
                    'dist_left = ' + str(round(dist_l_mm, 2)) + ' mm',
                    color='r')
-        ax[0].text(int((pix_out_r[1] + pix_in_r[1]) / 2) + 50,
+        ax.text(int((pix_out_r[1] + pix_in_r[1]) / 2) + 50,
                    int((pix_out_r[0] + pix_in_r[0]) / 2) + 50,
                    'dist_right = ' + str(round(dist_r_mm, 2)) + ' mm',
                    color='r')
