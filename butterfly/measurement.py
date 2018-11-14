@@ -54,16 +54,16 @@ def main(points_interest, T_space, ax=None):
         ax.set_title('final image')
         # ax.imshow(image)
         ax.plot([pix_out_l[1], pix_in_l[1]],
-                   [pix_out_l[0], pix_in_l[0]], color='r')
+                [pix_out_l[0], pix_in_l[0]], color='r')
         ax.plot([pix_out_r[1], pix_in_r[1]],
-                   [pix_out_r[0], pix_in_r[0]], color='r')
+                [pix_out_r[0], pix_in_r[0]], color='r')
         ax.text(int((pix_out_l[1] + pix_in_l[1]) / 2) + 50,
-                   int((pix_out_l[0] + pix_in_l[0]) / 2) - 50,
-                   'dist_left = ' + str(round(dist_l_mm, 2)) + ' mm',
-                   color='r')
+                int((pix_out_l[0] + pix_in_l[0]) / 2) - 50,
+                'dist_left = ' + str(round(dist_l_mm, 2)) + ' mm',
+                color='r')
         ax.text(int((pix_out_r[1] + pix_in_r[1]) / 2) + 50,
-                   int((pix_out_r[0] + pix_in_r[0]) / 2) + 50,
-                   'dist_right = ' + str(round(dist_r_mm, 2)) + ' mm',
-                   color='r')
+                int((pix_out_r[0] + pix_in_r[0]) / 2) + 50,
+                'dist_right = ' + str(round(dist_r_mm, 2)) + ' mm',
+                color='r')
 
     return dst_pix, dst_mm
