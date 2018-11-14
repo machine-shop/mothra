@@ -1,5 +1,5 @@
 matplotlib
-skimage
+scikit-image
 numpy
 cmath
 scipy
