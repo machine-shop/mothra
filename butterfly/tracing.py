@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import ndimage as ndi
-from cmath import exp, polar, pi
+from cmath import polar  # , pi  # exp
 from skimage.measure import regionprops
 
 
@@ -70,6 +70,7 @@ def fourier_descriptors(boundary, n_descriptors=15):
     y = boundary[:, 0]
     x = boundary[:, 1]
     complex_boundary = x + y * 1j
+    """
     n = len(boundary)
     descriptors = []
     k_values = symetric_list(n_descriptors)
@@ -80,6 +81,10 @@ def fourier_descriptors(boundary, n_descriptors=15):
             sum_c += complex_boundary[i] * exp(-2 * pi * 1j * (i + 1) * k / n)
         descriptors.append(round((sum_c / n).real, 3)
                            + round((sum_c / n).imag, 3) * 1j)
+    """
+
+    descriptors = np.fft.fft(complex_boundary)
+    descriptors[1+n_descriptors//2: 1+(-n_descriptors//2)] = 0
     return descriptors
 
 
@@ -90,6 +95,7 @@ def normalize_descriptors(descriptors):
 
 
 def inv_fourier(descriptors, n_points=1000):
+    """
     k_values = symetric_list(len(descriptors))
     x = []
     y = []
@@ -104,8 +110,10 @@ def inv_fourier(descriptors, n_points=1000):
 
     x = np.array(x).astype(int)
     y = np.array(y).astype(int)
+    """
+    inv = np.fft.ifft(descriptors)  # , n=n_points)
 
-    return y, x
+    return np.imag(inv), np.real(inv)  # y, x
 
 
 def detect_points_interest(smooth_boundary, side, width_cropped):
@@ -148,8 +156,8 @@ def detect_points_interest(smooth_boundary, side, width_cropped):
                                            smooth_boundary[:idx_start]),
                                           axis=0)
 
-    current_idx = 50
-    step = 1
+    current_idx = 200
+    step = 10
     iterations = 1
     if side == 'r':
         coeff = 1

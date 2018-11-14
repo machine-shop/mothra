@@ -2,6 +2,7 @@ import numpy as np
 import scipy.ndimage as ndi
 from skimage.measure import regionprops
 import pytest
+from numpy.testing import assert_allclose
 
 from butterfly import tracing
 
@@ -55,6 +56,42 @@ def test_boundary_tracing(fake_shape):
 
     assert np.all(boundary1 == bound1)
     assert np.all(boundary2 == bound2)
+
+
+def test_fourier_descriptors(n_descriptors=15):
+    expected_positive = np.array([9.3220e+03 + 1.1682e+04j,
+                                  -5.6435e+03 - 5.6435e+03j,
+                                  0,
+                                  0,
+                                  -5.4001e-12 - 5.9685e-12j,
+                                  -2.2606e+02 - 2.2606e+02j,
+                                  0,
+                                  0], dtype=complex)
+
+    expected_negative = np.array([-1.1550e+02 - 1.1550e+02j,
+                                  0,
+                                  0,
+                                  -5.4001e-12-5.9685e-12j,
+                                  -6.2735e+02-6.2735e+02j,
+                                  0,
+                                  0], dtype=complex)
+
+    binary = np.zeros((100, 100), dtype=bool)
+    binary[20:80, 10:70] = 1
+    labels, _ = ndi.label(binary,
+                          structure=ndi.generate_binary_structure(2, 1))
+    regions = regionprops(labels)
+    boundary = tracing.boundary_tracing(regions[0])
+    print(boundary.shape)
+    descriptors = tracing.fourier_descriptors(boundary)
+    print(descriptors.shape)
+    print(descriptors)
+
+    assert_allclose(descriptors[:1+n_descriptors//2],
+                    expected_positive, rtol=0.1)
+
+    assert_allclose(descriptors[1+(-n_descriptors//2):],
+                    expected_negative, rtol=0.1)
 
 
 def test_detect_points_interest(fake_butterfly):
