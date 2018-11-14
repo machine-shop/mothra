@@ -18,5 +18,5 @@ def test_different_t_space():
 def test_with_ax():
     fig, ax = plt.subplots(figsize=(20, 5))
     pixel_points = [(0, 0), (5, 0), (0, 0), (0, 4)]
-    mm_points = measurement.main(pixel_points, 2, ax[0])
+    mm_points = measurement.main(pixel_points, 2, ax)
     assert mm_points == ((5, 4), (1.25, 1))
