@@ -1,4 +1,3 @@
-os
 argparse
 csv
 matplotlib
