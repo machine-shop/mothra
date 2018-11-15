@@ -1,10 +1,7 @@
 import numpy as np
 from scipy import ndimage as ndi
-from cmath import polar  # , pi  # exp
 from skimage.measure import regionprops
 
-
-# import matplotlib.pyplot as plt
 
 def moore_neighborhood(current, backtrack):  # y, x
     operations = np.array([[-1, 0], [-1, 1], [0, 1], [1, 1],
@@ -67,53 +64,49 @@ def symetric_list(n):
 
 
 def fourier_descriptors(boundary, n_descriptors=15):
+    """List of Fourier descriptors with the first [n_descriptors] non-zeros.
+
+    Arguments
+    ---------
+    boundary : 2D array
+        Each row represents a different point of the boundary [y, x]
+    n_descriptors : int
+        Number of first descriptors we don't want to filter
+
+    Returns
+    -------
+    descriptors : 1D array
+        array of same length as boundary.shape[0]
+    """
     y = boundary[:, 0]
     x = boundary[:, 1]
     complex_boundary = x + y * 1j
-    """
-    n = len(boundary)
-    descriptors = []
-    k_values = symetric_list(n_descriptors)
-    for p in range(n_descriptors):
-        sum_c = 0
-        k = k_values[p]
-        for i in range(n):
-            sum_c += complex_boundary[i] * exp(-2 * pi * 1j * (i + 1) * k / n)
-        descriptors.append(round((sum_c / n).real, 3)
-                           + round((sum_c / n).imag, 3) * 1j)
-    """
 
     descriptors = np.fft.fft(complex_boundary)
     descriptors[1+n_descriptors//2: 1+(-n_descriptors//2)] = 0
     return descriptors
 
 
-def normalize_descriptors(descriptors):
-    mod_c1 = polar(descriptors[1])[0]
-    return ([round(polar(descriptor)[0] / mod_c1, 4)
-             for descriptor in descriptors[2:]])
+def inv_fourier(descriptors):
+    """Recreate a smooth boundary from the filtered descriptors.
 
+    Arguments
+    ---------
+    descriptors : 1D array
+        filtered descriptors (the discarded coefficients are zeros)
 
-def inv_fourier(descriptors, n_points=1000):
+    Returns
+    -------
+    smoothed_y : 1D array
+        y coordinates of smoothed boundary points
+    smoothed_x : 1D array
+        x coordinates of smoothed boundary points
     """
-    k_values = symetric_list(len(descriptors))
-    x = []
-    y = []
-    for i in range(n_points):
-        z = 0
-        for p in range(len(descriptors)):
-            k = k_values[p]
-            z += descriptors[p] * exp((2 * pi * 1j * k * i) / n_points)
-        z = int(z.real) + int(z.imag) * 1j
-        x.append(z.real)
-        y.append(z.imag)
+    inv = np.fft.ifft(descriptors)
+    smoothed_y = np.imag(inv)
+    smoothed_x = np.real(inv)
 
-    x = np.array(x).astype(int)
-    y = np.array(y).astype(int)
-    """
-    inv = np.fft.ifft(descriptors)  # , n=n_points)
-
-    return np.imag(inv), np.real(inv)  # y, x
+    return smoothed_y, smoothed_x
 
 
 def detect_points_interest(smooth_boundary, side, width_cropped):
@@ -156,8 +149,9 @@ def detect_points_interest(smooth_boundary, side, width_cropped):
                                            smooth_boundary[:idx_start]),
                                           axis=0)
 
-    current_idx = 200
-    step = 10
+    current_idx = max(1, int(len(smooth_boundary)*0.05))
+    step = max(1, int(len(smooth_boundary)*0.001))
+
     iterations = 1
     if side == 'r':
         coeff = 1
@@ -223,7 +217,7 @@ def main(binary, ax):
 
     Notes
     -----
-    This satge can be split in 4 different parts :
+    This stage can be split in 4 different parts :
     1. Split the butterfly to separate the two wings
     2. Find the boundaries of each wing
     3. Smooth those boundaries with Fourier transformation
@@ -263,8 +257,8 @@ def main(binary, ax):
     # 3. Smooth boundaries
     descriptors_l = fourier_descriptors(boundary_l, 45)
     descriptors_r = fourier_descriptors(boundary_r, 45)
-    smoothed_y_l, smoothed_x_l = inv_fourier(descriptors_l, 1500)
-    smoothed_y_r, smoothed_x_r = inv_fourier(descriptors_r, 1500)
+    smoothed_y_l, smoothed_x_l = inv_fourier(descriptors_l)
+    smoothed_y_r, smoothed_x_r = inv_fourier(descriptors_r)
     smoothed_l = np.concatenate((smoothed_y_l.reshape(-1, 1),
                                  smoothed_x_l.reshape(-1, 1)),
                                 axis=1)

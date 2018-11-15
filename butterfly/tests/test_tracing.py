@@ -3,6 +3,7 @@ import scipy.ndimage as ndi
 from skimage.measure import regionprops
 import pytest
 from numpy.testing import assert_allclose
+import matplotlib.pyplot as plt
 
 from butterfly import tracing
 
