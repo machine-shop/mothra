@@ -87,10 +87,11 @@ def main():
         image_names = os.listdir(raw_image_path)
     else:
         image_names = [""]
+    n = len(image_names)
 
     # For testing purpose, the pipeline is only applied to the first 10 images
-    for image_name in image_names[:10]:
-        print(raw_image_path + '/' + image_name)
+    for i, image_name in enumerate(image_names[:10]):
+        print(f'Image {i+1}/{n} : {image_name}')
         image_path = os.path.normpath(raw_image_path + '/' + image_name)
         image_rgb = imread(image_path)
         ax = [None, None, None]
@@ -112,6 +113,9 @@ def main():
                 dst_pix, dst_mm = measurement.main(points_interest,
                                                    T_space,
                                                    ax[0])
+                print(f'left_wing : {dst_mm[0]} mm')
+                print(f'right_wing : {dst_mm[1]} mm')
+
                 with open(args.path_csv, 'a') as csv_file:
                     writer = csv.writer(csv_file)
                     writer.writerow([image_name, dst_mm[0], dst_mm[1]])

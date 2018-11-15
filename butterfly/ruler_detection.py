@@ -2,7 +2,6 @@ from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
-import cmath
 
 RULER_TOP = 0.7
 RULER_LEFT = 0.2
@@ -69,12 +68,19 @@ def fourier(sums):
     t_space : float
         distance in pixels between two ticks (.5 mm)
     '''
-    fourier = np.fft.fft(sums)
-    mod = [cmath.polar(el)[0] for el in fourier]
+    fourier = np.fft.rfft(sums)
+    mod = np.abs(fourier)[1:]  # we discard the first coeff
+    idx = np.arange(1, len(mod) + 1)
+    idx_peaks = idx[mod > max(mod)/2]
     freq = np.fft.fftfreq(len(sums))
 
-    idx_max = np.argmax(mod[1:]) + 1
-    f_space = freq[idx_max]  # nb patterns per pixel
+    # idx_sorted = np.argsort(mod)
+    # idx_sorted = np.flip(idx_sorted, axis=0)
+    # two_first = idx_sorted[:2]
+    # print(two_first)
+    idx_max = min(idx_peaks)
+
+    f_space = 2*freq[idx_max]  # nb patterns per pixel
     t_space = 1 / f_space
     return t_space
 
