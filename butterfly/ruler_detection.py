@@ -74,10 +74,6 @@ def fourier(sums):
     idx_peaks = idx[mod > max(mod)/2]
     freq = np.fft.fftfreq(len(sums))
 
-    # idx_sorted = np.argsort(mod)
-    # idx_sorted = np.flip(idx_sorted, axis=0)
-    # two_first = idx_sorted[:2]
-    # print(two_first)
     idx_max = min(idx_peaks)
 
     f_space = 2*freq[idx_max]  # nb patterns per pixel
