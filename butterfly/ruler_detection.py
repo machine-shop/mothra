@@ -4,6 +4,7 @@ import numpy as np
 from scipy import ndimage as ndi
 import cmath
 
+
 RULER_TOP = 0.7
 RULER_LEFT = 0.2
 RULER_RIGHT = 0.4
@@ -76,7 +77,7 @@ def fourier(sums):
     idx_max = np.argmax(mod[1:]) + 1
     f_space = freq[idx_max]  # nb patterns per pixel
     t_space = 1 / f_space
-    return t_space
+    return abs(t_space)
 
 
 def main(img, ax):
