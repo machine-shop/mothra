@@ -34,7 +34,14 @@ def test_fourier():
 
     arr100 = np.arange(5, 100, 3)
     x100 = rd.fourier(arr100)
-    nt.assert_equal(x100, -32)
+    nt.assert_equal(x100, 32)
+
+
+def test_binary_rect():
+    data = np.full((500, 500, 3), 0.0)
+    data[450:500, :, :] += 0.6
+    expected = np.full((50, 100, 3), 0.6)
+    nt.assert_equal(rd.binarize_rect(450, data), expected)
 
 
 def test_binary_rect():
