@@ -39,14 +39,12 @@ def main(points_interest, T_space, ax=None):
                          + (pix_out_l[1] - pix_in_l[1]) ** 2)
 
     # Converting to millimeters
-    dist_l_mm = dist_l_pix / (2 * T_space)
-    dist_r_mm = dist_r_pix / (2 * T_space)
+    dist_l_mm = round(dist_l_pix / T_space, 2)
+    dist_r_mm = round(dist_r_pix / T_space, 2)
 
     # Do we want to round these?
     dist_l_pix = round(dist_l_pix, 2)
     dist_r_pix = round(dist_r_pix, 2)
-    dist_l_mm = round(dist_l_mm, 2)
-    dist_r_mm = round(dist_r_mm, 2)
 
     dst_pix = (dist_l_pix, dist_r_pix)
     dst_mm = (dist_l_mm, dist_r_mm)
@@ -54,16 +52,16 @@ def main(points_interest, T_space, ax=None):
         ax.set_title('final image')
         # ax.imshow(image)
         ax.plot([pix_out_l[1], pix_in_l[1]],
-                   [pix_out_l[0], pix_in_l[0]], color='r')
+                [pix_out_l[0], pix_in_l[0]], color='r')
         ax.plot([pix_out_r[1], pix_in_r[1]],
-                   [pix_out_r[0], pix_in_r[0]], color='r')
+                [pix_out_r[0], pix_in_r[0]], color='r')
         ax.text(int((pix_out_l[1] + pix_in_l[1]) / 2) + 50,
-                   int((pix_out_l[0] + pix_in_l[0]) / 2) - 50,
-                   'dist_left = ' + str(round(dist_l_mm, 2)) + ' mm',
-                   color='r')
+                int((pix_out_l[0] + pix_in_l[0]) / 2) - 50,
+                'dist_left = ' + str(round(dist_l_mm, 2)) + ' mm',
+                color='r')
         ax.text(int((pix_out_r[1] + pix_in_r[1]) / 2) + 50,
-                   int((pix_out_r[0] + pix_in_r[0]) / 2) + 50,
-                   'dist_right = ' + str(round(dist_r_mm, 2)) + ' mm',
-                   color='r')
+                int((pix_out_r[0] + pix_in_r[0]) / 2) + 50,
+                'dist_right = ' + str(round(dist_r_mm, 2)) + ' mm',
+                color='r')
 
     return dst_pix, dst_mm

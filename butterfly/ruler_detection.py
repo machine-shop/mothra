@@ -2,6 +2,7 @@ from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
+import matplotlib.pyplot as plt
 
 RULER_TOP = 0.7
 RULER_LEFT = 0.2
@@ -55,30 +56,32 @@ def binarize_rect(up_rectangle, binary):
     return rectangle_binary
 
 
-def fourier(sums):
+def fourier(signal):
     '''Performs a fourier transform to find the frequency and t space
 
     Parameters
     ----------
-    sums : array
-        array representing the sums (SUMS OF WHAT)???
+    signal : 1D array
+        array representing the value of the ticks in space
 
     Returns
     -------
     t_space : float
         distance in pixels between two ticks (.5 mm)
     '''
-    fourier = np.fft.rfft(sums)
-    mod = np.abs(fourier)[1:]  # we discard the first coeff
-    idx = np.arange(1, len(mod) + 1)
-    idx_peaks = idx[mod > max(mod)/2]
-    freq = np.fft.fftfreq(len(sums))
+    fourier = np.fft.rfft(signal)
+    mod = np.abs(fourier)
+    mod[0] = 0  # we discard the first coeff
+    freq = np.fft.rfftfreq(len(signal))
 
-    idx_max = min(idx_peaks)
+    # Normalization
+    mod = mod / np.max(mod)
 
-    f_space = 2*freq[idx_max]  # nb patterns per pixel
-    t_space = 1 / f_space
-    return t_space
+    # Choose frequence
+    f_space = freq[mod > 0.5][0]
+    T_space = 1 / f_space
+
+    return T_space
 
 
 def main(img, ax):
@@ -136,12 +139,3 @@ def main(img, ax):
                   t_space * 10]
         ax.fill_between(x_mult, y - LINE_WIDTH, y, color='blue')
     return t_space, top_ruler
-
-# if __name__ == '__main__':
-#     name = "BMNHE_502320.JPG"
-#     image_name = "./pictures/"+name
-#     img = imread(image_name)
-#     t_space, ax = main(img)
-#     print "T: ", t_space
-#     plt.savefig("./output/"+name)
-#     plt.close()
