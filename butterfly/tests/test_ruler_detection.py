@@ -20,28 +20,20 @@ def test_grayscale():
 
 
 def test_fourier():
-    seven_zeroes = np.zeros(7)
-    seven_t = rd.fourier(seven_zeroes)
-    nt.assert_equal(seven_t, 7)
 
-    seven_zero_ones = np.array([0, 1, 0, 1, 0, 1, 0])
-    seven_alt = rd.fourier(seven_zero_ones)
-    nt.assert_equal(seven_alt, 7.0/3.0)
+    T_BIG = 8
+    T_SMALL = T_BIG // 2
 
-    arr256 = np.arange(256)
-    x256 = rd.fourier(arr256)
-    nt.assert_equal(x256, 256)
+    signal = np.random.randint(0, 7, 500)
+    signal[::T_SMALL] = 10
+    signal[::T_BIG] = 20
+    T_space = rd.fourier(signal)
+    nt.assert_almost_equal(T_space, T_SMALL, decimal=0)
 
-    arr100 = np.arange(5, 100, 3)
-    x100 = rd.fourier(arr100)
-    nt.assert_equal(x100, 32)
-
-
-def test_binary_rect():
-    data = np.full((500, 500, 3), 0.0)
-    data[450:500, :, :] += 0.6
-    expected = np.full((50, 100, 3), 0.6)
-    nt.assert_equal(rd.binarize_rect(450, data), expected)
+    signal = np.random.randint(0, 7, 500)
+    signal[::T_BIG] = 20
+    T_space = rd.fourier(signal)
+    nt.assert_almost_equal(T_space, T_BIG, decimal=0)
 
 
 def test_binary_rect():
