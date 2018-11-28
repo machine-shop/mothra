@@ -78,7 +78,7 @@ def fourier(signal):
     mod = mod / np.max(mod)
 
     # Choose frequence
-    f_space = freq[mod > 0.5][0]
+    f_space = freq[mod > 0.6][0]
     T_space = 1 / f_space
 
     return T_space
