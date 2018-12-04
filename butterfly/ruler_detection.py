@@ -2,7 +2,6 @@ from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
-import cmath
 from joblib import Memory
 
 location = './cachedir'
