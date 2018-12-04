@@ -5,18 +5,18 @@ Analyzing images of butterflies and measuring their wing lengths. Using binariza
 ![example output](example_result.JPG)
 
 ## Usage
-
 ```
 $ python pipeline.py -p -i [input directory or image path] -o [output directory] -s [stage to run to] -csv [csv output file path]
 ```
+The pipeline script combines four modules to analyze an image: ruler detection, binarization, tracing, and final measurement. Run the pipeline.py file with the arguments to read in raw images and output result images and `.csv` file with the measurements.
 
 ## Options :
-* -s, --stage : string in ['ruler_detection', 'binarization', 'tracing', 'measurements']
-* -p, --plot : if entered, figures are plot to the output folder
-* -i, --input : path of the input folder or file (default: 'raw_images')
-* -o, --output_folder : path of the output folder (default: 'outputs')
-* -dpi : Dots per inch (default: 300)
-* -csv, --path_csv :  path of CSV file that contains results of measurements 
+* -s, --stage : The stage which to run the pipeline until. Must be one of  `['ruler_detection', 'binarization', 'tracing', 'measurements']`. To run the entire pipeline, simply use `-s measurement`. (Running the pipeline and stopping at an earlier stage can be useful for debugging.)
+* -p, --plot : This flag is used to generate output images. (Image outputs can be ommitted to improve runtime or save space.)
+* -i, --input : A single image input or a directory of images to be analyzed.
+* -o, --output_folder : The output directory in which the result images will be outputted.
+* -dpi : The resolution of the output image. (Default is `300`.)
+* -csv, --path_csv :  Path of `.csv` file for the measurement results.
 
 Example:
 ```
