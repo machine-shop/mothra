@@ -93,8 +93,13 @@ def main():
         image_names = [""]
     n = len(image_names)
 
-    # For testing purpose, the pipeline is only applied to the first 10 images
+    
     for i, image_name in enumerate(image_names):
+
+        # if input is not an image, continue
+        if not image_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+            continue
+
         print(f'Image {i+1}/{n} : {image_name}')
         image_path = os.path.normpath(raw_image_path + '/' + image_name)
         image_rgb = imread(image_path)

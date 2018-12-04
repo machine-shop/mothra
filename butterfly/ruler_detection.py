@@ -4,6 +4,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from joblib import Memory
 
+
 location = './cachedir'
 memory = Memory(location, verbose=0)
 
@@ -76,7 +77,6 @@ def fourier(signal):
     mod = np.abs(fourier)
     mod[0] = 0  # we discard the first coeff
     freq = np.fft.rfftfreq(len(signal))
-
 
     # Normalization
     mod = mod / np.max(mod)
