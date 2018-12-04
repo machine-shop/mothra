@@ -1,10 +1,13 @@
-# Butterflies-wings
+# Butterfly Wings
 
-The pipeline takes either a single image file or a folder of images and runs the pipeline up to the specified stage on the given images. Can output all images into an output folder as well as all measurements into a CSV file. 
+Analyzing images of butterflies and measuring their wing lengths. Using binarization techniques and calculating the resolution of ruler ticks, we read in images of butterflies and output the millimeter lengths of their wings.
+
+![alt text](example_result.jpg?raw=true "Example measurement output")
+
 ## Usage
 
 ```
-$ python pipeline.py -s <stage> [OPTION]
+$ python pipeline.py -p -i [input directory or image path] -o [output directory] -s [stage to run to] -csv [csv output file path]
 ```
 ## Options :
 * -s, --stage : string in ['ruler_detection', 'binarization', 'tracing', 'measurements']
@@ -16,7 +19,7 @@ $ python pipeline.py -s <stage> [OPTION]
 
 Example:
 ```
-$ python pipeline.py -i test_pictures -o out -p -s measurements
+$ python pipeline.py -p -i ../data/test_pictures -o ../data/test_output -s measurements -csv ../data/test_output/results.csv
 ```
 ## Accuracy: 
 Run the ```result_plotting.py``` file to print out to generate a histogram of the difference for all actual - predicted measurements. 
