@@ -4,8 +4,8 @@ from joblib import Memory
 location = './cachedir'
 memory = Memory(location, verbose=0)
 
-@memory.cache(ignore=['ax'])
-def main(points_interest, T_space, ax=None):
+@memory.cache()
+def main(points_interest, T_space):
     ''' Calculates the length and draws the lines for length
     of the butterfly wings.
 
@@ -22,8 +22,8 @@ def main(points_interest, T_space, ax=None):
 
     Returns
     -------
-    ax: array
-        the array containing the 3 intermediary Axes.
+    ax: ax
+        an ax object
     dst_pix: tuple
         the tuple contains the distance of the left/right wing
         distance in pixels
@@ -43,31 +43,14 @@ def main(points_interest, T_space, ax=None):
                          + (pix_out_l[1] - pix_in_l[1]) ** 2)
 
     # Converting to millimeters
-    dist_l_mm = dist_l_pix / (2 * T_space)
-    dist_r_mm = dist_r_pix / (2 * T_space)
+    dist_l_mm = round(dist_l_pix / T_space, 2)
+    dist_r_mm = round(dist_r_pix / T_space, 2)
 
     # Do we want to round these?
     dist_l_pix = round(dist_l_pix, 2)
     dist_r_pix = round(dist_r_pix, 2)
-    dist_l_mm = round(dist_l_mm, 2)
-    dist_r_mm = round(dist_r_mm, 2)
 
     dst_pix = (dist_l_pix, dist_r_pix)
     dst_mm = (dist_l_mm, dist_r_mm)
-    if ax is not None:
-        ax[0].set_title('final image')
-        # ax.imshow(image)
-        ax[0].plot([pix_out_l[1], pix_in_l[1]],
-                   [pix_out_l[0], pix_in_l[0]], color='r')
-        ax[0].plot([pix_out_r[1], pix_in_r[1]],
-                   [pix_out_r[0], pix_in_r[0]], color='r')
-        ax[0].text(int((pix_out_l[1] + pix_in_l[1]) / 2) + 50,
-                   int((pix_out_l[0] + pix_in_l[0]) / 2) - 50,
-                   'dist_left = ' + str(round(dist_l_mm, 2)) + ' mm',
-                   color='r')
-        ax[0].text(int((pix_out_r[1] + pix_in_r[1]) / 2) + 50,
-                   int((pix_out_r[0] + pix_in_r[0]) / 2) + 50,
-                   'dist_right = ' + str(round(dist_r_mm, 2)) + ' mm',
-                   color='r')
-
-    return dst_pix, dst_mm
+    plot_info = [pix_out_l, pix_out_r, pix_in_l, pix_in_r, dist_l_mm, dist_r_mm]
+    return dst_pix, dst_mm, plot_info

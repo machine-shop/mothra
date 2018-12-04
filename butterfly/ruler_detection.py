@@ -60,31 +60,37 @@ def binarize_rect(up_rectangle, binary):
     return rectangle_binary
 
 
-def fourier(sums):
+def fourier(signal):
     '''Performs a fourier transform to find the frequency and t space
 
     Parameters
     ----------
-    sums : array
-        array representing the sums (SUMS OF WHAT)???
+    signal : 1D array
+        array representing the value of the ticks in space
 
     Returns
     -------
     t_space : float
         distance in pixels between two ticks (.5 mm)
     '''
-    fourier = np.fft.fft(sums)
-    mod = [cmath.polar(el)[0] for el in fourier]
-    freq = np.fft.fftfreq(len(sums))
-
-    idx_max = np.argmax(mod[1:]) + 1
-    f_space = freq[idx_max]  # nb patterns per pixel
-    t_space = 1 / f_space
-    return t_space
+    fourier = np.fft.rfft(signal)
+    mod = np.abs(fourier)
+    mod[0] = 0  # we discard the first coeff
+    freq = np.fft.rfftfreq(len(signal))
 
 
-@memory.cache(ignore=['ax'])
-def main(img, ax):
+    # Normalization
+    mod = mod / np.max(mod)
+
+    # Choose frequence
+    f_space = freq[mod > 0.6][0]
+    T_space = 1 / f_space
+
+    return T_space
+
+
+@memory.cache()
+def main(img):
     '''Finds the distance between ticks
 
     Parameters
@@ -126,25 +132,9 @@ def main(img, ax):
 
     t_space = abs(fourier(sums))
 
-    # fig, ax = plt.subplots(figsize=(200, 50))
-    if ax:
-        ax.imshow(img)
-
-        x_single = [left_focus + first_index, left_focus + first_index +
-                    t_space]
-        y = np.array([up_focus, up_focus])
-        ax.fill_between(x_single, y, y + LINE_WIDTH, color='red')
-
-        x_mult = [left_focus + first_index, left_focus + first_index +
-                  t_space * 10]
-        ax.fill_between(x_mult, y - LINE_WIDTH, y, color='blue')
-    return t_space, top_ruler
-
-# if __name__ == '__main__':
-#     name = "BMNHE_502320.JPG"
-#     image_name = "./pictures/"+name
-#     img = imread(image_name)
-#     t_space, ax = main(img)
-#     print "T: ", t_space
-#     plt.savefig("./output/"+name)
-#     plt.close()
+    x_single = [left_focus + first_index, left_focus + first_index +
+                t_space]
+    y = np.array([up_focus, up_focus])
+    x_mult = [left_focus + first_index, left_focus + first_index +
+              t_space * 10]
+    return t_space, top_ruler, [x_single, y, x_mult, img]

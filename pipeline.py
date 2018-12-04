@@ -4,6 +4,10 @@ import csv
 from butterfly import (ruler_detection, tracing, measurement, binarization)
 import matplotlib.pyplot as plt
 from skimage.io import imread
+import numpy as np
+
+
+LINE_WIDTH = 40
 
 
 """
@@ -87,10 +91,11 @@ def main():
         image_names = os.listdir(raw_image_path)
     else:
         image_names = [""]
+    n = len(image_names)
 
     # For testing purpose, the pipeline is only applied to the first 10 images
-    for image_name in image_names[:10]:
-        print(raw_image_path + '/' + image_name)
+    for i, image_name in enumerate(image_names):
+        print(f'Image {i+1}/{n} : {image_name}')
         image_path = os.path.normpath(raw_image_path + '/' + image_name)
         image_rgb = imread(image_path)
         ax = [None, None, None]
@@ -103,15 +108,57 @@ def main():
                 ax0 = ax
                 if len(pipeline_process) > 1:
                     ax0 = ax[0]
-                T_space, top_ruler = ruler_detection.main(image_rgb, ax0)
+                T_space, top_ruler, plot_info = ruler_detection.main(image_rgb)
+                if ax0:
+                    x_single = plot_info[0]
+                    y = plot_info[1]
+                    x_mult = plot_info[2]
+                    plt_img = plot_info[3]
+                    ax0.imshow(plt_img)
+                    ax0.fill_between(x_single, y, y + LINE_WIDTH, color='red')
+                    ax0.fill_between(x_mult, y - LINE_WIDTH, y, color='blue')
             elif step == 'binarization':
-                binary = binarization.main(image_rgb, top_ruler, ax[1])
+                binary = binarization.main(image_rgb, top_ruler)
+                if(ax[1]):
+                    ax[1].set_title('Binary')
+                    ax[1].imshow(binary)
             elif step == 'tracing':
-                points_interest = tracing.main(binary, ax[2])
+                points_interest, plot_info = tracing.main(binary)
+                if ax[2]:
+                    without_antennae = plot_info[0]
+                    middle = plot_info[1]
+                    binary = plot_info[2]
+                    ax[2].set_title('Tracing')
+                    ax[2].imshow(without_antennae)
+                    ax[2].plot([middle, middle], [0, binary.shape[0]-5])
+                    ax[2].scatter(points_interest[:, 1],
+                                  points_interest[:, 0], color='r', s=10)
             else:
-                dst_pix, dst_mm = measurement.main(points_interest,
-                                                   T_space,
-                                                   ax[0])
+                dst_pix, dst_mm, plot_info = measurement.main(points_interest,
+                                                              T_space)
+                if ax0 is not None:
+                    pix_out_l = plot_info[0]
+                    pix_out_r = plot_info[1]
+                    pix_in_l = plot_info[2]
+                    pix_in_r = plot_info[3]
+                    dist_l_mm = plot_info[4]
+                    dist_r_mm = plot_info[5]
+                    ax0.set_title('final image')
+                    ax0.plot([pix_out_l[1], pix_in_l[1]],
+                             [pix_out_l[0], pix_in_l[0]], color='r')
+                    ax0.plot([pix_out_r[1], pix_in_r[1]],
+                             [pix_out_r[0], pix_in_r[0]], color='r')
+                    ax0.text(int((pix_out_l[1] + pix_in_l[1]) / 2) + 50,
+                             int((pix_out_l[0] + pix_in_l[0]) / 2) - 50,
+                             'dist_left = ' + str(round(dist_l_mm, 2)) + ' mm',
+                             color='r')
+                    ax0.text(int((pix_out_r[1] + pix_in_r[1]) / 2) + 50,
+                             int((pix_out_r[0] + pix_in_r[0]) / 2) + 50,
+                             'dist_right = ' + str(round(dist_r_mm, 2))
+                             + ' mm', color='r')
+                print(f'left_wing : {dst_mm[0]} mm')
+                print(f'right_wing : {dst_mm[1]} mm')
+
                 with open(args.path_csv, 'a') as csv_file:
                     writer = csv.writer(csv_file)
                     writer.writerow([image_name, dst_mm[0], dst_mm[1]])
