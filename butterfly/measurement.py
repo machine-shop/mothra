@@ -18,8 +18,8 @@ def main(points_interest, T_space, ax=None):
 
     Returns
     -------
-    ax: array
-        the array containing the 3 intermediary Axes.
+    ax: ax
+        an ax object
     dst_pix: tuple
         the tuple contains the distance of the left/right wing
         distance in pixels
