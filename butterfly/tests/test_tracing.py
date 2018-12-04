@@ -1,7 +1,4 @@
 import numpy as np
-import scipy.ndimage as ndi
-from skimage.measure import regionprops
-import matplotlib.pyplot as plt
 import pytest
 from numpy.testing import assert_array_equal
 
@@ -56,7 +53,6 @@ def test_outer_pix(fake_butterfly):
 
 
 def test_inner_pix(fake_butterfly):
-
     middle = tracing.split_picture(fake_butterfly)
 
     binary_left = fake_butterfly[:, :middle]

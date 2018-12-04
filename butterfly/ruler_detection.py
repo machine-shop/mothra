@@ -2,7 +2,6 @@ from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
-import matplotlib.pyplot as plt
 
 
 RULER_TOP = 0.7
@@ -74,7 +73,6 @@ def fourier(signal):
     mod = np.abs(fourier)
     mod[0] = 0  # we discard the first coeff
     freq = np.fft.rfftfreq(len(signal))
-
 
     # Normalization
     mod = mod / np.max(mod)
