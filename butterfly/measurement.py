@@ -18,8 +18,8 @@ def main(points_interest, T_space, ax=None):
 
     Returns
     -------
-    ax: array
-        the array containing the 3 intermediary Axes.
+    ax: ax
+        an ax object
     dst_pix: tuple
         the tuple contains the distance of the left/right wing
         distance in pixels
@@ -39,18 +39,16 @@ def main(points_interest, T_space, ax=None):
                          + (pix_out_l[1] - pix_in_l[1]) ** 2)
 
     # Converting to millimeters
-    dist_l_mm = dist_l_pix / (2 * T_space)
-    dist_r_mm = dist_r_pix / (2 * T_space)
+    dist_l_mm = round(dist_l_pix / T_space, 2)
+    dist_r_mm = round(dist_r_pix / T_space, 2)
 
     # Do we want to round these?
     dist_l_pix = round(dist_l_pix, 2)
     dist_r_pix = round(dist_r_pix, 2)
-    dist_l_mm = round(dist_l_mm, 2)
-    dist_r_mm = round(dist_r_mm, 2)
 
     dst_pix = (dist_l_pix, dist_r_pix)
     dst_mm = (dist_l_mm, dist_r_mm)
-    if ax:
+    if ax is not None:
         ax.set_title('final image')
         # ax.imshow(image)
         ax.plot([pix_out_l[1], pix_in_l[1]],

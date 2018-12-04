@@ -7,3 +7,7 @@ figures/
 outputs/
 *.csv
 .ipynb_checkpoints/
+**/*.prof
+**/*.cache
+**/*.png
+.ropeproject
