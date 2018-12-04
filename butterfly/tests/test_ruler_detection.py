@@ -46,5 +46,5 @@ def test_binary_rect():
 def test_main_ruler_detection():
     data = np.ones((500, 500, 3))
     data[350:500, 0:500:10, :] = 0
-    t_space, top_space = rd.main(data, None)
+    t_space, top_space, plot_info = rd.main(data)
     nt.assert_almost_equal(t_space, 10, decimal=0)

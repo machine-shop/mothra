@@ -1,8 +1,12 @@
 import numpy as np
 from scipy import ndimage as ndi
 from skimage.measure import regionprops
+from joblib import Memory
 from scipy.ndimage.morphology import binary_dilation
 
+
+location = './cachedir'
+memory = Memory(location, verbose=0)
 # import matplotlib.pyplot as plt
 
 
@@ -145,7 +149,8 @@ def split_picture(binary):
     return int(sum_values)
 
 
-def main(binary, ax=None):
+@memory.cache()
+def main(binary):
     """Find and retunrs the coordinates of the 4 points of interest
 
     Arguments
@@ -191,11 +196,4 @@ def main(binary, ax=None):
     # Reconstruct binary image without antennae
     without_antennae = np.concatenate((without_antenna_l, without_antenna_r),
                                       axis=1)
-    if ax:
-        ax.set_title('Tracing')
-        ax.imshow(without_antennae)
-        ax.plot([middle, middle], [0, binary.shape[0]-5])
-        ax.scatter(points_interest[:, 1],
-                   points_interest[:, 0], color='r', s=10)
-
-    return points_interest
+    return points_interest, [without_antennae, middle, binary]
