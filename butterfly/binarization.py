@@ -23,8 +23,10 @@ def find_tags_edge(binary, top_ruler):
         x coordinate of the vertical line separating the tags area from the
         butterfly area
     """
+    lower_bound = top_ruler - int(binary.shape[0] * 0.1)
+    left_bound = int(binary.shape[1] * 0.5)
+    focus = binary[:lower_bound, left_bound:]
 
-    focus = binary[:top_ruler, int(binary.shape[1] * 0.5):]
     markers = ndi.label(focus,
                         structure=ndi.generate_binary_structure(2, 1))[0]
     regions = regionprops(markers)
@@ -34,7 +36,11 @@ def find_tags_edge(binary, top_ruler):
     for i, area in enumerate(areas):
         if area > area_min:
             filtered_regions.append(regions[i])
+
     left_pixels = [np.min(region.coords[:, 1]) for region in filtered_regions]
+    left_pixels = np.array(left_pixels)
+    left_pixels = left_pixels[left_pixels > 0.05 * binary.shape[1]]
+
     crop_right = int(0.5 * binary.shape[1] + np.min(left_pixels))
 
     return crop_right
