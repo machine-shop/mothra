@@ -1,45 +1,47 @@
-import pandas as pd
 import os
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
-
-THRESH = 9
-OUTLIERS = 2
+RESULTS_INPUT = 'results.csv'
+ACTUAL_INPUT = 'actual.xlsx'
 
 # Reads in the files and parses out only the useful columns
-actual = pd.read_excel('actual.xlsx')
-predicted = pd.read_csv('predicted.csv')
+actual = pd.read_excel(ACTUAL_INPUT)
+predicted = pd.read_csv(RESULTS_INPUT)
 actual = actual[['full name', 'Right', 'Left']]
+actual = actual.rename(index=str, columns={"Right": "actual_right",
+                                  "Left": "actual_left"})
+predicted = predicted.rename(index=str, columns={"right_wing (mm)": "predicted_right",
+                                     "left_wing (mm)": "predicted_left"})
 
-# Takes all rows that need to be doubled and doubles them into a new dataframe
-mod_pred = predicted
-doubles = mod_pred.loc[(mod_pred['left_wing (mm)'] < THRESH) &
-                       (mod_pred['right_wing (mm)'] < THRESH)]
-doubles['left_wing (mm)'] = doubles['left_wing (mm)'] * 2
-doubles['right_wing (mm)'] = doubles['right_wing (mm)'] * 2
-
-# Keeping only the previous rows where either value doesn't need to be doubled
-mod_pred = mod_pred[(mod_pred['left_wing (mm)'] > THRESH) |
-                    (mod_pred['right_wing (mm)'] > THRESH)]
-new_pred = pd.concat([mod_pred, doubles])
-
-# Merging them together and creating new columns for the difference between predicted an
-og = pd.merge(actual, mod_pred, left_on = 'full name', right_on = 'image_id').drop(['image_id'], axis=1)
-both = og
-both['left_diff'] = both['Left'] - both['left_wing (mm)']
-both['right_diff'] = both['Right'] - both['right_wing (mm)']
+# Merging them together and creating new columns for the difference
+both = pd.merge(actual, predicted, left_on = 'full name',
+                right_on = 'image_id').drop(['image_id'], axis=1)
+both['left_diff'] = both['predicted_left'] - both['actual_left']
+both['right_diff'] = both['predicted_right'] - both['actual_right']
 all_diffs = both['right_diff'].append(both['left_diff'])
 
 # Outliers
-outliers = all_diffs[(all_diffs < -OUTLIERS) | (all_diffs > OUTLIERS)]
-all_diffs = all_diffs[(all_diffs > -OUTLIERS) & (all_diffs < OUTLIERS)]
+mean = np.mean(all_diffs)
+sd = np.std(all_diffs)
+lower = mean - 2 * sd
+upper = mean + 2 * sd
+print("Mean: {mean} SD: {sd}.".format(mean=mean, sd=sd))
+print("Lower: {lower} Upper: {upper}.".format(lower=lower, upper=upper))
 
-fig, ax = plt.subplots(figsize=(5, 5))
-ax = all_diffs.hist()
+outliers = all_diffs[(all_diffs < lower) | (all_diffs > upper)]
+print("Num outliers: {outliers}".format(outliers=len(outliers)))
+all_diffs = all_diffs[(all_diffs > lower) & (all_diffs < upper)]
 
+fig, ax = plt.subplots(figsize=(10, 5))
+ax = all_diffs.hist(bins='auto')
+
+# Saving the plot
 filename = 'result_plot.png'
 output_path = os.path.normpath(filename)
-plt.xlabel('Difference between (actual - predicted) in mm')
+plt.xlabel('Difference between (predicted - actual) in mm')
+start, end = ax.get_xlim()
 plt.ylabel('Number of samples')
 plt.title('Error in predicted length')
 plt.savefig(output_path)
