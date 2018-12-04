@@ -93,7 +93,7 @@ def main():
     for i, image_name in enumerate(image_names):
 
         # if input is not an image, continue
-        if not f.lower().endswith(('.png', '.jpg', '.jpeg')):
+        if not image_name.lower().endswith(('.png', '.jpg', '.jpeg')):
             continue
 
         print(f'Image {i+1}/{n} : {image_name}')
