@@ -33,7 +33,7 @@ print(f"Mean: {mean} SD: {sd}.")
 print(f"Lower: {lower} Upper: {upper}.")
 
 outliers = all_diffs[(all_diffs < lower) | (all_diffs > upper)]
-print("Num outliers: {outliers}".format(outliers=len(outliers)))
+print(f"Num outliers: {len(outliers)}")
 all_diffs = all_diffs[(all_diffs > lower) & (all_diffs < upper)]
 
 fig, ax = plt.subplots(figsize=(10, 5))
