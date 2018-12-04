@@ -2,13 +2,14 @@
 
 Analyzing images of butterflies and measuring their wing lengths. Using binarization techniques and calculating the resolution of ruler ticks, we read in images of butterflies and output the millimeter lengths of their wings.
 
-![alt text](example_result.jpg?raw=true "Example measurement output")
+![example output](example_result.JPG)
 
 ## Usage
 
 ```
 $ python pipeline.py -p -i [input directory or image path] -o [output directory] -s [stage to run to] -csv [csv output file path]
 ```
+
 ## Options :
 * -s, --stage : string in ['ruler_detection', 'binarization', 'tracing', 'measurements']
 * -p, --plot : if entered, figures are plot to the output folder
