@@ -2,3 +2,5 @@ matplotlib
 scikit-image
 numpy
 scipy
+pandas
+pytest-timeout
