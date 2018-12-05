@@ -4,6 +4,9 @@ from scipy import ndimage as ndi
 from skimage.measure import regionprops
 import skimage.color as color
 from skimage.exposure import rescale_intensity
+from joblib import Memory
+location = './cachedir'
+memory = Memory(location, verbose=0)
 
 
 def find_tags_edge(binary, top_ruler):
@@ -46,7 +49,8 @@ def find_tags_edge(binary, top_ruler):
     return crop_right
 
 
-def main(image_rgb, top_ruler, ax=None):
+@memory.cache()
+def main(image_rgb, top_ruler):
     """Binarizes and crops properly image_rgb
 
     Arguments
@@ -77,9 +81,4 @@ def main(image_rgb, top_ruler, ax=None):
     rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
     thresh_hsv = threshold_otsu(rescaled)
     bfly_bin = rescaled > thresh_hsv
-
-    if ax:
-        ax.set_title('Binary')
-        ax.imshow(bfly_bin)
-
     return bfly_bin

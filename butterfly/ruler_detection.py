@@ -2,7 +2,11 @@ from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
+from joblib import Memory
 
+
+location = './cachedir'
+memory = Memory(location, verbose=0)
 
 RULER_TOP = 0.7
 RULER_LEFT = 0.2
@@ -84,7 +88,8 @@ def fourier(signal):
     return T_space
 
 
-def main(img, ax):
+@memory.cache()
+def main(img):
     '''Finds the distance between ticks
 
     Parameters
@@ -126,16 +131,9 @@ def main(img, ax):
 
     t_space = abs(fourier(sums))
 
-    # fig, ax = plt.subplots(figsize=(200, 50))
-    if ax:
-        ax.imshow(img)
-
-        x_single = [left_focus + first_index, left_focus + first_index +
-                    t_space]
-        y = np.array([up_focus, up_focus])
-        ax.fill_between(x_single, y, y + LINE_WIDTH, color='red')
-
-        x_mult = [left_focus + first_index, left_focus + first_index +
-                  t_space * 10]
-        ax.fill_between(x_mult, y - LINE_WIDTH, y, color='blue')
-    return t_space, top_ruler
+    x_single = [left_focus + first_index, left_focus + first_index +
+                t_space]
+    y = np.array([up_focus, up_focus])
+    x_mult = [left_focus + first_index, left_focus + first_index +
+              t_space * 10]
+    return t_space, top_ruler, [x_single, y, x_mult, img]
