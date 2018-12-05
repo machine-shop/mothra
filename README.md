@@ -12,6 +12,8 @@ The pipeline script combines four modules to analyze an image: ruler detection, 
 
 Run the `pipeline.py` file with the arguments to read in raw images and output result images and `.csv` file with the measurements.
 
+The results are cached in `cachedir` so that if the same methods are re-run with the same inputs, the computation will simply be retrieved from memory instead of being recomputed. However, this means any modifications to a method with the same name and signature will not be reflected unless this `cachedir` is deleted. 
+
 ## Options
 * -p, --plot : This flag is used to generate output images. This can be ommitted to not plot any images (Image outputs can be ommitted to improve runtime or save space.)
 * -i, --input : A single image input or a directory of images to be analyzed. (Default is `raw_images`).
