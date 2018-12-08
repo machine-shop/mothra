@@ -12,7 +12,7 @@ The pipeline script combines four modules to analyze an image: ruler detection, 
 
 Run the `pipeline.py` file with the arguments to read in raw images and output result images and `.csv` file with the measurements.
 
-The results are cached in `cachedir` so that if the same methods are re-run with the same inputs, the computation will simply be retrieved from memory instead of being recomputed. However, this means any modifications to a method with the same name and signature will not be reflected unless this `cachedir` is deleted. 
+The results are cached in `cachedir` so that if the same methods are re-run with the same inputs, the computation will simply be retrieved from memory instead of being recomputed. Delete `cachedir` to remove the cache and to recompute all results. If the source files for any part of the pipeline are tweaked, then results will be recomputed automatically.
 
 ## Options
 * -p, --plot : This flag is used to generate output images. This can be ommitted to not plot any images (Image outputs can be ommitted to improve runtime or save space.)
@@ -22,46 +22,43 @@ The results are cached in `cachedir` so that if the same methods are re-run with
 * -csv, --path_csv :  Path of `.csv` file for the measurement results. (Default is `results.csv`).
 * -dpi : Optional argument to specify resolution of the output image. (Default is `300`.)
 
-## Examples:
-Running
+## Example
+Example data can be found at [github.com/machine-shop/butterfly-wings-data](https://github.com/machine-shop/butterfly-wings-data). For this example, clone the repository alongside `butterfly-wings`.
 ```
-$ python pipeline.py -s measurements
+git clone https://github.com/machine-shop/butterfly-wings.git
+git clone https://github.com/machine-shop/butterfly-wings-data.git
 ```
-in `/butterfly-wings`.
-Expected file locations:
+Resulting files:
 ```
 /butterfly-wings
     ...
     pipeline.py
     ...
-    /raw_images
-        image1.jpg
-        image2.jpg
-        ...
-    results.csv
+/butterfly-wings-data
+    image1.jpg
+    image2.jpg
+    ...
 ```
 
-Running
+Running this command
 ```
-$ python pipeline.py -p -i ../data/test_pictures -o ../data/test_output -s measurements -csv ../data/test_output/results.csv
+$ python pipeline.py -p -i ../butterfly-wings-data -o ../test_output -s measurements -csv ../test_output/results.csv
 ```
-in `/butterfly-wings`.
-Expected file locations:
+in `/butterfly-wings` will run the pipeline on the example data in `/butterfly-wings-data`. The file locations should look like this:
 ```
-/data
-    /test_pictures
-        image1.jpg
-        image2.jpg
-        ...
-    /test_output
-        image1.jpg (result image for image1.jpg)
-        image2.jpg
-        ...
-        results.csv
 /butterfly-wings
     ...
     pipeline.py
     ...
+/butterfly-wings-data
+    image1.jpg
+    image2.jpg
+    ...
+/test_output
+    image1.jpg (result image for image1.jpg)
+    image2.jpg
+    ...
+    results.csv
 ```
 
 ## Miscellaneous
@@ -70,5 +67,9 @@ Jupyter notebooks with prototypes for various methods are located in the `/noteb
 
 The testing suite can be run with `PYTHONPATH=. pytest` from `/butterfly-wings`.
 
-## Accuracy:
-Run the `result_plotting.py` file to print out to generate a histogram of the difference for all actual - predicted measurements. (Not parametarized, so you will need to edit the script for the correct paths to compare result `.csv`'s)
+## Accuracy
+Run the `result_plotting.py` file to print out to generate a histogram of the difference for all actual - predicted measurements. (Not parametarized, so you will need to edit the script for the correct paths to compare result `.csv`'s). Default expected locations are:
+```
+/butterfly-wings/results.csv (generated measurements)
+/butterfly-wings/actual.xlsx (original measurements spreadsheet)
+```
