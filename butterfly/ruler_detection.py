@@ -1,4 +1,4 @@
-from skimage.filters import threshold_otsu
+from skimage.filters import threshold_triangle
 from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
@@ -29,10 +29,9 @@ def grayscale(img):
     binary : array
         array that represents the binarized image
     '''
-    image_gray = img[:, :, 0]
-    thresh = threshold_otsu(image_gray, nbins=60)
-    binary = image_gray > thresh
-    return binary
+    thresh = threshold_triangle(img)
+    binary = img > thresh
+    return binary[:, :, 0]
 
 
 def binarize_rect(up_rectangle, binary):
@@ -58,6 +57,23 @@ def binarize_rect(up_rectangle, binary):
 
     rectangle_binary = binary[up_rectangle:, left_rectangle: right_rectangle]
     return rectangle_binary
+
+def remove_numbers(focus):
+    '''
+    Needs docs and test coverage
+    '''
+    focus_numbers_markers, focus_numbers_nb_labels = ndi.label(focus, ndi.generate_binary_structure(2, 1))
+    focus_numbers_regions = regionprops(focus_numbers_markers)
+    focus_numbers_region_areas = [region.filled_area for region in focus_numbers_regions]
+    focus_numbers_avg_area = np.mean(focus_numbers_region_areas)
+    
+    focus_numbers_filled = np.copy(focus)
+    for region in focus_numbers_regions:
+        if region.eccentricity < 0.99 and region.filled_area > focus_numbers_avg_area:
+            min_row, min_col, max_row, max_col = region.bbox
+            focus_numbers_filled[min_row:max_row, min_col:max_col] = 0
+    
+    return focus_numbers_filled
 
 
 def fourier(signal):
@@ -120,12 +136,15 @@ def main(img):
     top_ruler = up_rectangle + offset
 
     # Focusing on the ticks
-    up_focus = up_rectangle + offset + 60
+    up_focus = up_rectangle + offset
     left_focus = int(binary.shape[1] * 0.1)
     right_focus = int(binary.shape[1] * 0.9)
-    focus = ~binary[up_focus: up_focus + HEIGHT_FOCUS, left_focus: right_focus]
+    focus = ~binary[up_focus: , left_focus: right_focus]
 
-    sums = np.sum(focus, axis=0) / float(HEIGHT_FOCUS)
+    # Removing the numbers in the ruler to denoise the fourier transform analysis
+    focus_numbers_filled = remove_numbers(focus)
+
+    sums = np.sum(focus_numbers_filled, axis=0) / float(HEIGHT_FOCUS)
 
     first_index = np.argmax(sums > FIRST_INDEX_THRESHOLD)
 
