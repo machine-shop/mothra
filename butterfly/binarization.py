@@ -4,6 +4,7 @@ from scipy import ndimage as ndi
 from skimage.measure import regionprops
 import skimage.color as color
 from skimage.exposure import rescale_intensity
+from skimage.morphology import binary_erosion
 from joblib import Memory
 location = './cachedir'
 memory = Memory(location, verbose=0)
@@ -26,28 +27,26 @@ def find_tags_edge(binary, top_ruler):
         x coordinate of the vertical line separating the tags area from the
         butterfly area
     """
-    lower_bound = top_ruler - int(binary.shape[0] * 0.1)
+    lower_bound = top_ruler
     left_bound = int(binary.shape[1] * 0.5)
     focus = binary[:lower_bound, left_bound:]
-
-    markers = ndi.label(focus,
+    
+    focus_filled = ndi.binary_fill_holes(focus)
+    focus_filled_eroded = binary_erosion(focus_filled)
+    
+    
+    markers = ndi.label(focus_filled_eroded,
                         structure=ndi.generate_binary_structure(2, 1))[0]
     
     regions = regionprops(markers)
-    biggest_areas = [(i, region.area) for i, region in enumerate(regions)]
-    biggest_areas.sort(key=lambda x: x[1], reverse=True)
+    regions.sort(key=lambda r: r.bbox[3], reverse=True)
+    regions.sort(key=lambda r: r.area, reverse=True)
     
-    filtered_regions = []
-    for i, area in biggest_areas[1:5]:
-        if regions[i].extent>0.8:
-            filtered_regions.append(regions[i])
-
-    left_pixels = [np.min(region.coords[:, 1]) for region in filtered_regions]
-    left_pixels = np.array(left_pixels)
-    left_pixels = left_pixels[left_pixels > 0.05 * binary.shape[1]]
-
-    crop_right = int(0.5 * binary.shape[1] + np.min(left_pixels))
-
+    filtered_regions = regions[:3]
+    
+    left_sides = [r.bbox[1] for r in filtered_regions]
+    crop_right = int(0.5 * binary.shape[1] + np.min(left_sides))
+    
     return crop_right
 
 
