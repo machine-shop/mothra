@@ -32,12 +32,14 @@ def find_tags_edge(binary, top_ruler):
 
     markers = ndi.label(focus,
                         structure=ndi.generate_binary_structure(2, 1))[0]
+    
     regions = regionprops(markers)
-    areas = [region.area for region in regions]
-    area_min = 0.01 * binary.shape[0] * binary.shape[1]
+    biggest_areas = [(i, region.area) for i, region in enumerate(regions)]
+    biggest_areas.sort(key=lambda x: x[1], reverse=True)
+    
     filtered_regions = []
-    for i, area in enumerate(areas):
-        if area > area_min:
+    for i, area in biggest_areas[1:5]:
+        if regions[i].extent>0.8:
             filtered_regions.append(regions[i])
 
     left_pixels = [np.min(region.coords[:, 1]) for region in filtered_regions]
