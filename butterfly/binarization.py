@@ -10,6 +10,11 @@ location = './cachedir'
 memory = Memory(location, verbose=0)
 
 
+EXTENT_TOLERANCE = 0.7
+ORIENTATION_TOLERANCE = 20/np.pi*180
+NUM_TAG_REGIONS = 3
+
+
 def find_tags_edge(binary, top_ruler):
     """Find the edge between the tag area on the right and the butterfly area
     and returns the corresponding x coordinate of that vertical line
@@ -39,10 +44,16 @@ def find_tags_edge(binary, top_ruler):
                         structure=ndi.generate_binary_structure(2, 1))[0]
     
     regions = regionprops(markers)
-    regions.sort(key=lambda r: r.bbox[3], reverse=True)
     regions.sort(key=lambda r: r.area, reverse=True)
-    
-    filtered_regions = regions[:3]
+
+    filtered_regions = []
+    for r in regions:
+        rotated_axes_area = r.major_axis_length * r.minor_axis_length
+        rotated_extent = r.area / rotated_axes_area
+        if rotated_extent > EXTENT_TOLERANCE and r.orientation < ORIENTATION_TOLERANCE:
+            filtered_regions.append(r)
+        if len(filtered_regions) >= NUM_TAG_REGIONS:
+            break
     
     left_sides = [r.bbox[1] for r in filtered_regions]
     crop_right = int(0.5 * binary.shape[1] + np.min(left_sides))
