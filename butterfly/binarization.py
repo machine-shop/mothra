@@ -50,13 +50,13 @@ def find_tags_edge(binary, top_ruler):
     for r in regions:
         rotated_axes_area = r.major_axis_length * r.minor_axis_length
         rotated_extent = r.area / rotated_axes_area
-        if rotated_extent > EXTENT_TOLERANCE and r.orientation < ORIENTATION_TOLERANCE:
+        if rotated_extent > EXTENT_TOLERANCE and abs(r.orientation) < ORIENTATION_TOLERANCE:
             filtered_regions.append(r)
         if len(filtered_regions) >= NUM_TAG_REGIONS:
             break
     
     left_sides = [r.bbox[1] for r in filtered_regions]
-    crop_right = int(0.5 * binary.shape[1] + np.min(left_sides))
+    crop_right = int(0.5 * binary.shape[1]) + np.min(left_sides) - 1
     
     return crop_right
 
