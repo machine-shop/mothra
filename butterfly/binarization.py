@@ -55,8 +55,8 @@ def find_tags_edge(binary, top_ruler):
         if len(filtered_regions) >= NUM_TAG_REGIONS:
             break
     
-    left_sides = [r.bbox[1] for r in filtered_regions]
-    crop_right = int(0.5 * binary.shape[1]) + np.min(left_sides) - 1
+    left_sides = [r.bbox[1] for r in filtered_regions] + [focus.shape[1]]
+    crop_right = left_bound + np.min(left_sides) - 1
     
     return crop_right
 
