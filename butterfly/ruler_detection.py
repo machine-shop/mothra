@@ -94,11 +94,20 @@ def fourier(signal):
     mod[0] = 0  # we discard the first coeff
     freq = np.fft.rfftfreq(len(signal))
 
-    # Normalization
-    mod = mod / np.max(mod)
-
-    # Choose frequence
-    f_space = freq[mod > 0.6][0]
+    highest_mod_indices = np.flip(np.argsort(mod))
+    highest_freqs = freq[highest_mod_indices]
+    
+    last_freq = highest_freqs[0]
+    epsilon = 0.05 * freq[-1]
+    for f in highest_freqs:
+        if abs(last_freq - f) < epsilon:
+            continue
+        if np.abs(f - 2 * last_freq) < epsilon:
+            break
+        if np.abs(last_freq - 2 * f) < epsilon:
+            last_freq = f
+            break
+    f_space = last_freq
     T_space = 1 / f_space
 
     return T_space
