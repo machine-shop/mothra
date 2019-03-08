@@ -1,4 +1,4 @@
-from skimage.filters import threshold_triangle
+from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
@@ -29,7 +29,7 @@ def grayscale(img):
     binary : array
         array that represents the binarized image
     '''
-    thresh = threshold_triangle(img)
+    thresh = threshold_otsu(img)
     binary = img > thresh
     return binary[:, :, 0]
 
@@ -110,7 +110,7 @@ def fourier(signal):
     f_space = last_freq
     T_space = 1 / f_space
 
-    return T_space
+    return 2 * T_space
 
 
 @memory.cache()
