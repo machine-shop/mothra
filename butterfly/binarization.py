@@ -15,7 +15,7 @@ ORIENTATION_TOLERANCE = 20/np.pi*180
 NUM_TAG_REGIONS = 3
 
 
-def find_tags_edge(binary, top_ruler):
+def find_tags_edge(binary, top_ruler, axes):
     """Find the edge between the tag area on the right and the butterfly area
     and returns the corresponding x coordinate of that vertical line
 
@@ -35,14 +35,13 @@ def find_tags_edge(binary, top_ruler):
     lower_bound = top_ruler
     left_bound = int(binary.shape[1] * 0.5)
     focus = binary[:lower_bound, left_bound:]
-    
+
     focus_filled = ndi.binary_fill_holes(focus)
     focus_filled_eroded = binary_erosion(focus_filled)
-    
-    
+
     markers = ndi.label(focus_filled_eroded,
                         structure=ndi.generate_binary_structure(2, 1))[0]
-    
+
     regions = regionprops(markers)
     regions.sort(key=lambda r: r.area, reverse=True)
 
@@ -50,19 +49,26 @@ def find_tags_edge(binary, top_ruler):
     for r in regions:
         rotated_axes_area = r.major_axis_length * r.minor_axis_length
         rotated_extent = r.area / rotated_axes_area
-        if rotated_extent > EXTENT_TOLERANCE and abs(r.orientation) < ORIENTATION_TOLERANCE:
+        if (rotated_extent > EXTENT_TOLERANCE and
+                abs(r.orientation) < ORIENTATION_TOLERANCE):
             filtered_regions.append(r)
         if len(filtered_regions) >= NUM_TAG_REGIONS:
             break
-    
+
     left_sides = [r.bbox[1] for r in filtered_regions] + [focus.shape[1]]
-    crop_right = left_bound + np.min(left_sides) - 1
-    
+    min_left_sides = np.min(left_sides) - 1
+    crop_right = left_bound + min_left_sides
+
+    if axes[6]:
+        axes[6].imshow(markers)
+        axes[6].axvline(x=min_left_sides, color='c', linestyle='dashed')
+        axes[6].set_title('Tags detection')
+
     return crop_right
 
 
 @memory.cache()
-def main(image_rgb, top_ruler):
+def main(image_rgb, top_ruler, axes):
     """Binarizes and crops properly image_rgb
 
     Arguments
@@ -86,11 +92,18 @@ def main(image_rgb, top_ruler):
     thresh_rgb = threshold_otsu(image_gray, nbins=60)
     binary = image_gray > thresh_rgb
 
-    label_edge = find_tags_edge(binary, top_ruler)
+    label_edge = find_tags_edge(binary, top_ruler, axes)
 
     bfly_rgb = image_rgb[:top_ruler, :label_edge]
     bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
     rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
     thresh_hsv = threshold_otsu(rescaled)
     bfly_bin = rescaled > thresh_hsv
+
+    if axes[1]:
+        axes[1].imshow(bfly_bin)
+        axes[1].set_title('Binarized butterfly')
+    if axes[3]:
+        axes[3].axvline(x=label_edge, color='c', linestyle='dashed')
+
     return bfly_bin
