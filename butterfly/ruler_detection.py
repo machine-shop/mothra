@@ -150,14 +150,20 @@ def main(img):
     right_focus = int(binary.shape[1] * 0.9)
     focus = ~binary[up_focus: , left_focus: right_focus]
 
+    ##################
+    focus = focus[int(0.1*focus.shape[0]):]
+
     # Removing the numbers in the ruler to denoise the fourier transform analysis
     focus_numbers_filled = remove_numbers(focus)
 
     sums = np.sum(focus_numbers_filled, axis=0) / float(HEIGHT_FOCUS)
 
+    ##################
+    sums_thresholded = sums > 0
+
     first_index = np.argmax(sums > FIRST_INDEX_THRESHOLD)
 
-    t_space = abs(fourier(sums))
+    t_space = abs(fourier(sums_thresholded))
 
     x_single = [left_focus + first_index, left_focus + first_index +
                 t_space]
