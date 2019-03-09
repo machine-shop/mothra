@@ -91,7 +91,7 @@ def fourier(signal):
     '''
     fourier = np.fft.rfft(signal)
     mod = np.abs(fourier)
-    mod[0] = 0  # we discard the first coeff
+    mod[0:10] = 0  # we discard the first several coeffs
     freq = np.fft.rfftfreq(len(signal))
     
     f_space = freq[np.argmax(mod)]
@@ -136,11 +136,13 @@ def main(img):
     left_focus = int(binary.shape[1] * 0.1)
     right_focus = int(binary.shape[1] * 0.9)
     focus = ~binary[up_focus: , left_focus: right_focus]
-    focus = focus[int(0.1*focus.shape[0]):]
 
     # Removing the numbers in the ruler to denoise the fourier transform analysis
     focus_numbers_filled = remove_numbers(focus)
 
+    # Cropping the top and bottom segments of the ruler to improve detection
+    focus_numbers_filled = focus[int(0.1*focus_numbers_filled.shape[0]):int(0.75*focus_numbers_filled.shape[0])]
+    
     sums = np.sum(focus_numbers_filled, axis=0) / float(HEIGHT_FOCUS)
     sums_thresholded = sums > 0
 
