@@ -11,8 +11,8 @@ memory = Memory(location, verbose=0)
 
 
 EXTENT_TOLERANCE = 0.7
-ORIENTATION_TOLERANCE = 20/np.pi*180
-NUM_TAG_REGIONS = 3
+ORIENTATION_TOLERANCE = 20/180*np.pi
+NUM_TAG_REGIONS = 2
 
 
 def find_tags_edge(binary, top_ruler):
@@ -47,13 +47,11 @@ def find_tags_edge(binary, top_ruler):
     regions.sort(key=lambda r: r.area, reverse=True)
 
     filtered_regions = []
-    for r in regions:
+    for r in regions[:NUM_TAG_REGIONS]:
         rotated_axes_area = r.major_axis_length * r.minor_axis_length
         rotated_extent = r.area / rotated_axes_area
         if rotated_extent > EXTENT_TOLERANCE and abs(r.orientation) < ORIENTATION_TOLERANCE:
             filtered_regions.append(r)
-        if len(filtered_regions) >= NUM_TAG_REGIONS:
-            break
     
     left_sides = [r.bbox[1] for r in filtered_regions] + [focus.shape[1]]
     crop_right = left_bound + np.min(left_sides) - 1
