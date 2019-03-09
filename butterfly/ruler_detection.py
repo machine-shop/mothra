@@ -93,21 +93,8 @@ def fourier(signal):
     mod = np.abs(fourier)
     mod[0] = 0  # we discard the first coeff
     freq = np.fft.rfftfreq(len(signal))
-
-    highest_mod_indices = np.flip(np.argsort(mod))
-    highest_freqs = freq[highest_mod_indices]
     
-    last_freq = highest_freqs[0]
-    epsilon = 0.05 * freq[-1]
-    for f in highest_freqs:
-        if abs(last_freq - f) < epsilon:
-            continue
-        if np.abs(f - 2 * last_freq) < epsilon:
-            break
-        if np.abs(last_freq - 2 * f) < epsilon:
-            last_freq = f
-            break
-    f_space = last_freq
+    f_space = freq[np.argmax(mod)]
     T_space = 1 / f_space
 
     return 2 * T_space
@@ -149,16 +136,12 @@ def main(img):
     left_focus = int(binary.shape[1] * 0.1)
     right_focus = int(binary.shape[1] * 0.9)
     focus = ~binary[up_focus: , left_focus: right_focus]
-
-    ##################
     focus = focus[int(0.1*focus.shape[0]):]
 
     # Removing the numbers in the ruler to denoise the fourier transform analysis
     focus_numbers_filled = remove_numbers(focus)
 
     sums = np.sum(focus_numbers_filled, axis=0) / float(HEIGHT_FOCUS)
-
-    ##################
     sums_thresholded = sums > 0
 
     first_index = np.argmax(sums > FIRST_INDEX_THRESHOLD)
