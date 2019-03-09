@@ -141,8 +141,8 @@ def main(img):
     focus_numbers_filled = remove_numbers(focus)
 
     # Cropping the top and bottom segments of the ruler to improve detection
-    focus_numbers_filled = focus[int(0.1*focus_numbers_filled.shape[0]):int(0.75*focus_numbers_filled.shape[0])]
-    
+    focus_numbers_filled = focus_numbers_filled[int(0.1*focus_numbers_filled.shape[0]):int(0.75*focus_numbers_filled.shape[0])]
+
     sums = np.sum(focus_numbers_filled, axis=0) / float(HEIGHT_FOCUS)
     sums_thresholded = sums > 0
 
