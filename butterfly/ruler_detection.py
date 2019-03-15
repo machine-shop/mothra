@@ -3,7 +3,7 @@ from skimage.measure import regionprops
 import numpy as np
 from scipy import ndimage as ndi
 from joblib import Memory
-
+import matplotlib.patches as patches
 
 location = './cachedir'
 memory = Memory(location, verbose=0)
@@ -12,12 +12,13 @@ RULER_TOP = 0.7
 RULER_LEFT = 0.2
 RULER_RIGHT = 0.4
 FIRST_INDEX_THRESHOLD = 0.9
-HEIGHT_FOCUS = 400
+HEIGHT_FOCUS_RATIO = 0.116
+OFFSET_FOCUS_RATIO = 0.017
 LINE_WIDTH = 40
 
 
-def grayscale(img):
-    ''' Returns a grayscale version of the image.
+def binarize(img):
+    ''' Returns a binarized version of the image.
 
     Parameters
     ----------
@@ -35,7 +36,7 @@ def grayscale(img):
     return binary
 
 
-def binarize_rect(up_rectangle, binary):
+def binarize_rect(up_rectangle, binary, axes):
     '''Returns binary rectangle of segment of ruler were interested in
 
         Parameters
@@ -53,14 +54,18 @@ def binarize_rect(up_rectangle, binary):
     left_rectangle = int(binary.shape[1] * RULER_LEFT)
     right_rectangle = int(binary.shape[1] * RULER_RIGHT)
 
-    rectangle = np.zeros((binary.shape[0], binary.shape[1]))
-    rectangle[up_rectangle:, left_rectangle: right_rectangle] = 1
-
     rectangle_binary = binary[up_rectangle:, left_rectangle: right_rectangle]
+    if axes[3]:
+        rect = patches.Rectangle((left_rectangle, up_rectangle),
+                                 right_rectangle - left_rectangle,
+                                 binary.shape[0] - up_rectangle,
+                                 linewidth=1, edgecolor='g', facecolor='none')
+        axes[3].add_patch(rect)
+
     return rectangle_binary
 
 
-def fourier(signal):
+def fourier(signal, axes):
     '''Performs a fourier transform to find the frequency and t space
 
     Parameters
@@ -85,11 +90,16 @@ def fourier(signal):
     f_space = freq[mod > 0.6][0]
     T_space = 1 / f_space
 
+    if axes[4]:
+        axes[4].plot(signal, linewidth=0.5)
+        axes[5].axvline(x=f_space, color='r', linestyle='dotted', linewidth=1)
+        axes[5].plot(freq, mod, linewidth=0.5)
+
     return T_space
 
 
 @memory.cache()
-def main(img):
+def main(img, axes):
     '''Finds the distance between ticks
 
     Parameters
@@ -104,10 +114,19 @@ def main(img):
     t_space : float
         distance between two ticks (.5 mm)
     '''
-    binary = grayscale(img)
+    binary = binarize(img)
+    if axes[0]:
+        axes[0].set_title('Final output')
+        axes[0].imshow(img)
+        if axes[3]:
+            axes[3].set_title('Image structure')
+            axes[4].set_title('Ruler signal')
+            axes[5].set_title('Fourier transform of ruler signal')
+            axes[3].imshow(img)
 
+    # Detecting top ruler
     up_rectangle = int(binary.shape[0] * RULER_TOP)
-    rectangle_binary = binarize_rect(up_rectangle, binary)
+    rectangle_binary = binarize_rect(up_rectangle, binary, axes)
     markers, nb_labels = ndi.label(rectangle_binary,
                                    ndi.generate_binary_structure(2, 1))
 
@@ -120,20 +139,35 @@ def main(img):
     top_ruler = up_rectangle + offset
 
     # Focusing on the ticks
-    up_focus = up_rectangle + offset + 60
+    up_focus = int(top_ruler + OFFSET_FOCUS_RATIO * binary.shape[0])
     left_focus = int(binary.shape[1] * 0.1)
     right_focus = int(binary.shape[1] * 0.9)
-    focus = ~binary[up_focus: up_focus + HEIGHT_FOCUS, left_focus: right_focus]
+    height_focus = int(HEIGHT_FOCUS_RATIO * binary.shape[0])
+    focus = ~binary[up_focus: up_focus + height_focus, left_focus: right_focus]
 
-    sums = np.sum(focus, axis=0) / float(HEIGHT_FOCUS)
+    means = np.mean(focus, axis=0)
 
-    first_index = np.argmax(sums > FIRST_INDEX_THRESHOLD)
+    first_index = np.argmax(means > FIRST_INDEX_THRESHOLD)
 
-    t_space = abs(fourier(sums))
+    t_space = abs(fourier(means, axes))
 
     x_single = [left_focus + first_index, left_focus + first_index +
                 t_space]
     y = np.array([up_focus, up_focus])
     x_mult = [left_focus + first_index, left_focus + first_index +
               t_space * 10]
-    return t_space, top_ruler, [x_single, y, x_mult, img]
+
+    # Plotting
+    if axes[0]:
+        axes[0].fill_between(x_single, y, y + LINE_WIDTH, color='red')
+        axes[0].fill_between(x_mult, y - LINE_WIDTH, y, color='blue')
+
+    if axes[3]:
+        rect = patches.Rectangle((left_focus, up_focus),
+                                 right_focus - left_focus,
+                                 height_focus,
+                                 linewidth=1, edgecolor='r', facecolor='none')
+        axes[3].axhline(y=top_ruler, color='b', linestyle='dashed')
+        axes[3].add_patch(rect)
+
+    return t_space, top_ruler
