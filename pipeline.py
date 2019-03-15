@@ -150,7 +150,7 @@ def main():
         for image_name in image_names:
             if not image_name.lower().endswith(('.png', '.jpg', '.jpeg')):
                 continue
-            image_path = os.path.join(raw_image_path, image_name)
+            image_path = os.path.join(raw_image_path, image_name).replace("\\","/")
             image_paths.append(image_path)
     else:
         image_paths = [raw_image_path]
@@ -180,8 +180,7 @@ def main():
                     writer.writerow([image_name, dst_mm[0], dst_mm[1]])
 
         if plot_level > 0:
-            output_path = os.path.join(args.output_folder, image_name)
-            # output_path = os.path.normpath(filename)
+            output_path = os.path.normpath(os.path.join(args.output_folder, image_name))
             dpi = args.dpi
             if plot_level == 2:
                 dpi = int(1.5 * args.dpi)

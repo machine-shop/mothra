@@ -25,14 +25,10 @@ def test_fourier():
     T_BIG = 8
     T_SMALL = T_BIG // 2
 
-    signal = np.random.randint(0, 7, 500)
+    signal = np.zeros(500)
     signal[::T_SMALL] = 10
     signal[::T_BIG] = 20
-    T_space = rd.fourier(signal, AXES)
-    nt.assert_almost_equal(T_space, T_SMALL, decimal=0)
-
-    signal = np.random.randint(0, 7, 500)
-    signal[::T_BIG] = 20
+    signal_filtered = signal > 0
     T_space = rd.fourier(signal, AXES)
     nt.assert_almost_equal(T_space, T_BIG, decimal=0)
 
@@ -46,6 +42,7 @@ def test_binary_rect():
 
 def test_main_ruler_detection():
     data = np.ones((500, 500, 3))
-    data[350:500, 0:500:10, :] = 0
+    data[350:500, 0:500:20, :] = 0
+    data[425:500, 10:500:20, :] = 0
     t_space, top_space = rd.main(data, AXES)
-    nt.assert_almost_equal(t_space, 10, decimal=0)
+    nt.assert_almost_equal(t_space, 20, decimal=0)

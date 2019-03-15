@@ -150,36 +150,27 @@ def main(img, axes):
     offset = np.min(coords[:, 0])
     top_ruler = up_rectangle + offset
 
-    # Focusing on the ticks
-# <<<<<<< HEAD
-    up_focus = int(top_ruler + OFFSET_FOCUS_RATIO * binary.shape[0])
-    left_focus = int(binary.shape[1] * 0.1)
-    right_focus = int(binary.shape[1] * 0.9)
-    height_focus = int(HEIGHT_FOCUS_RATIO * binary.shape[0])
-    focus = ~binary[up_focus: up_focus + height_focus, left_focus: right_focus]
+    # Focusing on the ruler
+    up_focus = up_rectangle + offset
+    focus = ~binary[up_focus:]
 
     # Removing the numbers in the ruler to denoise the fourier transform analysis
     focus_numbers_filled = remove_numbers(focus)
 
-    # Cropping the top and bottom segments of the ruler to improve detection
-#    focus_numbers_filled = focus_numbers_filled[int(0.1*focus_numbers_filled.shape[0]):int(0.75*focus_numbers_filled.shape[0])]
+    # Cropping the center of the ruler to improve detection
+    up_trim = int(0.1*focus_numbers_filled.shape[0])
+    down_trim = int(0.75*focus_numbers_filled.shape[0])
+    left_focus = int(0.1*focus_numbers_filled.shape[1])
+    right_focus = int(0.9*focus_numbers_filled.shape[1])
+    focus_numbers_filled = focus_numbers_filled[up_trim:down_trim, left_focus:right_focus]
 
-    sums = np.sum(focus_numbers_filled, axis=0) / float(HEIGHT_FOCUS)
+    sums = np.sum(focus_numbers_filled, axis=0)
     sums_thresholded = sums > 0
-# =======
-#     up_focus = int(top_ruler + OFFSET_FOCUS_RATIO * binary.shape[0])
-#     left_focus = int(binary.shape[1] * 0.1)
-#     right_focus = int(binary.shape[1] * 0.9)
-#     height_focus = int(HEIGHT_FOCUS_RATIO * binary.shape[0])
-#     focus = ~binary[up_focus: up_focus + height_focus, left_focus: right_focus]
 
-#     means = np.mean(focus, axis=0)
-# >>>>>>> master
+    means = np.mean(focus, axis=0)
+    first_index = np.argmax(means > FIRST_INDEX_THRESHOLD)
 
-#     first_index = np.argmax(means > FIRST_INDEX_THRESHOLD)
-
-# <<<<<<< HEAD
-    t_space = abs(fourier(sums_thresholded))
+    t_space = abs(fourier(sums_thresholded, axes))
 
     x_single = [left_focus + first_index, left_focus + first_index +
                 t_space]

@@ -7,7 +7,6 @@ from scipy.ndimage.morphology import binary_dilation
 
 location = './cachedir'
 memory = Memory(location, verbose=0)
-# import matplotlib.pyplot as plt
 
 
 def remove_antenna(half_binary):
