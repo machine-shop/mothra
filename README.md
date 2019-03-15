@@ -16,9 +16,10 @@ The results are cached in `cachedir` so that if the same methods are re-run with
 
 ## Options
 * -p, --plot : This flag is used to generate output images. This can be ommitted to not plot any images (Image outputs can be ommitted to improve runtime or save space.)
+* -pp, --detailed_plot : Outputs detailed plots to help debugging. 
 * -i, --input : A single image input or a directory of images to be analyzed. (Default is `raw_images`).
 * -o, --output_folder : The output directory in which the result images will be outputted. (Default is `outputs`).
-* -s, --stage : The stage which to run the pipeline until. Must be one of  `['ruler_detection', 'binarization', 'tracing', 'measurements']`. To run the entire pipeline, simply use `-s measurements`. (Running the pipeline and stopping at an earlier stage can be useful for debugging.)
+* -s, --stage : The stage which to run the pipeline until. Must be one of  `['ruler_detection', 'binarization', 'measurements']`. To run the entire pipeline, simply use `-s measurements`. (Running the pipeline and stopping at an earlier stage can be useful for debugging.)
 * -csv, --path_csv :  Path of `.csv` file for the measurement results. (Default is `results.csv`).
 * -dpi : Optional argument to specify resolution of the output image. (Default is `300`.)
 

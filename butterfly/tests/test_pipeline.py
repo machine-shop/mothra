@@ -1,8 +1,9 @@
 import subprocess
 import os
 import shutil
-
 import pytest
+
+import pipeline
 
 
 TIMEOUT_TIME = 60
@@ -41,3 +42,17 @@ def test_pipeline_main():
 
     # assert the two outputs exist
     assert(output_image and output_csv)
+
+
+def test_create_layout():
+    axes = pipeline.create_layout(1, 0)
+    for ax in axes:
+        assert ax is None
+    axes = pipeline.create_layout(3, 2)
+    for ax in axes:
+        assert ax
+    axes = pipeline.create_layout(3, 1)
+    for ax in axes[:3]:
+        assert ax
+    for ax in axes[3:]:
+        assert ax is None

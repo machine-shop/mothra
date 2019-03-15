@@ -150,7 +150,7 @@ def split_picture(binary):
 
 
 @memory.cache()
-def main(binary):
+def main(binary, axes):
     """Find and retunrs the coordinates of the 4 points of interest
 
     Arguments
@@ -196,4 +196,14 @@ def main(binary):
     # Reconstruct binary image without antennae
     without_antennae = np.concatenate((without_antenna_l, without_antenna_r),
                                       axis=1)
-    return points_interest, [without_antennae, middle, binary]
+    if axes[2]:
+        axes[2].set_title('Points of interest')
+        axes[2].imshow(without_antennae)
+        axes[2].axvline(middle, color='m', linestyle='dashed')
+        markersize = 10
+        if axes[3]:
+            markersize = 2
+        axes[2].scatter(points_interest[:, 1], points_interest[:, 0],
+                        color='r', s=markersize)
+
+    return points_interest

@@ -4,16 +4,64 @@ import csv
 from butterfly import (ruler_detection, tracing, measurement, binarization)
 import matplotlib.pyplot as plt
 from skimage.io import imread
-import numpy as np
 
-
-LINE_WIDTH = 40
-
+WSPACE_SUBPLOTS = 0.7
 
 """
 Example :
     $ python pipeline_argparse.py --stage tracing --plot -dpi 400
 """
+
+
+def create_layout(n_stages, plot_level):
+    """Creates Axes to plot figures
+
+    Parameters
+    ----------
+    n_stages : int
+        length of pipeline process
+    plot_level : int
+        0 : no plotting
+        1 : regular plots
+        2 : detailed plots
+
+    Returns
+    -------
+    axes : list of Axes
+    """
+    if plot_level == 0:
+        return [None] * 7
+
+    elif plot_level == 1:
+        ncols = n_stages
+        fig, ax = plt.subplots(nrows=1, ncols=ncols, figsize=(12, 5))
+        if n_stages == 1:
+            ax = [ax]
+        ax_list = []
+        for ax in ax:
+            ax_list.append(ax)
+        return ax_list + [None] * (7 - n_stages)
+
+    elif plot_level == 2:
+        shape = (3, 3)
+        ax_main = plt.subplot2grid(shape, (0, 0))
+        ax_structure = plt.subplot2grid(shape, (0, 1))
+        ax_signal = plt.subplot2grid(shape, (1, 0), colspan=2)
+        ax_fourier = plt.subplot2grid(shape, (2, 0), colspan=2)
+
+        ax_tags = plt.subplot2grid(shape, (0, 2))
+        ax_bin = plt.subplot2grid(shape, (1, 2))
+        ax_poi = plt.subplot2grid(shape, (2, 2))
+        plt.tight_layout()
+        if n_stages == 1:
+            return [ax_main, None, None, ax_structure, ax_signal, ax_fourier,
+                    None]
+        elif n_stages == 2:
+            return [ax_main, ax_bin, None, ax_structure, ax_signal, ax_fourier,
+                    ax_tags]
+        elif n_stages == 3:
+            return [ax_main, ax_bin, ax_poi, ax_structure, ax_signal,
+                    ax_fourier, ax_tags]
 
 
 def main():
@@ -26,6 +74,11 @@ def main():
                         action='store_true',
                         help='If entered images are plotted to the output\
                         folder')
+
+    parser.add_argument('-pp', '--detailed_plot',
+                        action='store_true',
+                        help='If entered detailed images are plotted to the\
+                        output folder')
 
     # Input path
     parser.add_argument('-i', '--input',
@@ -66,12 +119,18 @@ def main():
     else:
         os.mkdir(args.output_folder)
 
-    stages = ['ruler_detection', 'binarization', 'tracing', 'measurements']
+    stages = ['ruler_detection', 'binarization', 'measurements']
 
     if args.stage not in stages:
         print("ERROR : Stage can only be 'ruler_detection', 'binarization',\
-              'tracing' or 'measurements'")
+               or 'measurements'")
         return 0
+
+    plot_level = 0
+    if args.plot:
+        plot_level = 1
+    if args.detailed_plot:
+        plot_level = 2
 
     # Initializing the csv file
     if args.stage == 'measurements':
@@ -81,97 +140,52 @@ def main():
             writer = csv.writer(csv_file)
             writer.writerow(['image_id', 'left_wing (mm)', 'right_wing (mm)'])
 
-    raw_image_path = args.input
-
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
 
     raw_image_path = args.input
     if(os.path.isdir(raw_image_path)):
         image_names = os.listdir(raw_image_path)
+        image_paths = []
+        for image_name in image_names:
+            if not image_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+                continue
+            image_path = os.path.join(raw_image_path, image_name)
+            image_paths.append(image_path)
     else:
-        image_names = [""]
-    n = len(image_names)
+        image_paths = [raw_image_path]
+    n = len(image_paths)
 
-    
-    for i, image_name in enumerate(image_names):
-
-        # if input is not an image, continue
-        if not image_name.lower().endswith(('.png', '.jpg', '.jpeg')):
-            continue
-
+    for i, image_path in enumerate(image_paths):
+        image_name = image_path.split('/')[-1]
         print(f'Image {i+1}/{n} : {image_name}')
-        image_path = os.path.normpath(raw_image_path + '/' + image_name)
+
         image_rgb = imread(image_path)
-        ax = [None, None, None]
-        if args.plot:
-            ncols = min(len(pipeline_process), 3)
-            fig, ax = plt.subplots(ncols=ncols, figsize=(20, 5))
+        axes = create_layout(len(pipeline_process), plot_level)
 
         for step in pipeline_process:
             if step == 'ruler_detection':
-                ax0 = ax
-                if len(pipeline_process) > 1:
-                    ax0 = ax[0]
-                T_space, top_ruler, plot_info = ruler_detection.main(image_rgb)
-                if ax0:
-                    x_single = plot_info[0]
-                    y = plot_info[1]
-                    x_mult = plot_info[2]
-                    plt_img = plot_info[3]
-                    ax0.imshow(plt_img)
-                    ax0.fill_between(x_single, y, y + LINE_WIDTH, color='red')
-                    ax0.fill_between(x_mult, y - LINE_WIDTH, y, color='blue')
+                T_space, top_ruler = ruler_detection.main(image_rgb, axes)
+
             elif step == 'binarization':
-                binary = binarization.main(image_rgb, top_ruler)
-                if(ax[1]):
-                    ax[1].set_title('Binary')
-                    ax[1].imshow(binary)
-            elif step == 'tracing':
-                points_interest, plot_info = tracing.main(binary)
-                if ax[2]:
-                    without_antennae = plot_info[0]
-                    middle = plot_info[1]
-                    binary = plot_info[2]
-                    ax[2].set_title('Tracing')
-                    ax[2].imshow(without_antennae)
-                    ax[2].plot([middle, middle], [0, binary.shape[0]-5])
-                    ax[2].scatter(points_interest[:, 1],
-                                  points_interest[:, 0], color='r', s=10)
-            else:
-                dst_pix, dst_mm, plot_info = measurement.main(points_interest,
-                                                              T_space)
-                if ax0 is not None:
-                    pix_out_l = plot_info[0]
-                    pix_out_r = plot_info[1]
-                    pix_in_l = plot_info[2]
-                    pix_in_r = plot_info[3]
-                    dist_l_mm = plot_info[4]
-                    dist_r_mm = plot_info[5]
-                    ax0.set_title('final image')
-                    ax0.plot([pix_out_l[1], pix_in_l[1]],
-                             [pix_out_l[0], pix_in_l[0]], color='r')
-                    ax0.plot([pix_out_r[1], pix_in_r[1]],
-                             [pix_out_r[0], pix_in_r[0]], color='r')
-                    ax0.text(int((pix_out_l[1] + pix_in_l[1]) / 2) + 50,
-                             int((pix_out_l[0] + pix_in_l[0]) / 2) - 50,
-                             'dist_left = ' + str(round(dist_l_mm, 2)) + ' mm',
-                             color='r')
-                    ax0.text(int((pix_out_r[1] + pix_in_r[1]) / 2) + 50,
-                             int((pix_out_r[0] + pix_in_r[0]) / 2) + 50,
-                             'dist_right = ' + str(round(dist_r_mm, 2))
-                             + ' mm', color='r')
-                print(f'left_wing : {dst_mm[0]} mm')
-                print(f'right_wing : {dst_mm[1]} mm')
+                binary = binarization.main(image_rgb, top_ruler, axes)
+
+            elif step == 'measurements':
+                points_interest = tracing.main(binary, axes)
+                dst_pix, dst_mm = measurement.main(points_interest, T_space,
+                                                   axes)
 
                 with open(args.path_csv, 'a') as csv_file:
                     writer = csv.writer(csv_file)
                     writer.writerow([image_name, dst_mm[0], dst_mm[1]])
 
-        if args.plot:
-            filename = args.output_folder + '/' + image_name
-            output_path = os.path.normpath(filename)
-            plt.savefig(output_path, dpi=args.dpi)
+        if plot_level > 0:
+            output_path = os.path.join(args.output_folder, image_name)
+            # output_path = os.path.normpath(filename)
+            dpi = args.dpi
+            if plot_level == 2:
+                dpi = int(1.5 * args.dpi)
+            plt.savefig(output_path, dpi=dpi)
             plt.close()
 
 
