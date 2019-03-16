@@ -7,7 +7,6 @@ from scipy.ndimage.morphology import binary_dilation
 
 location = './cachedir'
 memory = Memory(location, verbose=0)
-# import matplotlib.pyplot as plt
 
 
 def remove_antenna(half_binary):
@@ -150,7 +149,7 @@ def split_picture(binary):
 
 
 @memory.cache()
-def main(binary, axes):
+def main(binary, axes=None):
     """Find and retunrs the coordinates of the 4 points of interest
 
     Arguments
@@ -196,7 +195,7 @@ def main(binary, axes):
     # Reconstruct binary image without antennae
     without_antennae = np.concatenate((without_antenna_l, without_antenna_r),
                                       axis=1)
-    if axes[2]:
+    if axes and axes[2]:
         axes[2].set_title('Points of interest')
         axes[2].imshow(without_antennae)
         axes[2].axvline(middle, color='m', linestyle='dashed')

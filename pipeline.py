@@ -30,7 +30,7 @@ def create_layout(n_stages, plot_level):
     axes : list of Axes
     """
     if plot_level == 0:
-        return [None] * 7
+        return None
 
     elif plot_level == 1:
         ncols = n_stages
@@ -157,7 +157,7 @@ def main():
     n = len(image_paths)
 
     for i, image_path in enumerate(image_paths):
-        image_name = image_path.split('/')[-1]
+        image_name = os.path.basename(image_path)
         print(f'Image {i+1}/{n} : {image_name}')
 
         image_rgb = imread(image_path)
@@ -180,8 +180,7 @@ def main():
                     writer.writerow([image_name, dst_mm[0], dst_mm[1]])
 
         if plot_level > 0:
-            output_path = os.path.join(args.output_folder, image_name)
-            # output_path = os.path.normpath(filename)
+            output_path = os.path.normpath(os.path.join(args.output_folder, image_name))
             dpi = args.dpi
             if plot_level == 2:
                 dpi = int(1.5 * args.dpi)

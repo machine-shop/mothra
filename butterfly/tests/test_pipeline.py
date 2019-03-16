@@ -46,8 +46,7 @@ def test_pipeline_main():
 
 def test_create_layout():
     axes = pipeline.create_layout(1, 0)
-    for ax in axes:
-        assert ax is None
+    assert axes is None
     axes = pipeline.create_layout(3, 2)
     for ax in axes:
         assert ax

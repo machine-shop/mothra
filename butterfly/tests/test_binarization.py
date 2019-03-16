@@ -5,8 +5,6 @@ from butterfly import binarization
 
 import pytest
 
-AXES = [None] * 7
-
 
 @pytest.fixture(scope="module")
 def fake_butterfly_layout():
@@ -56,13 +54,13 @@ def fake_butterfly_no_tags():
 
 def test_find_tags_edge(fake_butterfly_layout):
     butterfly, (rows, cols) = fake_butterfly_layout
-    result = binarization.find_tags_edge(butterfly, 230, AXES)
+    result = binarization.find_tags_edge(butterfly, 230)
     assert (250 <= result <= 260)  # assert the tags edge is in a proper place
 
 
 def test_missing_tags(fake_butterfly_no_tags):
     butterfly, (rows, cols) = fake_butterfly_no_tags
-    result = binarization.find_tags_edge(butterfly, 230, AXES)
+    result = binarization.find_tags_edge(butterfly, 230)
     # such a crop will probably throw off measurement process
     # but the program won't crash
     assert (result >= 399)
@@ -74,7 +72,7 @@ def test_main(fake_butterfly_layout):
     picture_3d = np.dstack((picture_2d,
                             1/2 * picture_2d,
                             1/4 * picture_2d))  # fake RGB image
-    result = binarization.main(picture_3d, 230, AXES)
+    result = binarization.main(picture_3d, 230)
     y_where, x_where = np.where(result)
     x_where_min, x_where_max = np.min(x_where), np.max(x_where)
     y_where_min, y_where_max = np.min(y_where), np.max(y_where)
