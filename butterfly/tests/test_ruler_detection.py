@@ -28,9 +28,8 @@ def test_fourier():
     signal = np.zeros(500)
     signal[::T_SMALL] = 10
     signal[::T_BIG] = 20
-    signal_filtered = signal > 0
     T_space = rd.fourier(signal, AXES)
-    nt.assert_almost_equal(T_space, T_BIG, decimal=0)
+    nt.assert_almost_equal(T_space, T_SMALL, decimal=0)
 
 
 def test_binary_rect():

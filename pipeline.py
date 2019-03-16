@@ -150,14 +150,14 @@ def main():
         for image_name in image_names:
             if not image_name.lower().endswith(('.png', '.jpg', '.jpeg')):
                 continue
-            image_path = os.path.join(raw_image_path, image_name).replace("\\","/")
+            image_path = os.path.join(raw_image_path, image_name)
             image_paths.append(image_path)
     else:
         image_paths = [raw_image_path]
     n = len(image_paths)
 
     for i, image_path in enumerate(image_paths):
-        image_name = image_path.split('/')[-1]
+        image_name = os.path.basename(image_path)
         print(f'Image {i+1}/{n} : {image_name}')
 
         image_rgb = imread(image_path)

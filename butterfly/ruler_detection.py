@@ -12,8 +12,6 @@ RULER_TOP = 0.7
 RULER_LEFT = 0.2
 RULER_RIGHT = 0.4
 FIRST_INDEX_THRESHOLD = 0.9
-HEIGHT_FOCUS_RATIO = 0.116
-OFFSET_FOCUS_RATIO = 0.017
 LINE_WIDTH = 40
 
 
@@ -64,8 +62,18 @@ def binarize_rect(up_rectangle, binary, axes):
     return rectangle_binary
 
 def remove_numbers(focus):
-    '''
-    Needs docs and test coverage
+    ''' Returns a ruler image but with the numbers stripped away, to improve ruler
+    fourier transform analysis
+
+    Parameters
+    ----------
+    focus : 2D array
+        Binary image of the ruler
+
+    Returns
+    -------
+    focus_nummbers_filled : 2D array
+        Binary image of the ruler without numbers
     '''
     focus_numbers_markers, focus_numbers_nb_labels = ndi.label(focus, ndi.generate_binary_structure(2, 1))
     focus_numbers_regions = regionprops(focus_numbers_markers)
@@ -94,10 +102,15 @@ def fourier(signal, axes):
     t_space : float
         distance in pixels between two ticks (.5 mm)
     '''
-    fourier = np.fft.rfft(signal)
+    
+    # thresholding the signal so the fourier transform results better correlate to 
+    # frequency and not amplitude of the signal
+    signal_thresholded = signal > 0
+
+    fourier = np.fft.rfft(signal_thresholded)
     mod = np.abs(fourier)
     mod[0:10] = 0  # we discard the first several coeffs
-    freq = np.fft.rfftfreq(len(signal))
+    freq = np.fft.rfftfreq(len(signal_thresholded))
     
     f_space = freq[np.argmax(mod)]
     T_space = 1 / f_space
@@ -107,7 +120,7 @@ def fourier(signal, axes):
         axes[5].axvline(x=f_space, color='r', linestyle='dotted', linewidth=1)
         axes[5].plot(freq, mod, linewidth=0.5)
 
-    return 2 * T_space
+    return T_space
 
 
 @memory.cache()
@@ -164,13 +177,12 @@ def main(img, axes):
     right_focus = int(0.9*focus_numbers_filled.shape[1])
     focus_numbers_filled = focus_numbers_filled[up_trim:down_trim, left_focus:right_focus]
 
-    sums = np.sum(focus_numbers_filled, axis=0)
-    sums_thresholded = sums > 0
-
     means = np.mean(focus, axis=0)
     first_index = np.argmax(means > FIRST_INDEX_THRESHOLD)
 
-    t_space = abs(fourier(sums_thresholded, axes))
+    # Fourier transform analysis to give us the pixels between the 1mm ticks
+    sums = np.sum(focus_numbers_filled, axis=0)
+    t_space = 2 * fourier(sums, axes)
 
     x_single = [left_focus + first_index, left_focus + first_index +
                 t_space]
@@ -180,8 +192,8 @@ def main(img, axes):
 
     # Plotting
     if axes[0]:
-        axes[0].fill_between(x_single, y, y + LINE_WIDTH, color='red')
-        axes[0].fill_between(x_mult, y - LINE_WIDTH, y, color='blue')
+        axes[0].fill_between(x_single, y, y + LINE_WIDTH, color='red', linewidth=0)
+        axes[0].fill_between(x_mult, y - LINE_WIDTH, y, color='blue', linewidth=0)
 
     if axes[3]:
         rect = patches.Rectangle((left_focus, up_focus),
