@@ -48,12 +48,3 @@ plt.ylabel('Number of samples')
 plt.title('Error in predicted length')
 plt.savefig(output_path)
 plt.close()
-
-# Printing the outliers
-both['left_SD'] = (both['left_diff'] - mean) / sd
-both['right_SD'] = (both['right_diff'] - mean) / sd
-outliers = both[(abs(both['right_SD'])>1) | (abs(both['left_SD'])>1)].sort_values('left_SD', ascending=False).sort_values('right_SD', ascending=False)
-
-outliers.to_csv("outliers.csv")
-print(f'Saved {len(outliers)} outliers to outliers.csv')
-
