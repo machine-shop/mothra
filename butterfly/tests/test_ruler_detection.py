@@ -6,8 +6,6 @@ from numpy import testing as nt
 RULER_TOP = 50
 RULER_LEFT = 0.2
 RULER_RIGHT = 0.4
-AXES = [None] * 7
-
 
 def test_binarize():
     input = np.array([[[1, 1, 1],
@@ -28,7 +26,7 @@ def test_fourier():
     signal = np.zeros(500)
     signal[::T_SMALL] = 10
     signal[::T_BIG] = 20
-    T_space = rd.fourier(signal, AXES)
+    T_space = rd.fourier(signal)
     nt.assert_almost_equal(T_space, T_SMALL, decimal=0)
 
 
@@ -36,12 +34,12 @@ def test_binary_rect():
     data = np.full((500, 500, 3), 0.0)
     data[450:500, :, :] += 0.6
     expected = np.full((50, 100, 3), 0.6)
-    nt.assert_equal(rd.binarize_rect(450, data, AXES), expected)
+    nt.assert_equal(rd.binarize_rect(450, data), expected)
 
 
 def test_main_ruler_detection():
     data = np.ones((500, 500, 3))
     data[350:500, 0:500:20, :] = 0
     data[425:500, 10:500:20, :] = 0
-    t_space, top_space = rd.main(data, AXES)
+    t_space, top_space = rd.main(data)
     nt.assert_almost_equal(t_space, 20, decimal=0)

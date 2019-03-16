@@ -6,7 +6,7 @@ memory = Memory(location, verbose=0)
 
 
 @memory.cache()
-def main(points_interest, T_space, axes):
+def main(points_interest, T_space, axes=None):
     ''' Calculates the length and draws the lines for length
     of the butterfly wings.
 
@@ -51,7 +51,7 @@ def main(points_interest, T_space, axes):
     dst_pix = (dist_l_pix, dist_r_pix)
     dst_mm = (dist_l_mm, dist_r_mm)
 
-    if axes[0]:
+    if axes and axes[0]:
         textsize = 7
         if axes[3]:
             textsize = 4

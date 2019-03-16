@@ -30,7 +30,7 @@ def create_layout(n_stages, plot_level):
     axes : list of Axes
     """
     if plot_level == 0:
-        return [None] * 7
+        return None
 
     elif plot_level == 1:
         ncols = n_stages

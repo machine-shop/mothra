@@ -12,6 +12,7 @@ RULER_TOP = 0.7
 RULER_LEFT = 0.2
 RULER_RIGHT = 0.4
 FIRST_INDEX_THRESHOLD = 0.9
+HEIGHT_FOCUS_RATIO = 0.116
 LINE_WIDTH = 40
 
 
@@ -33,7 +34,7 @@ def binarize(img):
     return binary[:, :, 0]
 
 
-def binarize_rect(up_rectangle, binary, axes):
+def binarize_rect(up_rectangle, binary, axes=None):
     '''Returns binary rectangle of segment of ruler were interested in
 
         Parameters
@@ -52,7 +53,7 @@ def binarize_rect(up_rectangle, binary, axes):
     right_rectangle = int(binary.shape[1] * RULER_RIGHT)
 
     rectangle_binary = binary[up_rectangle:, left_rectangle: right_rectangle]
-    if axes[3]:
+    if axes and axes[3]:
         rect = patches.Rectangle((left_rectangle, up_rectangle),
                                  right_rectangle - left_rectangle,
                                  binary.shape[0] - up_rectangle,
@@ -89,7 +90,7 @@ def remove_numbers(focus):
     return focus_numbers_filled
 
 
-def fourier(signal, axes):
+def fourier(signal, axes=None):
     '''Performs a fourier transform to find the frequency and t space
 
     Parameters
@@ -115,7 +116,7 @@ def fourier(signal, axes):
     f_space = freq[np.argmax(mod)]
     T_space = 1 / f_space
 
-    if axes[4]:
+    if axes and axes[4]:
         axes[4].plot(signal, linewidth=0.5)
         axes[5].axvline(x=f_space, color='r', linestyle='dotted', linewidth=1)
         axes[5].plot(freq, mod, linewidth=0.5)
@@ -124,7 +125,7 @@ def fourier(signal, axes):
 
 
 @memory.cache()
-def main(img, axes):
+def main(img, axes=None):
     '''Finds the distance between ticks
 
     Parameters
@@ -140,7 +141,7 @@ def main(img, axes):
         distance between two ticks (.5 mm)
     '''
     binary = binarize(img)
-    if axes[0]:
+    if axes and axes[0]:
         axes[0].set_title('Final output')
         axes[0].imshow(img)
         if axes[3]:
@@ -191,11 +192,12 @@ def main(img, axes):
               t_space * 10]
 
     # Plotting
-    if axes[0]:
+    if axes and axes[0]:
         axes[0].fill_between(x_single, y, y + LINE_WIDTH, color='red', linewidth=0)
         axes[0].fill_between(x_mult, y - LINE_WIDTH, y, color='blue', linewidth=0)
 
-    if axes[3]:
+    if axes and axes[3]:
+        height_focus = int(HEIGHT_FOCUS_RATIO * binary.shape[0])
         rect = patches.Rectangle((left_focus, up_focus),
                                  right_focus - left_focus,
                                  height_focus,
