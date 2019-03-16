@@ -12,7 +12,6 @@ RULER_TOP = 0.7
 RULER_LEFT = 0.2
 RULER_RIGHT = 0.4
 FIRST_INDEX_THRESHOLD = 0.9
-HEIGHT_FOCUS_RATIO = 0.116
 LINE_WIDTH = 40
 
 
@@ -197,10 +196,9 @@ def main(img, axes=None):
         axes[0].fill_between(x_mult, y - LINE_WIDTH, y, color='blue', linewidth=0)
 
     if axes and axes[3]:
-        height_focus = int(HEIGHT_FOCUS_RATIO * binary.shape[0])
-        rect = patches.Rectangle((left_focus, up_focus),
+        rect = patches.Rectangle((left_focus, up_focus+up_trim),
                                  right_focus - left_focus,
-                                 height_focus,
+                                 down_trim,
                                  linewidth=1, edgecolor='r', facecolor='none')
         axes[3].axhline(y=top_ruler, color='b', linestyle='dashed')
         axes[3].add_patch(rect)
