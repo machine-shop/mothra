@@ -16,7 +16,11 @@ The results are cached in `cachedir` so that if the same methods are re-run with
 
 ## Options
 * -p, --plot : This flag is used to generate output images. This can be ommitted to not plot any images (Image outputs can be ommitted to improve runtime or save space.)
-* -pp, --detailed_plot : Outputs detailed plots to help debugging. 
+* -pp, --detailed_plot : Outputs detailed plots to help debugging. Included in the detailed plot are the various points of interest of the image marked in seperate plots, as well as the method we are using to measure the pixels per millimeter on the ruler (Again, can be ommitted to improve runtime and save space). Example detailed result: 
+<p align="center">
+    <img src="./example_result_detailed.JPG" width="400">
+</p>
+
 * -i, --input : A single image input or a directory of images to be analyzed. (Default is `raw_images`).
 * -o, --output_folder : The output directory in which the result images will be outputted. (Default is `outputs`).
 * -s, --stage : The stage which to run the pipeline until. Must be one of  `['ruler_detection', 'binarization', 'measurements']`. To run the entire pipeline, simply use `-s measurements`. (Running the pipeline and stopping at an earlier stage can be useful for debugging.)
