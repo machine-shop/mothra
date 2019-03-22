@@ -36,7 +36,7 @@ parser.add_argument('-o', '--outliers',
                     action='store_true',
                     help='Produce an "outliers.csv" file containing only measurements that are deemed outliers')
 parser.add_argument('-sd', '--sd',
-                    type=int,
+                    type=float,
                     help="The number of SD's that are used as a theshold for classifying an outlier",
                     default=2)
 parser.add_argument('-co', '--copy_outliers',
