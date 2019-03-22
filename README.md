@@ -67,9 +67,6 @@ in `/butterfly-wings` will run the pipeline on the example data in `/butterfly-w
 ```
 
 ## Miscellaneous
-
-Jupyter notebooks with prototypes for various methods are located in the `/notebooks` directory.
-
 The testing suite can be run with `PYTHONPATH=. pytest` from `/butterfly-wings`.
 
 # Result Plotting
