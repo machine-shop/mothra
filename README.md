@@ -111,7 +111,7 @@ Example files:
 
 Thus, we will specify `-n "full name"`, `-l "Left"`, `-r "Right"`.
 
-We know what `results.csv` looks like (since it is out output from the pipeline).
+We know what `results.csv` looks like (since it is output by the pipeline).
 
 We also want to output both the `comparison.csv` and `outliers.csv` table, so we will specify `-c` and `-o`, and we also want to copy outliers from the images folder `Measured_images_Data_H.comma`, so we will do `-co "../Measured_images_Data_H.comma"`. We also want to define an outlier as a measurement +-1.75 SD's from the actual measurement, so we well specify `-sd 1.75`. Thus the usage is:
 
