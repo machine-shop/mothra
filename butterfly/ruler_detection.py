@@ -177,8 +177,8 @@ def main(img, axes=None):
     right_focus = int(0.9*focus_numbers_filled.shape[1])
     focus_numbers_filled = focus_numbers_filled[up_trim:down_trim, left_focus:right_focus]
 
-    means = np.mean(focus, axis=0)
-    first_index = np.argmax(means > FIRST_INDEX_THRESHOLD)
+    means = np.mean(focus_numbers_filled, axis=0)
+    first_index = np.argmax(means > FIRST_INDEX_THRESHOLD * means.max())
 
     # Fourier transform analysis to give us the pixels between the 1mm ticks
     sums = np.sum(focus_numbers_filled, axis=0)
