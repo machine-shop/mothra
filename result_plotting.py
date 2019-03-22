@@ -1,7 +1,10 @@
 import os
+import shutil
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+
 import argparse
 
 # Argument parsing
@@ -106,13 +109,13 @@ print(f"Saved plot of differences to {filename}")
 
 
 # Printing either full comparison csv or outliers csv
-comparison_filename = 'comparison.csv'
 both['SD_sum'] = abs(both['left_SD']) + abs(both['left_SD'])
 both.sort_values('SD_sum', ascending=False, inplace=True)
 both.drop('SD_sum', axis=1, inplace=True)
 both.sort_values('is_outlier', ascending=False, inplace=True, kind='mergesort')
 
 if args.comparison:
+    comparison_filename = 'comparison.csv'
     outlier_col_str = both["is_outlier"].replace({True:"TRUE", False:""})
     both_outlier_col_str = both.copy()
     both_outlier_col_str["is_outlier"] = outlier_col_str
@@ -120,10 +123,28 @@ if args.comparison:
     print(f"Saved all differences to {comparison_filename}")
 
 if args.outliers:
-    both_outliers_only = both[both['is_outlier']]
+    outliers_filename = 'outliers.csv'
+    both_outliers_only = both[both['is_outlier']].copy()
     both_outliers_only.drop('is_outlier', axis=1, inplace=True)
-    both_outliers_only.to_csv("outliers.csv")
-    print(f'Saved {num_outlier_images} rows to outliers.csv')
+    both_outliers_only.to_csv(outliers_filename)
+    print(f'Saved {num_outlier_images} rows to {outliers_filename}')
 
+# Fetching outlier images
+if args.copy_outliers:
+    outliers_folder = 'outliers/'
+    if os.path.exists(outliers_folder):
+        oldList = os.listdir(outliers_folder)
+        for oldFile in oldList:
+            os.remove(os.path.join(outliers_folder, oldFile))
+    else:
+        os.mkdir(outliers_folder)
 
-# Fetching outliers
+    image_list = both[both['is_outlier']]['image_id']
+    print(f'Copying {len(image_list)} outlier images to {outliers_folder} ...', end="")
+
+    for image_name in image_list:
+        image_path = os.path.join(args.copy_outliers, image_name)
+        shutil.copy(image_path, outliers_folder)
+
+    print("done")
+
