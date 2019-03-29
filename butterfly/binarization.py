@@ -77,9 +77,10 @@ def find_tags_edge(image_rgb, top_ruler, axes=None):
     max_img_focus_cutoff_regions = [r for r in max_img_focus_regions if r.centroid[1]>cutoff]
 
     # From the remaining regions find their leftmost edge
-    max_img_leftedges = [r.bbox[1] for r in max_img_focus_cutoff_regions]
-    label_edge = np.min(max_img_leftedges)
-    
+    max_img_leftedges = [r.bbox[1] for r in max_img_focus_cutoff_regions] + [max_img.shape[1]]
+    # Binary erosion causes a pixel to be eroded away from the tag edge
+    label_edge = np.min(max_img_leftedges) - 1
+
 
     if axes and axes[6]:
         halfway = img_tags_filled_eroded.shape[1]//2

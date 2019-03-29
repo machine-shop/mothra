@@ -54,13 +54,21 @@ def fake_butterfly_no_tags():
 
 def test_find_tags_edge(fake_butterfly_layout):
     butterfly, (rows, cols) = fake_butterfly_layout
-    result = binarization.find_tags_edge(butterfly, 230)
+    picture_2d = butterfly.astype(np.uint8)
+    picture_3d = np.dstack((picture_2d,
+                            1/2 * picture_2d,
+                            1/4 * picture_2d))  # fake RGB image
+    result = binarization.find_tags_edge(picture_3d, 230)
     assert (250 <= result <= 260)  # assert the tags edge is in a proper place
 
 
 def test_missing_tags(fake_butterfly_no_tags):
     butterfly, (rows, cols) = fake_butterfly_no_tags
-    result = binarization.find_tags_edge(butterfly, 230)
+    picture_2d = butterfly.astype(np.uint8)
+    picture_3d = np.dstack((picture_2d,
+                            1/2 * picture_2d,
+                            1/4 * picture_2d))  # fake RGB image
+    result = binarization.find_tags_edge(picture_3d, 230)
     # such a crop will probably throw off measurement process
     # but the program won't crash
     assert (result >= 399)
