@@ -10,9 +10,9 @@ location = './cachedir'
 memory = Memory(location, verbose=0)
 
 MIN_REGION_HEIGHT = 0.05
+RULER_CROP_MARGIN = 0.05
 
-
-def find_tags_edge(image_rgb, axes=None):
+def find_tags_edge(image_rgb, top_ruler, axes=None):
     """Find the edge between the tag area on the right and the butterfly area
     and returns the corresponding x coordinate of that vertical line
 
@@ -29,6 +29,10 @@ def find_tags_edge(image_rgb, axes=None):
         x coordinate of the vertical line separating the tags area from the
         butterfly area
     """
+
+    # Make sure ruler is cropped out with some extra margin
+    image_rgb = image_rgb[:top_ruler - int(RULER_CROP_MARGIN*image_rgb.shape[0])]
+    
     # Binarize the image with rgb2hsv to highlight the butterfly
     img_hsv = color.rgb2hsv(image_rgb)[:, :, 1]
     img_hsv_rescaled = rescale_intensity(img_hsv, out_range=(0, 255))
@@ -58,35 +62,28 @@ def find_tags_edge(image_rgb, axes=None):
     max_img_regions = regionprops(max_img_markers)
     
     
-    # For all notable regions, get their centroid y position, as well as distance to top left corner (0, 0)
+    # For all notable regions, get their distance to top left corner (0, 0)
     smallest_area = (MIN_REGION_HEIGHT * max_img.shape[0]) ** 2
     max_img_big_regions = [r for r in max_img_regions if r.area>smallest_area]
-    max_img_region_y = [r.centroid[0] for r in max_img_big_regions]
     max_img_region_disttocorner = [np.linalg.norm(r.centroid) for r in max_img_big_regions]
 
     # Using those, find the ruler and butterfly and ignore them. The remaining regions are tags
-    ruler_region = max_img_big_regions[np.argsort(max_img_region_y)[-1]]
     bfly_region = max_img_big_regions[np.argsort(max_img_region_disttocorner)[0]]
-    max_img_big_regions.remove(ruler_region)
     max_img_big_regions.remove(bfly_region)
-
+    
     # From the remaining regions find their leftmost edge
     max_img_region_leftedge = [r.bbox[1] for r in max_img_big_regions]
     label_edge = np.min(max_img_region_leftedge)
-    
-    # Ideally, these two failure cases do not occur together
-    
-    # Case 1: tags regions and ruler regions are conjoined somehow. Use butterfly + 10 pixels to crop
-    if label_edge < (1/3)*max_img.shape[1]:
-        label_edge = bfly_region.bbox[3] + 10
         
-    # Case 2: butterfly is not binarized well (likely produces problem with measurement also). Use only regions from the right third of the image
-    if label_edge < (1/3)*max_img.shape[1]:
-        cutoff = (2/3)*max_img.shape[1]
-        max_img_rightthird = [r for r in max_img_big_regions if r.centroid[1] > cutoff]
+    # Failure Case: butterfly is not binarized well (likely produces problem with measurement also). 
+    # Fix: Use only regions from the right third of the image
+    cutoff = (1/3)*max_img.shape[1]
+    if label_edge < cutoff:
+        rightthird_cutoff = (2/3)*max_img.shape[1]
+        max_img_rightthird = [r for r in max_img_big_regions if r.centroid[1] > rightthird_cutoff]
         max_img_rightthird_leftedge = [r.bbox[1] for r in max_img_rightthird]
         label_edge = np.min(max_img_rightthird_leftedge)
-        
+
     if axes and axes[6]:
         halfway = img_tags_filled_eroded.shape[1]//2
         axes[6].imshow(img_tags_filled_eroded[:, halfway:])
@@ -117,7 +114,7 @@ def main(image_rgb, top_ruler, axes=None):
         Binarized and cropped version of imge_rgb
     """
 
-    label_edge = find_tags_edge(image_rgb, axes)
+    label_edge = find_tags_edge(image_rgb, top_ruler, axes)
 
     bfly_rgb = image_rgb[:top_ruler, :label_edge]
     bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
