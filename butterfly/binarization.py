@@ -10,7 +10,8 @@ location = './cachedir'
 memory = Memory(location, verbose=0)
 
 MIN_REGION_HEIGHT = 0.05
-RULER_CROP_MARGIN = 0.05
+RULER_CROP_MARGIN = 0.025
+REGION_CUTOFF = 2/5
 
 def find_tags_edge(image_rgb, top_ruler, axes=None):
     """Find the edge between the tag area on the right and the butterfly area
@@ -62,27 +63,23 @@ def find_tags_edge(image_rgb, top_ruler, axes=None):
     max_img_regions = regionprops(max_img_markers)
     
     
-    # For all notable regions, get their distance to top left corner (0, 0)
+    # For all notable regions (large, and and in the right third of the image), get their distance to top left corner (0, 0)
     smallest_area = (MIN_REGION_HEIGHT * max_img.shape[0]) ** 2
-    max_img_big_regions = [r for r in max_img_regions if r.area>smallest_area]
-    max_img_region_disttocorner = [np.linalg.norm(r.centroid) for r in max_img_big_regions]
+    max_img_focus_regions = [r for r in max_img_regions if r.area>smallest_area]
+    max_img_region_disttocorner = [np.linalg.norm(r.centroid) for r in max_img_focus_regions]
 
     # Using those, find the ruler and butterfly and ignore them. The remaining regions are tags
-    bfly_region = max_img_big_regions[np.argsort(max_img_region_disttocorner)[0]]
-    max_img_big_regions.remove(bfly_region)
-    
+    bfly_region = max_img_focus_regions[np.argsort(max_img_region_disttocorner)[0]]
+    max_img_focus_regions.remove(bfly_region)
+
+    # To remove ambiguity what is a tag, only look at the right REGION_CUTOFF percent of the image for tags
+    cutoff = (1-REGION_CUTOFF) * max_img.shape[1]
+    max_img_focus_cutoff_regions = [r for r in max_img_focus_regions if r.centroid[1]>cutoff]
+
     # From the remaining regions find their leftmost edge
-    max_img_region_leftedge = [r.bbox[1] for r in max_img_big_regions]
-    label_edge = np.min(max_img_region_leftedge)
-        
-    # Failure Case: butterfly is not binarized well (likely produces problem with measurement also). 
-    # Fix: Use only regions from the right third of the image
-    cutoff = (1/3)*max_img.shape[1]
-    if label_edge < cutoff:
-        rightthird_cutoff = (2/3)*max_img.shape[1]
-        max_img_rightthird = [r for r in max_img_big_regions if r.centroid[1] > rightthird_cutoff]
-        max_img_rightthird_leftedge = [r.bbox[1] for r in max_img_rightthird]
-        label_edge = np.min(max_img_rightthird_leftedge)
+    max_img_leftedges = [r.bbox[1] for r in max_img_focus_cutoff_regions]
+    label_edge = np.min(max_img_leftedges)
+    
 
     if axes and axes[6]:
         halfway = img_tags_filled_eroded.shape[1]//2
