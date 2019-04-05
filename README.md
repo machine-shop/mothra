@@ -6,7 +6,7 @@ Analyzing images of butterflies and measuring their wing lengths. Using binariza
 
 ## Usage
 ```
-$ python pipeline.py -p -i [input directory or image path] -o [output directory] -s [stage to run to] -csv [csv output file path]
+$ python pipeline.py -p -i [input directory or image path] -o [output directory] -csv [csv output file path]
 ```
 The pipeline script combines four modules to analyze an image: ruler detection, binarization, tracing, and final measurement. These modules are located in `/butterfly`. Python module requirements are listed in `requirements.txt`.
 
@@ -23,7 +23,7 @@ The results are cached in `cachedir` so that if the same methods are re-run with
 
 * -i, --input : A single image input or a directory of images to be analyzed. (Default is `raw_images`).
 * -o, --output_folder : The output directory in which the result images will be outputted. (Default is `outputs`).
-* -s, --stage : The stage which to run the pipeline until. Must be one of  `['ruler_detection', 'binarization', 'measurements']`. To run the entire pipeline, simply use `-s measurements`. (Running the pipeline and stopping at an earlier stage can be useful for debugging.)
+* -s, --stage : The stage which to run the pipeline until. Must be one of  `['ruler_detection', 'binarization', 'measurements']`. Pipeline runs to measurement stage by default (running to completion). Running the pipeline and stopping at an earlier stage can be useful for debugging.
 * -csv, --path_csv :  Path of `.csv` file for the measurement results. (Default is `results.csv`).
 * -dpi : Optional argument to specify resolution of the output image. (Default is `300`.)
 
@@ -47,7 +47,7 @@ Resulting files:
 
 Running this command
 ```
-$ python pipeline.py -p -i ../butterfly-wings-data -o ../test_output -s measurements -csv ../test_output/results.csv
+$ python pipeline.py -p -i ../butterfly-wings-data -o ../test_output -csv ../test_output/results.csv
 ```
 in `/butterfly-wings` will run the pipeline on the example data in `/butterfly-wings-data`. The file locations should look like this:
 ```

@@ -18,7 +18,6 @@ def test_pipeline_main():
         'python', 'pipeline.py', '-p',
         '-i', test_input_dir,
         '-o', test_output_dir,
-        '-s', 'measurements',
         '-csv', test_output_dir + 'test_results.csv'
     ]
 
