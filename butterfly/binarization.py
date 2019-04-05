@@ -9,60 +9,94 @@ from joblib import Memory
 location = './cachedir'
 memory = Memory(location, verbose=0)
 
+# Height of a square region used to determine the minimum region size in find_tags_edge.
+# Percent of height of the image.
+MIN_REGION_HEIGHT = 0.05
 
-EXTENT_TOLERANCE = 0.7
-ORIENTATION_TOLERANCE = 20/180*np.pi
-NUM_TAG_REGIONS = 2
+# Height of extra margin to make sure all of the ruler is cropped out in find_tags_edge.
+# Percent of height of the image
+RULER_CROP_MARGIN = 0.025
 
+# Distance from right-hand edge of the image in which we consider regions to be tags.
+# Used in find_tags_edge. Percent of width of the image
+REGION_CUTOFF = 2/5
 
-def find_tags_edge(binary, top_ruler, axes=None):
+def find_tags_edge(image_rgb, top_ruler, axes=None):
     """Find the edge between the tag area on the right and the butterfly area
     and returns the corresponding x coordinate of that vertical line
 
     Arguments
     ---------
-    binary : 2D array
-        Binarized image of the entire RGB image
+    image_rgb : (M, N, 3) ndarray
+        Full RGB image input image
     top_ruler : int
         Y-coordinate of the top of the ruler
 
     Returns
     -------
-    crop_right : int
+    label_edge : int
         x coordinate of the vertical line separating the tags area from the
         butterfly area
     """
-    lower_bound = top_ruler
-    left_bound = int(binary.shape[1] * 0.5)
-    focus = binary[:lower_bound, left_bound:]
 
-    focus_filled = ndi.binary_fill_holes(focus)
-    focus_filled_eroded = binary_erosion(focus_filled)
+    # Make sure ruler is cropped out with some extra margin
+    image_rgb = image_rgb[:top_ruler - int(RULER_CROP_MARGIN*image_rgb.shape[0])]
+    
+    # Binarize the image with rgb2hsv to highlight the butterfly
+    img_hsv = color.rgb2hsv(image_rgb)[:, :, 1]
+    img_hsv_rescaled = rescale_intensity(img_hsv, out_range=(0, 255))
+    img_hsv_thresh = threshold_otsu(img_hsv_rescaled)
+    img_bfly_bin = img_hsv_rescaled > img_hsv_thresh
+    
+    # Fill holes and erode the butterfly to get clean butterfly region
+    img_bfly_bin_filled = ndi.binary_fill_holes(img_bfly_bin)
+    img_bfly_bin_filled_eroded = binary_erosion(img_bfly_bin_filled)
+    
+    
+    # Binarize the image with otsu to highlight the labels/ruler
+    img_gray = image_rgb[:, :, 0]
+    img_otsu_thresh = threshold_otsu(img_gray, nbins=60)
+    img_tags_bin = img_gray > img_otsu_thresh
+    
+    # Fill holes and erode tags to get clean regions
+    img_tags_filled = ndi.binary_fill_holes(img_tags_bin)
+    img_tags_filled_eroded = binary_erosion(img_tags_filled)
+    
+    
+    # Combine clean butterfly and tags images
+    max_img = np.max([img_bfly_bin_filled_eroded, img_tags_filled_eroded], axis=0)
+    
+    # Calculate regionprops
+    max_img_markers, max_img_labels = ndi.label(max_img)
+    max_img_regions = regionprops(max_img_markers)
+    
+    
+    # For all notable regions (large, and and in the right third of the image), get their distance to top left corner (0, 0)
+    smallest_area = (MIN_REGION_HEIGHT * max_img.shape[0]) ** 2
+    max_img_focus_regions = [r for r in max_img_regions if r.area>smallest_area]
+    max_img_region_disttocorner = [np.linalg.norm(r.centroid) for r in max_img_focus_regions]
 
-    markers = ndi.label(focus_filled_eroded,
-                        structure=ndi.generate_binary_structure(2, 1))[0]
+    # Using those, find the ruler and butterfly and ignore them. The remaining regions are tags
+    bfly_region = max_img_focus_regions[np.argsort(max_img_region_disttocorner)[0]]
+    max_img_focus_regions.remove(bfly_region)
 
-    regions = regionprops(markers)
-    regions.sort(key=lambda r: r.area, reverse=True)
+    # To remove ambiguity what is a tag, only look at the right REGION_CUTOFF percent of the image for tags
+    cutoff = (1-REGION_CUTOFF) * max_img.shape[1]
+    max_img_focus_cutoff_regions = [r for r in max_img_focus_regions if r.centroid[1]>cutoff]
 
-    filtered_regions = []
-    for r in regions[:NUM_TAG_REGIONS]:
-        rotated_axes_area = r.major_axis_length * r.minor_axis_length
-        rotated_extent = r.area / rotated_axes_area
-        if (rotated_extent > EXTENT_TOLERANCE and
-                abs(r.orientation) < ORIENTATION_TOLERANCE):
-            filtered_regions.append(r)
+    # From the remaining regions find their leftmost edge
+    max_img_leftedges = [r.bbox[1] for r in max_img_focus_cutoff_regions] + [max_img.shape[1]]
+    # Binary erosion causes a pixel to be eroded away from the tag edge
+    label_edge = np.min(max_img_leftedges) - 1
 
-    left_sides = [r.bbox[1] for r in filtered_regions] + [focus.shape[1]]
-    min_left_sides = np.min(left_sides) - 1
-    crop_right = left_bound + min_left_sides
 
     if axes and axes[6]:
-        axes[6].imshow(markers)
-        axes[6].axvline(x=min_left_sides, color='c', linestyle='dashed')
+        halfway = img_tags_filled_eroded.shape[1]//2
+        axes[6].imshow(img_tags_filled_eroded[:, halfway:])
+        axes[6].axvline(x=label_edge-halfway, color='c', linestyle='dashed')
         axes[6].set_title('Tags detection')
 
-    return crop_right
+    return label_edge
 
 
 @memory.cache()
@@ -86,11 +120,7 @@ def main(image_rgb, top_ruler, axes=None):
         Binarized and cropped version of imge_rgb
     """
 
-    image_gray = image_rgb[:, :, 0]
-    thresh_rgb = threshold_otsu(image_gray, nbins=60)
-    binary = image_gray > thresh_rgb
-
-    label_edge = find_tags_edge(binary, top_ruler, axes)
+    label_edge = find_tags_edge(image_rgb, top_ruler, axes)
 
     bfly_rgb = image_rgb[:top_ruler, :label_edge]
     bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
