@@ -98,7 +98,8 @@ def main():
                         type=str,
                         help="Stage name: 'ruler_detection', 'binarization',\
                         'tracing', 'measurements",
-                        required=True)
+                        required=False,
+                        default='measurements')
     # Dots per inch
     parser.add_argument('-dpi',
                         type=int,
