@@ -9,8 +9,16 @@ from joblib import Memory
 location = './cachedir'
 memory = Memory(location, verbose=0)
 
+# Height of a square region used to determine the minimum region size in find_tags_edge.
+# Percent of height of the image.
 MIN_REGION_HEIGHT = 0.05
+
+# Height of extra margin to make sure all of the ruler is cropped out in find_tags_edge.
+# Percent of height of the image
 RULER_CROP_MARGIN = 0.025
+
+# Distance from right-hand edge of the image in which we consider regions to be tags.
+# Used in find_tags_edge. Percent of width of the image
 REGION_CUTOFF = 2/5
 
 def find_tags_edge(image_rgb, top_ruler, axes=None):
@@ -19,7 +27,7 @@ def find_tags_edge(image_rgb, top_ruler, axes=None):
 
     Arguments
     ---------
-    image_rgb : color image
+    image_rgb : (M, N, 3) ndarray
         Full RGB image input image
     top_ruler : int
         Y-coordinate of the top of the ruler
