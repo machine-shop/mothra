@@ -139,7 +139,8 @@ def main():
             os.remove(args.path_csv)
         with open(args.path_csv, 'w') as csv_file:
             writer = csv.writer(csv_file)
-            writer.writerow(['image_id', 'left_wing (mm)', 'right_wing (mm)'])
+            writer.writerow(['image_id', 'left_wing (mm)', 'right_wing (mm)',
+                'left_wing_center (mm)', 'right_wing_center (mm)', 'wing_span (mm)'])
 
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
@@ -178,7 +179,7 @@ def main():
 
                 with open(args.path_csv, 'a') as csv_file:
                     writer = csv.writer(csv_file)
-                    writer.writerow([image_name, dst_mm[0], dst_mm[1]])
+                    writer.writerow([image_name, dst_mm[0], dst_mm[1], dst_mm[2], dst_mm[3], dst_mm[4]])
 
         if plot_level > 0:
             output_path = os.path.normpath(os.path.join(args.output_folder, image_name))
