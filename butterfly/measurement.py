@@ -14,10 +14,10 @@ def main(points_interest, T_space, axes=None):
     ----------
     ax: array
         the array containing the 3 intermediary Axes.
-    points_interest: array
-        the array containing the four points of interest,
-        each of which is a coordinate specifying the start/end
-        point of the left/right wing.
+    points_interest: dictionary 
+        dictionary containing the points of interest in the form [y, x],
+        keyed with "outer_pix_l", "inner_pix_l", "outer_pix_r", "inner_pix_r", 
+        "body_center"
     T_space: float
         number of pixels between 2 ticks.
 
@@ -25,52 +25,104 @@ def main(points_interest, T_space, axes=None):
     -------
     ax: ax
         an ax object
-    dst_pix: tuple
-        the tuple contains the distance of the left/right wing
-        distance in pixels
+    dst_pix: dictionary
+        dictionary containing measurements in pixels, keyed with
+        "dist_l", "dist_r", "dist_l_center",
+        "dist_r_center", "dist_span"
     dst_mm: tuple
-        the tuple contains the distance of the left/right wing
-        distance in millimeters
+        dictionary containing measurements in mm, keyed with
+        the same keys as dst_pix
 
     '''
 
-    pix_out_l, pix_in_l, pix_out_r, pix_in_r = points_interest
-    dist_r_pix = np.sqrt((pix_out_r[0] - pix_in_r[0]) ** 2
-                         + (pix_out_r[1] - pix_in_r[1]) ** 2)
-    dist_l_pix = np.sqrt((pix_out_l[0] - pix_in_l[0]) ** 2
-                         + (pix_out_l[1] - pix_in_l[1]) ** 2)
+    # Extract points of interest
+    pix_out_l, pix_out_r = np.array(points_interest["outer_pix_l"]), np.array(points_interest["outer_pix_r"])
+    pix_in_l, pix_in_r = np.array(points_interest["inner_pix_l"]), np.array(points_interest["inner_pix_r"])
+    body_center = np.array(points_interest["body_center"])
+
+    # Distance measurements between points of interest
+    dist_r_pix = np.linalg.norm(pix_out_r - pix_in_r)
+    dist_l_pix = np.linalg.norm(pix_out_l - pix_in_l)
+    dist_r_center_pix = np.linalg.norm(pix_out_r - body_center)
+    dist_l_center_pix = np.linalg.norm(pix_out_l - body_center)
+    dist_span_pix = np.linalg.norm(pix_out_l - pix_out_r)
 
     # Converting to millimeters
     dist_l_mm = round(dist_l_pix / T_space, 2)
     dist_r_mm = round(dist_r_pix / T_space, 2)
+    dist_l_center_mm = round(dist_l_center_pix / T_space, 2)
+    dist_r_center_mm = round(dist_r_center_pix / T_space, 2)
+    dist_span_mm = round(dist_span_pix / T_space, 2)
 
     # Do we want to round these?
     dist_l_pix = round(dist_l_pix, 2)
     dist_r_pix = round(dist_r_pix, 2)
+    dist_l_center_pix = round(dist_l_center_pix, 2)
+    dist_r_center_pix = round(dist_r_center_pix, 2)
+    dist_span_pix = round(dist_span_pix, 2)
 
-    dst_pix = (dist_l_pix, dist_r_pix)
-    dst_mm = (dist_l_mm, dist_r_mm)
+    dist_pix = {
+        "dist_l": dist_l_pix,
+        "dist_r": dist_r_pix,
+        "dist_l_center": dist_l_center_pix,
+        "dist_r_center": dist_r_center_pix,
+        "dist_span": dist_span_pix
+    }
+    dist_mm = {
+        "dist_l": dist_l_mm,
+        "dist_r": dist_r_mm,
+        "dist_l_center": dist_l_center_mm,
+        "dist_r_center": dist_r_center_mm,
+        "dist_span": dist_span_mm
+    }
 
     if axes and axes[0]:
-        textsize = 7
+        textsize = 5
         if axes[3]:
-            textsize = 4
+            textsize = 3
         axes[0].plot([pix_out_l[1], pix_in_l[1]],
                      [pix_out_l[0], pix_in_l[0]], color='r')
         axes[0].plot([pix_out_r[1], pix_in_r[1]],
                      [pix_out_r[0], pix_in_r[0]], color='r')
         axes[0].text(int((pix_out_l[1] + pix_in_l[1]) / 2) + 50,
                      int((pix_out_l[0] + pix_in_l[0]) / 2) - 50,
-                     'dist_left = ' + str(round(dist_l_mm, 2)) + ' mm',
+                     'left_wing = ' + str(round(dist_l_mm, 2)) + ' mm',
                      size=textsize,
                      color='r')
         axes[0].text(int((pix_out_r[1] + pix_in_r[1]) / 2) + 50,
                      int((pix_out_r[0] + pix_in_r[0]) / 2) + 50,
-                     'dist_right = ' + str(round(dist_r_mm, 2))
+                     'right_wing = ' + str(round(dist_r_mm, 2))
                      + ' mm',
                      size=textsize, color='r')
 
-    print(f'left_wing : {dst_mm[0]} mm')
-    print(f'right_wing : {dst_mm[1]} mm')
+        axes[0].plot([pix_out_l[1], body_center[1]],
+                     [pix_out_l[0], body_center[0]], color='orange', linestyle='dotted')
+        axes[0].plot([pix_out_r[1], body_center[1]],
+                     [pix_out_r[0], body_center[0]], color='orange', linestyle='dotted')
+        axes[0].text(int((pix_out_l[1] + body_center[1]) / 2) + 50,
+                     int((pix_out_l[0] + body_center[0]) / 2) - 50,
+                     'left_wing_center = ' + str(round(dist_l_center_mm, 2)) + ' mm',
+                     size=textsize,
+                     color='orange')
+        axes[0].text(int((pix_out_r[1] + body_center[1]) / 2) + 50,
+                     int((pix_out_r[0] + body_center[0]) / 2) + 50,
+                     'right_wing_center = ' + str(round(dist_r_center_mm, 2))
+                     + ' mm',
+                     size=textsize, color='orange')
 
-    return dst_pix, dst_mm
+        axes[0].plot([pix_out_l[1], pix_out_r[1]],
+                     [pix_out_l[0], pix_out_r[0]], color='orange', linestyle='dashed')
+        axes[0].text(int((pix_out_l[1] + pix_out_r[1]) / 2) - 50,
+                     int((pix_out_l[0] + pix_out_r[0]) / 2) - 50,
+                     'wing_span = ' + str(round(dist_span_mm, 2))
+                     + ' mm',
+                     size=textsize, color='orange')
+
+
+    print(f'left_wing : {dist_mm["dist_l"]} mm')
+    print(f'right_wing : {dist_mm["dist_r"]} mm')
+    print(f'left_wing_center : {dist_mm["dist_l_center"]} mm')
+    print(f'right_wing_center : {dist_mm["dist_r_center"]} mm')
+    print(f'wing_span : {dist_mm["dist_span"]} mm')
+
+    return dist_pix, dist_mm

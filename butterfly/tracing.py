@@ -162,9 +162,10 @@ def main(binary, axes=None):
 
     Returns
     -------
-    points_interest : 2D array
-        array of coordinates of the points of interest in the form [y, x]
-        [outer_pix_l, inner_pix_l, outer_pix_r, inner_pix_r]
+    points_interest : dictionary 
+        dictionary containing the points of interest in the form [y, x],
+        keyed with "outer_pix_l", "inner_pix_l", "outer_pix_r", "inner_pix_r", 
+        "body_center"
     """
     binary = binary_dilation(binary, iterations=2)
 
@@ -187,10 +188,18 @@ def main(binary, axes=None):
     inner_pix_r = inner_pix_r + np.array([0, middle])
     outer_pix_r = outer_pix_r + np.array([0, middle])
 
-    points_interest = np.array([outer_pix_l,
-                                inner_pix_l,
-                                outer_pix_r,
-                                inner_pix_r])
+    # Centroid of central column
+    middle_arr = binary[:, middle]
+    middle_y = int(np.mean(np.argwhere(middle_arr)))
+    body_center = (middle_y, middle)
+
+    points_interest = {
+        "outer_pix_l": outer_pix_l,
+        "inner_pix_l": inner_pix_l,
+        "outer_pix_r": outer_pix_r,
+        "inner_pix_r": inner_pix_r,
+        "body_center": body_center
+    }
 
     # Reconstruct binary image without antennae
     without_antennae = np.concatenate((without_antenna_l, without_antenna_r),
@@ -202,7 +211,8 @@ def main(binary, axes=None):
         markersize = 10
         if axes[3]:
             markersize = 2
-        axes[2].scatter(points_interest[:, 1], points_interest[:, 0],
+        points_interest_arr = np.array(list(points_interest.values()))
+        axes[2].scatter(points_interest_arr[:, 1], points_interest_arr[:, 0],
                         color='r', s=markersize)
 
     return points_interest
