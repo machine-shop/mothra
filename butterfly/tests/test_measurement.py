@@ -6,28 +6,49 @@ import pytest
 
 @pytest.fixture(scope="module")
 def fake_points_of_interest():
-    pixel_points = [(0, -4), (0, -1), (0, 5), (0, 1), (0, 0)]
-    true_results_pix = (3, 4, 4, 5, 9)
-    true_results_mm = (1.5, 2, 2, 2.5, 4.5)
-    return pixel_points, true_results_pix, true_results_mm
+    points_interest = {
+        "outer_pix_l": (0, -4),
+        "inner_pix_l": (0, -1),
+        "outer_pix_r": (0, 5),
+        "inner_pix_r": (0, 1),
+        "body_center": (0, 0)
+    }
+    dist_pix = {
+        "dist_l": 3,
+        "dist_r": 4,
+        "dist_l_center": 4,
+        "dist_r_center": 5,
+        "dist_span": 9
+    }
+    dist_mm = {
+        "dist_l": 1.5,
+        "dist_r": 2,
+        "dist_l_center": 2,
+        "dist_r_center": 2.5,
+        "dist_span": 4.5
+    }
+    return points_interest, dist_pix, dist_mm
 
 
 def test_t_space_unchanged(fake_points_of_interest):
     # tests with simple t_space = 1 that everything remains the same.
-    pixel_points, true_results_pix, true_results_mm = fake_points_of_interest
-    dst_pix, dst_mm = measurement.main(pixel_points, 1)
-    assert (dst_pix, dst_mm) == (true_results_pix, true_results_pix)
+    points_interest, true_results_pix, true_results_mm = fake_points_of_interest
+    dist_pix, dist_mm = measurement.main(points_interest, 1)
+    assert dist_pix == true_results_pix
+    assert dist_mm == true_results_pix
 
 
 def test_different_t_space(fake_points_of_interest):
-    pixel_points, true_results_pix, true_results_mm = fake_points_of_interest
-    dst_pix, dst_mm = measurement.main(pixel_points, 2)
-    assert (dst_pix, dst_mm) == (true_results_pix, true_results_mm)
+    points_interest, true_results_pix, true_results_mm = fake_points_of_interest
+    dist_pix, dist_mm = measurement.main(points_interest, 2)
+    assert dist_pix == true_results_pix
+    assert dist_mm == true_results_mm
 
 
 def test_with_ax(fake_points_of_interest):
     fig, ax = plt.subplots(figsize=(20, 5))
-    pixel_points, true_results_pix, true_results_mm = fake_points_of_interest
+    points_interest, true_results_pix, true_results_mm = fake_points_of_interest
     axes = [ax] + [None] * 6
-    dst_pix, dst_mm = measurement.main(pixel_points, 2)
-    assert (dst_pix, dst_mm) == (true_results_pix, true_results_mm)
+    dist_pix, dist_mm = measurement.main(points_interest, 2)
+    assert dist_pix == true_results_pix
+    assert dist_mm == true_results_mm

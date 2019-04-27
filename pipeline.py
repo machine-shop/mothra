@@ -174,12 +174,14 @@ def main():
 
             elif step == 'measurements':
                 points_interest = tracing.main(binary, axes)
-                dst_pix, dst_mm = measurement.main(points_interest, T_space,
+                dist_pix, dist_mm = measurement.main(points_interest, T_space,
                                                    axes)
 
                 with open(args.path_csv, 'a') as csv_file:
                     writer = csv.writer(csv_file)
-                    writer.writerow([image_name, dst_mm[0], dst_mm[1], dst_mm[2], dst_mm[3], dst_mm[4]])
+                    writer.writerow([image_name, dist_mm["dist_l"], dist_mm["dist_r"], 
+                                    dist_mm["dist_l_center"], dist_mm["dist_r_center"], 
+                                    dist_mm["dist_span"]])
 
         if plot_level > 0:
             output_path = os.path.normpath(os.path.join(args.output_folder, image_name))
