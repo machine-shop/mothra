@@ -4,7 +4,10 @@ from scipy import ndimage as ndi
 from skimage.measure import regionprops
 import skimage.color as color
 from skimage.exposure import rescale_intensity
-from skimage.morphology import binary_erosion
+from skimage.morphology import binary_erosion, binary_dilation
+from skimage.transform import rescale
+from skimage import img_as_ubyte
+import cv2 as cv
 from joblib import Memory
 location = './cachedir'
 memory = Memory(location, verbose=0)
@@ -20,6 +23,11 @@ RULER_CROP_MARGIN = 0.025
 # Distance from right-hand edge of the image in which we consider regions to be tags.
 # Used in find_tags_edge. Percent of width of the image
 REGION_CUTOFF = 2/5
+
+# Grabcut method constants
+DILATION_SIZE = 5
+GRABCUT_RESCALE_FACTOR = 0.25
+GRABCUT_ITERATIONS = 10
 
 def find_tags_edge(image_rgb, top_ruler, axes=None):
     """Find the edge between the tag area on the right and the butterfly area
@@ -99,6 +107,51 @@ def find_tags_edge(image_rgb, top_ruler, axes=None):
     return label_edge
 
 
+def grabcut_binarization(bfly_rgb, bfly_bin):
+    """
+    TODO: docstring and tests for this
+    """
+
+    # Dilation of image to capture butterfly region
+    selem = np.array([[0, 1, 0],
+                      [1, 1, 1],
+                      [0, 1, 0]])
+    selem = np.kron(selem, np.ones((DILATION_SIZE,DILATION_SIZE)))
+    bfly_bin_dilated = binary_dilation(bfly_bin, selem)
+    bfly_bin_dilated_markers, _ = ndi.label(bfly_bin_dilated, ndi.generate_binary_structure(2, 1))
+    bfly_bin_dilated_regions = regionprops(bfly_bin_dilated_markers)
+    bfly_bin_dilated_regions_sorted = sorted(bfly_bin_dilated_regions, key=lambda r: r.area, reverse=True)
+    bfly_region = bfly_bin_dilated_regions_sorted[0]
+
+    # Downscale image to improve grabcut speed
+    bfly_rgb_rescale = rescale(bfly_rgb, GRABCUT_RESCALE_FACTOR)
+    bfly_rgb_rescale = img_as_ubyte(bfly_rgb_rescale)
+
+    # Determine grabcut highlight region using butterfly region (after rescaling)
+    padding = int(1/100*bfly_rgb_rescale.shape[0]) # Extra to ensure butterfly is captured in box
+    rect = (int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[1]-padding), 
+            int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[0]-padding), 
+            int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[3]+padding), 
+            int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[2]+padding))
+
+    # Grabcut
+    mask = np.zeros(bfly_rgb_rescale.shape[:2],np.uint8)
+    bgdModel = np.zeros((1,65),np.float64)
+    fgdModel = np.zeros((1,65),np.float64)
+    
+    cv.grabCut(bfly_rgb_rescale,mask,rect,bgdModel,fgdModel,GRABCUT_ITERATIONS,cv.GC_INIT_WITH_RECT)
+
+    mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
+    bfly_grabcut_rescale = bfly_rgb_rescale*mask2[:,:,np.newaxis]
+    
+    # Rescale the image back up and get binary of result
+    bfly_grabcut = rescale(bfly_grabcut_rescale, 1/scale_factor)
+    bfly_grabcut_bin = np.max(bfly_grabcut, axis=2)>0
+
+    return bfly_grabcut_bin
+
+
+
 @memory.cache()
 def main(image_rgb, top_ruler, axes=None):
     """Binarizes and crops properly image_rgb
@@ -127,6 +180,9 @@ def main(image_rgb, top_ruler, axes=None):
     rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
     thresh_hsv = threshold_otsu(rescaled)
     bfly_bin = rescaled > thresh_hsv
+
+    # TODO: only use this for some methods via a runtime option
+    bfly_bin = grabcut_binarization(bfly_rgb, bfly_bin)
 
     if axes and axes[1]:
         axes[1].imshow(bfly_bin)
