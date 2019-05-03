@@ -22,7 +22,7 @@ RULER_CROP_MARGIN = 0.025
 
 # Distance from right-hand edge of the image in which we consider regions to be tags.
 # Used in find_tags_edge. Percent of width of the image
-REGION_CUTOFF = 2/5
+REGION_CUTOFF = 1/3
 
 # Grabcut method constants
 DILATION_SIZE = 5
@@ -145,7 +145,7 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     bfly_grabcut_rescale = bfly_rgb_rescale*mask2[:,:,np.newaxis]
     
     # Rescale the image back up and get binary of result
-    bfly_grabcut = rescale(bfly_grabcut_rescale, 1/scale_factor)
+    bfly_grabcut = rescale(bfly_grabcut_rescale, bfly_rgb.shape[0]/bfly_rgb_rescale.shape[0])
     bfly_grabcut_bin = np.max(bfly_grabcut, axis=2)>0
 
     return bfly_grabcut_bin
@@ -153,7 +153,7 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
 
 
 @memory.cache()
-def main(image_rgb, top_ruler, axes=None):
+def main(image_rgb, top_ruler, grabcut=False, axes=None):
     """Binarizes and crops properly image_rgb
 
     Arguments
@@ -181,8 +181,8 @@ def main(image_rgb, top_ruler, axes=None):
     thresh_hsv = threshold_otsu(rescaled)
     bfly_bin = rescaled > thresh_hsv
 
-    # TODO: only use this for some methods via a runtime option
-    bfly_bin = grabcut_binarization(bfly_rgb, bfly_bin)
+    if grabcut:
+        bfly_bin = grabcut_binarization(bfly_rgb, bfly_bin)
 
     if axes and axes[1]:
         axes[1].imshow(bfly_bin)

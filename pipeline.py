@@ -105,10 +105,17 @@ def main():
                         type=int,
                         help='Dots per inch of the saved figures',
                         default=300)
+
+    # CSV output path
     parser.add_argument('-csv', '--path_csv',
                         type=str,
                         help='Path of the resulting csv file',
                         default='results.csv')
+
+    # Grabcut
+    parser.add_argument('-g', '--grabcut',
+                        action='store_true',
+                        help='Use grabcut in binarization step')
 
     args = parser.parse_args()
 
@@ -170,7 +177,7 @@ def main():
                 T_space, top_ruler = ruler_detection.main(image_rgb, axes)
 
             elif step == 'binarization':
-                binary = binarization.main(image_rgb, top_ruler, axes)
+                binary = binarization.main(image_rgb, top_ruler, args.grabcut, axes)
 
             elif step == 'measurements':
                 points_interest = tracing.main(binary, axes)
