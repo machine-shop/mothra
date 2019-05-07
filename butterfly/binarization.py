@@ -4,7 +4,7 @@ from scipy import ndimage as ndi
 from skimage.measure import regionprops
 import skimage.color as color
 from skimage.exposure import rescale_intensity
-from skimage.morphology import binary_erosion, binary_dilation
+from skimage.morphology import binary_erosion, binary_dilation, selem
 from skimage.transform import rescale
 from skimage import img_as_ubyte
 import cv2 as cv
@@ -24,10 +24,16 @@ RULER_CROP_MARGIN = 0.025
 # Used in find_tags_edge. Percent of width of the image
 REGION_CUTOFF = 1/3
 
-# Grabcut method constants
-DILATION_SIZE = 5
+# Size of disk used in dilation to get connect butterfly regions
+# Used during getting butterfly bounding box in grabcut
+DILATION_SIZE = 10
+
+# Image downsize percentage used to improve grabcut speed
 GRABCUT_RESCALE_FACTOR = 0.25
+
+# Number of iterations used in grabcut
 GRABCUT_ITERATIONS = 10
+
 
 def find_tags_edge(image_rgb, top_ruler, axes=None):
     """Find the edge between the tag area on the right and the butterfly area
@@ -108,16 +114,26 @@ def find_tags_edge(image_rgb, top_ruler, axes=None):
 
 
 def grabcut_binarization(bfly_rgb, bfly_bin):
-    """
-    TODO: docstring and tests for this
+    """Extract shape of the butterfly using OpenCV's grabcut. Greatly improves
+    binarization of blue-colored butterflies.
+
+    Arguments
+    ---------
+    bfly_rgb : (M, N, 3) ndarray
+        Input RGB image of butterfly (ruler and tags cropped out)
+    bfly_bin : (M, N) ndarray
+        Binarizaed image of butterfly (ruler and tags cropped out) Expected 
+        to be binarized saturation channel of bfly_rgb.
+
+    Returns
+    -------
+    bfly_grabcut_bin : (M, N) ndarray
+        Resulting binarized image of butterfly after segmentation by grabcut.
     """
 
     # Dilation of image to capture butterfly region
-    selem = np.array([[0, 1, 0],
-                      [1, 1, 1],
-                      [0, 1, 0]])
-    selem = np.kron(selem, np.ones((DILATION_SIZE,DILATION_SIZE)))
-    bfly_bin_dilated = binary_dilation(bfly_bin, selem)
+    selem_arr = selem.disk(DILATION_SIZE) 
+    bfly_bin_dilated = binary_dilation(bfly_bin, selem_arr)
     bfly_bin_dilated_markers, _ = ndi.label(bfly_bin_dilated, ndi.generate_binary_structure(2, 1))
     bfly_bin_dilated_regions = regionprops(bfly_bin_dilated_markers)
     bfly_bin_dilated_regions_sorted = sorted(bfly_bin_dilated_regions, key=lambda r: r.area, reverse=True)
@@ -135,14 +151,15 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
             int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[2]+padding))
 
     # Grabcut
-    mask = np.zeros(bfly_rgb_rescale.shape[:2],np.uint8)
-    bgdModel = np.zeros((1,65),np.float64)
-    fgdModel = np.zeros((1,65),np.float64)
+    mask = np.zeros(bfly_rgb_rescale.shape[:2], np.uint8)
+    bgd_model = np.zeros((1,65), np.float64)
+    fgd_model = np.zeros((1,65), np.float64)
     
-    cv.grabCut(bfly_rgb_rescale,mask,rect,bgdModel,fgdModel,GRABCUT_ITERATIONS,cv.GC_INIT_WITH_RECT)
+    cv.grabCut(bfly_rgb_rescale, mask, rect, 
+        bgd_model, fgd_model, GRABCUT_ITERATIONS, cv.GC_INIT_WITH_RECT)
 
     mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
-    bfly_grabcut_rescale = bfly_rgb_rescale*mask2[:,:,np.newaxis]
+    bfly_grabcut_rescale = bfly_rgb_rescale*mask2[:, :, np.newaxis]
     
     # Rescale the image back up and get binary of result
     bfly_grabcut = rescale(bfly_grabcut_rescale, bfly_rgb.shape[0]/bfly_rgb_rescale.shape[0])
