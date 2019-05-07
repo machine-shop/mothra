@@ -144,7 +144,7 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     bfly_rgb_rescale = img_as_ubyte(bfly_rgb_rescale)
 
     # Determine grabcut highlight region using butterfly region (after rescaling)
-    padding = int(1/100*bfly_rgb_rescale.shape[0]) # Extra to ensure butterfly is captured in box
+    padding = 0
     rect = (int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[1]-padding), 
             int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[0]-padding), 
             int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[3]+padding), 
