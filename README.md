@@ -26,6 +26,7 @@ The results are cached in `cachedir` so that if the same methods are re-run with
 * -s, --stage : The stage which to run the pipeline until. Must be one of  `['ruler_detection', 'binarization', 'measurements']`. Pipeline runs to measurement stage by default (running to completion). Running the pipeline and stopping at an earlier stage can be useful for debugging.
 * -csv, --path_csv :  Path of `.csv` file for the measurement results. (Default is `results.csv`).
 * -dpi : Optional argument to specify resolution of the output image. (Default is `300`.)
+* -g, --grabcut : Use OpenCV's grabcut method in order to improve binarization on blue butterflies.
 
 ## Example
 Example data can be found at [github.com/machine-shop/butterfly-wings-data](https://github.com/machine-shop/butterfly-wings-data). For this example, clone the repository alongside `butterfly-wings`.
