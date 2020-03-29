@@ -30,6 +30,9 @@ The results are cached in `cachedir` so that if the same methods are re-run with
 
 ## Example
 Example data can be found at [github.com/machine-shop/butterfly-wings-data](https://github.com/machine-shop/butterfly-wings-data). For this example, clone the repository alongside `butterfly-wings`.
+
+A larger repository of test data is now also available at https://zenodo.org/record/3732132.
+
 ```
 git clone https://github.com/machine-shop/butterfly-wings.git
 git clone https://github.com/machine-shop/butterfly-wings-data.git
