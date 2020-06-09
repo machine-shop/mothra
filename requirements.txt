@@ -6,3 +6,4 @@ scipy
 pandas
 pytest-timeout
 joblib
+fastai
