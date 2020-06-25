@@ -1,3 +1,5 @@
+#!/bin/env python
+
 import os
 import argparse
 import csv
@@ -97,7 +99,7 @@ def main():
     parser.add_argument('-s', '--stage',
                         type=str,
                         help="Stage name: 'ruler_detection', 'binarization',\
-                        'tracing', 'measurements",
+                        'measurements'",
                         required=False,
                         default='measurements')
     # Dots per inch
@@ -173,7 +175,7 @@ def main():
         image_name = os.path.basename(image_path)
         print(f'Image {i+1}/{n} : {image_name}')
 
-        image_rgb = imread(image_path, plugin='matplotlib')
+        image_rgb = imread(image_path)
         axes = create_layout(len(pipeline_process), plot_level)
 
         for step in pipeline_process:
