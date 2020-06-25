@@ -140,7 +140,8 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     bfly_region = bfly_bin_dilated_regions_sorted[0]
 
     # Downscale image to improve grabcut speed
-    bfly_rgb_rescale = rescale(bfly_rgb, GRABCUT_RESCALE_FACTOR)
+    bfly_rgb_rescale = rescale(bfly_rgb, GRABCUT_RESCALE_FACTOR,
+                               multichannel=True)
     bfly_rgb_rescale = img_as_ubyte(bfly_rgb_rescale)
 
     # Determine grabcut highlight region using butterfly region (after rescaling)
