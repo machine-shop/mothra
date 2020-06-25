@@ -123,7 +123,7 @@ def fourier(signal, axes=None):
     return T_space
 
 
-@memory.cache()
+@memory.cache(ignore=['axes'])
 def main(img, axes=None):
     '''Finds the distance between ticks
 
