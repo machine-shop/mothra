@@ -1,5 +1,6 @@
 from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
+from skimage import color
 import numpy as np
 from scipy import ndimage as ndi
 from joblib import Memory
@@ -80,13 +81,13 @@ def remove_numbers(focus):
     focus_numbers_regions = regionprops(focus_numbers_markers)
     focus_numbers_region_areas = [region.filled_area for region in focus_numbers_regions]
     focus_numbers_avg_area = np.mean(focus_numbers_region_areas)
-    
+
     focus_numbers_filled = np.copy(focus)
     for region in focus_numbers_regions:
         if region.eccentricity < 0.99 and region.filled_area > focus_numbers_avg_area:
             min_row, min_col, max_row, max_col = region.bbox
             focus_numbers_filled[min_row:max_row, min_col:max_col] = 0
-    
+
     return focus_numbers_filled
 
 
@@ -103,8 +104,8 @@ def fourier(signal, axes=None):
     t_space : float
         distance in pixels between two ticks (.5 mm)
     '''
-    
-    # thresholding the signal so the fourier transform results better correlate to 
+
+    # thresholding the signal so the fourier transform results better correlate to
     # frequency and not amplitude of the signal
     signal_thresholded = signal > 0
 
@@ -112,7 +113,7 @@ def fourier(signal, axes=None):
     mod = np.abs(fourier)
     mod[0:10] = 0  # we discard the first several coeffs
     freq = np.fft.rfftfreq(len(signal_thresholded))
-    
+
     f_space = freq[np.argmax(mod)]
     T_space = 1 / f_space
 
@@ -141,6 +142,7 @@ def main(img, axes=None):
         distance between two ticks (.5 mm)
     '''
     binary = binarize(img)
+
     if axes and axes[0]:
         axes[0].set_title('Final output')
         axes[0].imshow(img)

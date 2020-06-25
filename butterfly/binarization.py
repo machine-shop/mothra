@@ -55,36 +55,36 @@ def find_tags_edge(image_rgb, top_ruler, axes=None):
 
     # Make sure ruler is cropped out with some extra margin
     image_rgb = image_rgb[:top_ruler - int(RULER_CROP_MARGIN*image_rgb.shape[0])]
-    
+
     # Binarize the image with rgb2hsv to highlight the butterfly
     img_hsv = color.rgb2hsv(image_rgb)[:, :, 1]
     img_hsv_rescaled = rescale_intensity(img_hsv, out_range=(0, 255))
     img_hsv_thresh = threshold_otsu(img_hsv_rescaled)
     img_bfly_bin = img_hsv_rescaled > img_hsv_thresh
-    
+
     # Fill holes and erode the butterfly to get clean butterfly region
     img_bfly_bin_filled = ndi.binary_fill_holes(img_bfly_bin)
     img_bfly_bin_filled_eroded = binary_erosion(img_bfly_bin_filled)
-    
-    
+
+
     # Binarize the image with otsu to highlight the labels/ruler
     img_gray = image_rgb[:, :, 0]
     img_otsu_thresh = threshold_otsu(img_gray, nbins=60)
     img_tags_bin = img_gray > img_otsu_thresh
-    
+
     # Fill holes and erode tags to get clean regions
     img_tags_filled = ndi.binary_fill_holes(img_tags_bin)
     img_tags_filled_eroded = binary_erosion(img_tags_filled)
-    
-    
+
+
     # Combine clean butterfly and tags images
     max_img = np.max([img_bfly_bin_filled_eroded, img_tags_filled_eroded], axis=0)
-    
+
     # Calculate regionprops
     max_img_markers, max_img_labels = ndi.label(max_img)
     max_img_regions = regionprops(max_img_markers)
-    
-    
+
+
     # For all notable regions (large, and and in the right third of the image), get their distance to top left corner (0, 0)
     smallest_area = (MIN_REGION_HEIGHT * max_img.shape[0]) ** 2
     max_img_focus_regions = [r for r in max_img_regions if r.area>smallest_area]
@@ -122,7 +122,7 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     bfly_rgb : (M, N, 3) ndarray
         Input RGB image of butterfly (ruler and tags cropped out)
     bfly_bin : (M, N) ndarray
-        Binarizaed image of butterfly (ruler and tags cropped out) Expected 
+        Binarizaed image of butterfly (ruler and tags cropped out) Expected
         to be binarized saturation channel of bfly_rgb.
 
     Returns
@@ -132,7 +132,7 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     """
 
     # Dilation of image to capture butterfly region
-    selem_arr = selem.disk(DILATION_SIZE) 
+    selem_arr = selem.disk(DILATION_SIZE)
     bfly_bin_dilated = binary_dilation(bfly_bin, selem_arr)
     bfly_bin_dilated_markers, _ = ndi.label(bfly_bin_dilated, ndi.generate_binary_structure(2, 1))
     bfly_bin_dilated_regions = regionprops(bfly_bin_dilated_markers)
@@ -145,22 +145,22 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
 
     # Determine grabcut highlight region using butterfly region (after rescaling)
     padding = 0
-    rect = (int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[1]-padding), 
-            int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[0]-padding), 
-            int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[3]+padding), 
+    rect = (int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[1]-padding),
+            int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[0]-padding),
+            int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[3]+padding),
             int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[2]+padding))
 
     # Grabcut
     mask = np.zeros(bfly_rgb_rescale.shape[:2], np.uint8)
     bgd_model = np.zeros((1,65), np.float64)
     fgd_model = np.zeros((1,65), np.float64)
-    
-    cv.grabCut(bfly_rgb_rescale, mask, rect, 
+
+    cv.grabCut(bfly_rgb_rescale, mask, rect,
         bgd_model, fgd_model, GRABCUT_ITERATIONS, cv.GC_INIT_WITH_RECT)
 
     mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
     bfly_grabcut_rescale = bfly_rgb_rescale*mask2[:, :, np.newaxis]
-    
+
     # Rescale the image back up and get binary of result
     bfly_grabcut = rescale(bfly_grabcut_rescale, bfly_rgb.shape[0]/bfly_rgb_rescale.shape[0])
     bfly_grabcut_bin = np.max(bfly_grabcut, axis=2)>0
