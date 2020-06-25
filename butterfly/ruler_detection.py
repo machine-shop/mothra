@@ -28,9 +28,10 @@ def binarize(img):
     binary : array
         array that represents the binarized image
     '''
-    thresh = threshold_otsu(img)
-    binary = img > thresh
-    return binary[:, :, 0]
+    gray = color.rgb2gray(img)
+    thresh = threshold_otsu(gray)
+    binary = gray > thresh
+    return binary
 
 
 def binarize_rect(up_rectangle, binary, axes=None):
