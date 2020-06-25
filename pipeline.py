@@ -97,7 +97,7 @@ def main():
     parser.add_argument('-s', '--stage',
                         type=str,
                         help="Stage name: 'ruler_detection', 'binarization',\
-                        'tracing', 'measurements",
+                        'measurements'",
                         required=False,
                         default='measurements')
     # Dots per inch
