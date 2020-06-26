@@ -9,8 +9,9 @@ from skimage.transform import rescale
 from skimage import img_as_ubyte
 import cv2 as cv
 from joblib import Memory
-from fastai.vision import load_learner
-from . import unet_pipeline as unet
+from fastai.vision import load_learner, open_image
+from pathlib import Path
+from skimage.io import imsave
 
 location = './cachedir'
 memory = Memory(location, verbose=0)
@@ -179,12 +180,20 @@ def unet_binarization(bfly_rgb):
 
     # parameters here were defined when training the U-net.
     print('Processing U-net...')
-    bfly_unet_bin = unet.predict(bfly_rgb,
-                                 window_shape=(608, 608, 3),
-                                 pad_width=16,
-                                 step=576,
-                                 learner=learner,
-                                 is_multichannel=True)
+    aux_fname = Path('.bfly_aux.png')
+    imsave(fname=aux_fname, arr=bfly_rgb, check_contrast=False)
+    bfly_aux = open_image(aux_fname)
+
+    _, pred_classes, _ = learner.predict(bfly_aux)
+
+    # rescale the image back up.
+    scale_ratio = np.asarray(bfly_rgb.shape[:2]) / np.asarray(pred_classes[0].shape)
+    bfly_unet_bin = rescale(image=pred_classes[0].numpy().astype('float'),
+                            scale=scale_ratio)
+
+    # removing auxiliary file.
+    Path.unlink(aux_fname)
+
     return bfly_unet_bin
 
 
