@@ -12,6 +12,7 @@ from joblib import Memory
 from fastai.vision import load_learner, open_image
 from pathlib import Path
 from skimage.io import imsave
+from . import connection
 
 location = './cachedir'
 memory = Memory(location, verbose=0)
@@ -176,7 +177,21 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
 def unet_binarization(bfly_rgb):
     """
     """
-    learner = load_learner(path='./butterfly/misc', file='unet_butterfly.pkl')
+    WEIGHTS = Path('./butterfly/misc/unet_butterfly.pkl')
+    # check if weights is in its folder. If not, download it.
+    if not WEIGHTS.is_file():
+        print(f'{WEIGHTS} not in the path. Downloading...')
+        connection.fetch_data(filename=WEIGHTS)
+    # file exists: check if we have the last version; download if not.
+    else:
+        if connection.has_internet():
+            local_hash = connection.read_hash_local()
+            online_hash = connection.read_hash_online()
+            if local_hash != online_hash:
+                print('New training data available. Downloading...')
+                connection.fetch_data(filename=WEIGHTS)
+
+    learner = load_learner(path=WEIGHTS.parent, file=WEIGHTS.name)
 
     # parameters here were defined when training the U-net.
     print('Processing U-net...')
@@ -187,7 +202,8 @@ def unet_binarization(bfly_rgb):
     _, pred_classes, _ = learner.predict(bfly_aux)
 
     # rescale the image back up.
-    scale_ratio = np.asarray(bfly_rgb.shape[:2]) / np.asarray(pred_classes[0].shape)
+    scale_ratio = np.asarray(bfly_rgb.shape[:2]) / np.asarray(
+        pred_classes[0].shape)
     bfly_unet_bin = rescale(image=pred_classes[0].numpy().astype('float'),
                             scale=scale_ratio)
 
