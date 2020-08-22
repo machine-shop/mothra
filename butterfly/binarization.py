@@ -169,6 +169,7 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     return bfly_grabcut_bin
 
 
+
 @memory.cache(ignore=['axes'])
 def main(image_rgb, top_ruler, grabcut=False, axes=None):
     """Binarizes and crops properly image_rgb
