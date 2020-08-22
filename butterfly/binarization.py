@@ -169,6 +169,32 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     return bfly_grabcut_bin
 
 
+def return_largest_region(img_bin):
+    """Returns the largest region in the input image.
+
+    Parameters
+    ----------
+    img_bin : (M, N) ndarray
+        A binary image.
+
+    Returns
+    -------
+    img_bin : (M, N) ndarray
+        The input binary image containing only the largest region.
+    """
+    props = regionprops(label(img_bin))
+
+    # largest_reg will receive the largest region label and its area.
+    largest_reg = [0, 0]
+    for prop in props:
+            if prop.area > largest_reg[1]:
+                largest_reg = [prop.label, prop.area]
+
+    img_bin[label(img_bin) != largest_reg[0]] = 0
+
+    return img_as_bool(img_bin)
+
+
 @memory.cache(ignore=['axes'])
 def main(image_rgb, top_ruler, grabcut=False, axes=None):
     """Binarizes and crops properly image_rgb
@@ -211,29 +237,3 @@ def main(image_rgb, top_ruler, grabcut=False, axes=None):
         axes[3].axvline(x=label_edge, color='c', linestyle='dashed')
 
     return bfly_bin
-
-
-def return_largest_region(img_bin):
-    """Returns the largest region in the input image.
-
-    Parameters
-    ----------
-    img_bin : (M, N) ndarray
-        A binary image.
-
-    Returns
-    -------
-    img_bin : (M, N) ndarray
-        The input binary image containing only the largest region.
-    """
-    props = regionprops(label(img_bin))
-
-    # largest_reg will receive the largest region label and its area.
-    largest_reg = [0, 0]
-    for prop in props:
-            if prop.area > largest_reg[1]:
-                largest_reg = [prop.label, prop.area]
-
-    img_bin[label(img_bin) != largest_reg[0]] = 0
-
-    return img_as_bool(img_bin)
