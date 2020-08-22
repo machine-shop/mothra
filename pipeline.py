@@ -119,10 +119,6 @@ def main():
                         action='store_true',
                         help='Use grabcut in binarization step')
 
-    # U-nets
-    parser.add_argument('-u', '--unet',
-                        action='store_true',
-                        help='Use U-nets in binarization step')
     args = parser.parse_args()
 
     # Initialization
@@ -183,7 +179,7 @@ def main():
                 T_space, top_ruler = ruler_detection.main(image_rgb, axes)
 
             elif step == 'binarization':
-                binary = binarization.main(image_rgb, top_ruler, args.grabcut, args.unet, axes)
+                binary = binarization.main(image_rgb, top_ruler, args.grabcut, axes)
 
             elif step == 'measurements':
                 points_interest = tracing.main(binary, axes)
