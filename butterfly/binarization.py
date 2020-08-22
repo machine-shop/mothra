@@ -9,9 +9,6 @@ from skimage.transform import rescale
 from skimage.util import img_as_bool, img_as_ubyte
 import cv2 as cv
 from joblib import Memory
-from fastai.vision import load_learner
-from . import unet_pipeline as unet
-
 location = './cachedir'
 memory = Memory(location, verbose=0)
 
@@ -172,24 +169,8 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     return bfly_grabcut_bin
 
 
-def unet_binarization(bfly_rgb):
-    """
-    """
-    learner = load_learner(path='./butterfly/misc', file='unet_butterfly.pkl')
-
-    # parameters here were defined when training the U-net.
-    print('Processing U-net...')
-    bfly_unet_bin = unet.predict(bfly_rgb,
-                                 window_shape=(608, 608, 3),
-                                 pad_width=16,
-                                 step=576,
-                                 learner=learner,
-                                 is_multichannel=True)
-    return bfly_unet_bin
-
-
-@memory.cache(ignore=['axes'])
-def main(image_rgb, top_ruler, grabcut=False, unet=False, axes=None):
+@memory.cache()
+def main(image_rgb, top_ruler, grabcut=False, axes=None):
     """Binarizes and crops properly image_rgb
 
     Arguments
@@ -212,16 +193,13 @@ def main(image_rgb, top_ruler, grabcut=False, unet=False, axes=None):
     label_edge = find_tags_edge(image_rgb, top_ruler, axes)
 
     bfly_rgb = image_rgb[:top_ruler, :label_edge]
+    bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
+    rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
+    thresh_hsv = threshold_otsu(rescaled)
+    bfly_bin = rescaled > thresh_hsv
 
-    if unet:
-        bfly_bin = unet_binarization(bfly_rgb)
-    else:
-        bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
-        rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
-        thresh_hsv = threshold_otsu(rescaled)
-        bfly_bin = rescaled > thresh_hsv
-        if grabcut:
-            bfly_bin = grabcut_binarization(bfly_rgb, bfly_bin)
+    if grabcut:
+        bfly_bin = grabcut_binarization(bfly_rgb, bfly_bin)
 
     # if the binary image has more than one region, returns the largest one.
     bfly_bin = return_largest_region(bfly_bin)
