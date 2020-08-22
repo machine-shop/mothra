@@ -7,4 +7,3 @@ pandas
 pytest-timeout
 joblib
 fastai
-pooch
