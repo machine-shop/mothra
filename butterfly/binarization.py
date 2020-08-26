@@ -175,7 +175,17 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
 
 
 def unet_binarization(bfly_rgb):
-    """
+    """Extract shape of the butterfly using the U-net neural network.
+
+    Arguments
+    ---------
+    bfly_rgb : (M, N, 3) ndarray
+        Input RGB image of butterfly (ruler and tags cropped out)
+
+    Returns
+    -------
+    bfly_unet_bin : (M, N) ndarray
+        Resulting binarized image of butterfly after segmentation by U-net.
     """
     WEIGHTS = Path('./butterfly/misc/unet_butterfly.pkl')
     # check if weights is in its folder. If not, download it.
