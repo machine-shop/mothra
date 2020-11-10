@@ -51,7 +51,7 @@ Resulting files:
     ...
 ```
 
-Running the following command
+Running the command
 ```
 $ python pipeline.py -p -u -i ../butterfly-wings-data -o ../test_output -csv ../test_output/results.csv
 ```
