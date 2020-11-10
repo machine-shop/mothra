@@ -51,11 +51,11 @@ Resulting files:
     ...
 ```
 
-Running this command
+Running the following command
 ```
-$ python pipeline.py -p -i ../butterfly-wings-data -o ../test_output -csv ../test_output/results.csv
+$ python pipeline.py -p -u -i ../butterfly-wings-data -o ../test_output -csv ../test_output/results.csv
 ```
-in `/butterfly-wings` will run the pipeline on the example data in `/butterfly-wings-data`. The file locations should look like this:
+in `/butterfly-wings` will run the pipeline using the U-net deep neural network on the example data in the folder `/butterfly-wings-data`. The file locations should look like this:
 ```
 /butterfly-wings
     ...
