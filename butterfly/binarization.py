@@ -1,12 +1,12 @@
 import numpy as np
 from skimage.filters import threshold_otsu
 from scipy import ndimage as ndi
-from skimage.measure import regionprops
+from skimage.measure import label, regionprops
 import skimage.color as color
 from skimage.exposure import rescale_intensity
 from skimage.morphology import binary_erosion, binary_dilation, selem
 from skimage.transform import rescale
-from skimage import img_as_ubyte
+from skimage.util import img_as_bool, img_as_ubyte
 import cv2 as cv
 from joblib import Memory
 location = './cachedir'
@@ -169,6 +169,31 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     return bfly_grabcut_bin
 
 
+def return_largest_region(img_bin):
+    """Returns the largest region in the input image.
+
+    Parameters
+    ----------
+    img_bin : (M, N) ndarray
+        A binary image.
+
+    Returns
+    -------
+    img_bin : (M, N) ndarray
+        The input binary image containing only the largest region.
+    """
+    props = regionprops(label(img_bin))
+
+    # largest_reg will receive the largest region label and its area.
+    largest_reg = [0, 0]
+    for prop in props:
+            if prop.area > largest_reg[1]:
+                largest_reg = [prop.label, prop.area]
+
+    img_bin[label(img_bin) != largest_reg[0]] = 0
+
+    return img_as_bool(img_bin)
+
 
 @memory.cache(ignore=['axes'])
 def main(image_rgb, top_ruler, grabcut=False, axes=None):
@@ -201,6 +226,9 @@ def main(image_rgb, top_ruler, grabcut=False, axes=None):
 
     if grabcut:
         bfly_bin = grabcut_binarization(bfly_rgb, bfly_bin)
+
+    # if the binary image has more than one region, returns the largest one.
+    bfly_bin = return_largest_region(bfly_bin)
 
     if axes and axes[1]:
         axes[1].imshow(bfly_bin)
