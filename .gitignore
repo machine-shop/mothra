@@ -12,4 +12,4 @@ outputs/
 **/*.png
 .ropeproject
 cachedir
-butterfly/misc/unet_butterfly.pkl  # file at https://bit.ly/3fLLd6Y
+models/unet_butterfly.pkl  # file at https://gitlab.com/alexdesiqueira/butterfly-wings-data-unet/-/blob/master/unet_model/unet_butterfly.pkl
