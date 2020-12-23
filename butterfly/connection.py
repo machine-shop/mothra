@@ -27,7 +27,7 @@ def download_hash_online(url_hash=HASH_ONLINE, filename='SHA256SUM'):
     return None
 
 
-def fetch_data(path='./butterfly/misc/', filename='unet_butterfly.pkl'):
+def fetch_data(path='./models/', filename='unet_butterfly.pkl'):
     """Downloads and checks the hash of `filename`.
 
     Parameters
@@ -63,7 +63,7 @@ def has_internet():
     return socket.gethostbyname(socket.gethostname()) != '127.0.0.1'
 
 
-def read_hash_local(path='./butterfly/misc/', filename='SHA256SUM'):
+def read_hash_local(path='./models/', filename='SHA256SUM'):
     """Reads local SHA256 hash file.
 
     Parameters
@@ -94,7 +94,7 @@ def read_hash_local(path='./butterfly/misc/', filename='SHA256SUM'):
     return local_hash
 
 
-def read_hash_online(path='./butterfly/misc/', filename='.SHA256SUM_online'):
+def read_hash_online(path='./models/', filename='.SHA256SUM_online'):
     """Downloads and returns the SHA256 hash online for `filename`.
 
     Parameters
