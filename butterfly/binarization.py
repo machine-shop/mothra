@@ -187,7 +187,7 @@ def unet_binarization(bfly_rgb):
     bfly_unet_bin : (M, N) ndarray
         Resulting binarized image of butterfly after segmentation by U-net.
     """
-    WEIGHTS = Path('./butterfly/misc/unet_butterfly.pkl')
+    WEIGHTS = Path('./models/unet_butterfly.pkl')
     # check if WEIGHTS is in its folder. If not, download it.
     if not WEIGHTS.is_file():
         print(f'{WEIGHTS} not in the path. Downloading...')
