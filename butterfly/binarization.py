@@ -9,6 +9,11 @@ from skimage.transform import rescale
 from skimage.util import img_as_bool, img_as_ubyte
 import cv2 as cv
 from joblib import Memory
+from fastai.vision import load_learner, open_image
+from pathlib import Path
+from skimage.io import imsave
+from . import connection
+
 location = './cachedir'
 memory = Memory(location, verbose=0)
 
@@ -169,6 +174,55 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     return bfly_grabcut_bin
 
 
+def unet_binarization(bfly_rgb):
+    """Extract shape of the butterfly using the U-net neural network.
+
+    Arguments
+    ---------
+    bfly_rgb : (M, N, 3) ndarray
+        Input RGB image of butterfly (ruler and tags cropped out)
+
+    Returns
+    -------
+    bfly_unet_bin : (M, N) ndarray
+        Resulting binarized image of butterfly after segmentation by U-net.
+    """
+    WEIGHTS = Path('./models/unet_butterfly.pkl')
+    # check if WEIGHTS is in its folder. If not, download it.
+    if not WEIGHTS.is_file():
+        print(f'{WEIGHTS} not in the path. Downloading...')
+        connection.fetch_data(filename=WEIGHTS)
+    # file exists: check if we have the last version; download if not.
+    else:
+        if connection.has_internet():
+            local_hash = connection.read_hash_local()
+            online_hash = connection.read_hash_online()
+            if local_hash != online_hash:
+                print('New training data available. Downloading...')
+                connection.fetch_data(filename=WEIGHTS)
+
+    learner = load_learner(path=WEIGHTS.parent, file=WEIGHTS.name)
+
+    # parameters here were defined when training the U-net.
+    print('Processing U-net...')
+    aux_fname = Path('.bfly_aux.png')
+    imsave(fname=aux_fname, arr=bfly_rgb, check_contrast=False)
+    bfly_aux = open_image(aux_fname)
+
+    _, pred_classes, _ = learner.predict(bfly_aux)
+
+    # rescale the image back up.
+    scale_ratio = np.asarray(bfly_rgb.shape[:2]) / np.asarray(
+        pred_classes[0].shape)
+    bfly_unet_bin = rescale(image=pred_classes[0].numpy().astype('float'),
+                            scale=scale_ratio)
+
+    # removing auxiliary file.
+    Path.unlink(aux_fname)
+
+    return bfly_unet_bin
+
+
 def return_largest_region(img_bin):
     """Returns the largest region in the input image.
 
@@ -196,7 +250,7 @@ def return_largest_region(img_bin):
 
 
 @memory.cache(ignore=['axes'])
-def main(image_rgb, top_ruler, grabcut=False, axes=None):
+def main(image_rgb, top_ruler, grabcut=False, unet=False, axes=None):
     """Binarizes and crops properly image_rgb
 
     Arguments
@@ -219,13 +273,16 @@ def main(image_rgb, top_ruler, grabcut=False, axes=None):
     label_edge = find_tags_edge(image_rgb, top_ruler, axes)
 
     bfly_rgb = image_rgb[:top_ruler, :label_edge]
-    bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
-    rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
-    thresh_hsv = threshold_otsu(rescaled)
-    bfly_bin = rescaled > thresh_hsv
 
-    if grabcut:
-        bfly_bin = grabcut_binarization(bfly_rgb, bfly_bin)
+    if unet:
+        bfly_bin = unet_binarization(bfly_rgb)
+    else:
+        bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
+        rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
+        thresh_hsv = threshold_otsu(rescaled)
+        bfly_bin = rescaled > thresh_hsv
+        if grabcut:
+            bfly_bin = grabcut_binarization(bfly_rgb, bfly_bin)
 
     # if the binary image has more than one region, returns the largest one.
     bfly_bin = return_largest_region(bfly_bin)
