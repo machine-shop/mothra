@@ -155,7 +155,7 @@ def main(binary, axes=None):
     Arguments
     ---------
     binary : 2D array
-        Binarized and and cropped version of the butterfly
+        Binarized and cropped version of the butterfly
     ax : obj
         If any is provided, POI, smoothed wings boundaries and binary will
         be plotted on it
@@ -163,7 +163,7 @@ def main(binary, axes=None):
     Returns
     -------
     points_interest : dictionary 
-        dictionary containing the points of interest in the form [y, x],
+        Dictionary containing the points of interest in the form [y, x],
         keyed with "outer_pix_l", "inner_pix_l", "outer_pix_r", "inner_pix_r", 
         "body_center"
     """
@@ -174,6 +174,11 @@ def main(binary, axes=None):
 
     binary_left = binary[:, :middle]
     binary_right = binary[:, middle:]
+
+    # Centroid of central column
+    middle_arr = binary[:, middle]
+    middle_y = int(np.mean(np.argwhere(middle_arr)))
+    body_center = (middle_y, middle)
 
     # Left wing
     without_antenna_l = remove_antenna(binary_left)
@@ -187,11 +192,6 @@ def main(binary, axes=None):
     inner_pix_r = detect_inner_pix(without_antenna_r, outer_pix_r, 'r')
     inner_pix_r = inner_pix_r + np.array([0, middle])
     outer_pix_r = outer_pix_r + np.array([0, middle])
-
-    # Centroid of central column
-    middle_arr = binary[:, middle]
-    middle_y = int(np.mean(np.argwhere(middle_arr)))
-    body_center = (middle_y, middle)
 
     points_interest = {
         "outer_pix_l": outer_pix_l,
