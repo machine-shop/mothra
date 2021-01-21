@@ -150,7 +150,7 @@ def split_picture(binary):
 
 @memory.cache(ignore=['axes'])
 def main(binary, axes=None):
-    """Find and retunrs the coordinates of the 4 points of interest
+    """Find and returns the coordinates of the 4 points of interest
 
     Arguments
     ---------
