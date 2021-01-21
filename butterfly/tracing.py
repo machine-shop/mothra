@@ -42,7 +42,7 @@ def remove_antenna(half_binary):
     return without_antenna
 
 
-def detect_outer_pix(half_binary, side):
+def detect_outer_pix(half_binary, side, center):
     """Relative (r, c) coordinates of outer pixel (wing's tip)
 
     Arguments
@@ -51,6 +51,8 @@ def detect_outer_pix(half_binary, side):
         binary image of left/right wing
     side : str
         left ('l') or right ('r') wing
+    center : tuple
+        Centroid of the lepidopteran.
 
     Returns
     -------
@@ -182,13 +184,13 @@ def main(binary, axes=None):
 
     # Left wing
     without_antenna_l = remove_antenna(binary_left)
-    outer_pix_l = detect_outer_pix(without_antenna_l, 'l')
+    outer_pix_l = detect_outer_pix(without_antenna_l, 'l', body_center)
     inner_pix_l = detect_inner_pix(without_antenna_l, outer_pix_l, 'l')
     inner_pix_l = inner_pix_l + np.array([0, outer_pix_l[1]])
 
     # Right wing
     without_antenna_r = remove_antenna(binary_right)
-    outer_pix_r = detect_outer_pix(without_antenna_r, 'r')
+    outer_pix_r = detect_outer_pix(without_antenna_r, 'r', body_center)
     inner_pix_r = detect_inner_pix(without_antenna_r, outer_pix_r, 'r')
     inner_pix_r = inner_pix_r + np.array([0, middle])
     outer_pix_r = outer_pix_r + np.array([0, middle])
