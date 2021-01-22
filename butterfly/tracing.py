@@ -64,7 +64,7 @@ def detect_outer_pix(half_binary, center):
     idx_max = np.argmax(areas)
 
     coords = regions[idx_max].coords
-    distances = np.linalg.norm(coords - center)
+    distances = np.linalg.norm(coords - center, axis=-1)
     idx_outer_pix = np.argmax(distances)
     outer_pix = coords[idx_outer_pix]
 
@@ -181,8 +181,9 @@ def main(binary, axes=None):
     inner_pix_l = inner_pix_l + np.array([0, outer_pix_l[1]])
 
     # Right wing
+    body_center_r = (middle_y, 0)  # to calculate outer_pix_r correctly
     without_antenna_r = remove_antenna(binary_right)
-    outer_pix_r = detect_outer_pix(without_antenna_r, body_center)
+    outer_pix_r = detect_outer_pix(without_antenna_r, body_center_r)
     inner_pix_r = detect_inner_pix(without_antenna_r, outer_pix_r, 'r')
     inner_pix_r = inner_pix_r + np.array([0, middle])
     outer_pix_r = outer_pix_r + np.array([0, middle])
