@@ -42,15 +42,13 @@ def remove_antenna(half_binary):
     return without_antenna
 
 
-def detect_outer_pix(half_binary, side, center):
+def detect_outer_pix(half_binary, center):
     """Relative (r, c) coordinates of outer pixel (wing's tip)
 
     Arguments
     ---------
     half_binary : 2D array
-        binary image of left/right wing
-    side : str
-        left ('l') or right ('r') wing
+        Binary image of left/right wing.
     center : tuple
         Centroid of the lepidopteran.
 
@@ -59,12 +57,6 @@ def detect_outer_pix(half_binary, side, center):
     outer_pix : 1D array
         relative coordinates of the outer pixel (r, c)
     """
-    if side == 'r':
-        width = half_binary.shape[1]
-        corner = np.array([0, width])
-    else:
-        corner = np.array([0, 0])
-
     markers, _ = ndi.label(half_binary,
                            ndi.generate_binary_structure(2, 1))
     regions = regionprops(markers)
@@ -72,8 +64,8 @@ def detect_outer_pix(half_binary, side, center):
     idx_max = np.argmax(areas)
 
     coords = regions[idx_max].coords
-    distances = np.linalg.norm(coords - corner, axis=1)
-    idx_outer_pix = np.argmin(distances)
+    distances = np.linalg.norm(coords - center)
+    idx_outer_pix = np.argmax(distances)
     outer_pix = coords[idx_outer_pix]
 
     return outer_pix
@@ -184,13 +176,13 @@ def main(binary, axes=None):
 
     # Left wing
     without_antenna_l = remove_antenna(binary_left)
-    outer_pix_l = detect_outer_pix(without_antenna_l, 'l', body_center)
+    outer_pix_l = detect_outer_pix(without_antenna_l, body_center)
     inner_pix_l = detect_inner_pix(without_antenna_l, outer_pix_l, 'l')
     inner_pix_l = inner_pix_l + np.array([0, outer_pix_l[1]])
 
     # Right wing
     without_antenna_r = remove_antenna(binary_right)
-    outer_pix_r = detect_outer_pix(without_antenna_r, 'r', body_center)
+    outer_pix_r = detect_outer_pix(without_antenna_r, body_center)
     inner_pix_r = detect_inner_pix(without_antenna_r, outer_pix_r, 'r')
     inner_pix_r = inner_pix_r + np.array([0, middle])
     outer_pix_r = outer_pix_r + np.array([0, middle])
