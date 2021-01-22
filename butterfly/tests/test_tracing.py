@@ -44,8 +44,8 @@ def test_outer_pix(fake_butterfly):
     binary_left = fake_butterfly[:, :middle]
     binary_right = fake_butterfly[:, middle:]
 
-    outer_pix_l = tracing.detect_outer_pix(binary_left, 'l')
-    outer_pix_r = tracing.detect_outer_pix(binary_right, 'r')
+    outer_pix_l = tracing.detect_outer_pix(binary_left, middle)
+    outer_pix_r = tracing.detect_outer_pix(binary_right, middle)
     outer_pix_r = outer_pix_r + np.array([0, middle])
 
     assert_array_equal(outer_pix_l, np.array([250, 250]))
