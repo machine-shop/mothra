@@ -41,11 +41,17 @@ def test_remove_antenna(fake_butterfly):
 def test_outer_pix(fake_butterfly):
     middle = tracing.split_picture(fake_butterfly)
 
+    # calculating centroid of central column
+    middle_arr = fake_butterfly[:, middle]
+    middle_y = int(np.mean(np.argwhere(middle_arr)))
+    body_center = (middle_y, middle)
+
     binary_left = fake_butterfly[:, :middle]
     binary_right = fake_butterfly[:, middle:]
 
-    outer_pix_l = tracing.detect_outer_pix(binary_left, 'l')
-    outer_pix_r = tracing.detect_outer_pix(binary_right, 'r')
+    outer_pix_l = tracing.detect_outer_pix(binary_left, body_center)
+    body_center_r = (middle_y, 0)  # calculating outer_pix_r correctly
+    outer_pix_r = tracing.detect_outer_pix(binary_right, body_center_r)
     outer_pix_r = outer_pix_r + np.array([0, middle])
 
     assert_array_equal(outer_pix_l, np.array([250, 250]))
