@@ -5,6 +5,9 @@ import pytest
 
 import pipeline
 
+from skimage.io import imread
+from skimage.util import img_as_float
+
 
 TIMEOUT_TIME = 60
 
@@ -54,3 +57,15 @@ def test_create_layout():
         assert ax
     for ax in axes[3:]:
         assert ax is None
+
+
+def test_untilt_image():
+    """Checks if a tilted image received is correctly rotated by untilt_image.
+    """
+    tilted_path = 'butterfly/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
+    tilted_image = imread(tilted_path)
+
+    fixed_image = pipeline.untilt_image(tilted_image, tilted_path)
+
+    assert tilted_image.shape == (5184, 3456, 3)
+    assert fixed_image.shape == (3456, 5184, 3)

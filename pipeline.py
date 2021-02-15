@@ -6,6 +6,8 @@ import csv
 from butterfly import (ruler_detection, tracing, measurement, binarization)
 import matplotlib.pyplot as plt
 from skimage.io import imread
+from skimage.transform import rotate
+from exif import Image
 
 WSPACE_SUBPLOTS = 0.7
 
@@ -64,6 +66,33 @@ def create_layout(n_stages, plot_level):
         elif n_stages == 3:
             return [ax_main, ax_bin, ax_poi, ax_structure, ax_signal,
                     ax_fourier, ax_tags]
+
+
+def untilt_image(image, image_path):
+    """Check orientation according to EXIF info available on image.
+
+    References
+    ----------
+    [1] https://www.impulseadventure.com/photo/exif-orientation.html
+    """
+    exif_info = Image(image_path)
+
+    try:
+        if exif_info.has_exif:
+            orientation = exif_info.orientation.value
+            # checking possible orientations for images.
+            angles = {1: 0,  # (top, left)
+                      6: 90,  # (left, bottom)
+                      3: 180,  # (bottom, right)
+                      8: 270}  # (right, top)
+            angle = angles.get(orientation, 0)
+            return rotate(image, angle=angle, resize=True)
+        else:
+            print(f'Cannot evaluate orientation for {image_path}.')
+            return image
+    except ValueError:  # ... is not a valid TiffByteOrder
+        print(f'Cannot evaluate orientation for {image_path}.')
+        return image
 
 
 def main():
@@ -176,6 +205,10 @@ def main():
         print(f'Image {i+1}/{n} : {image_name}')
 
         image_rgb = imread(image_path)
+
+        # check image and untilt it, if necessary.
+        image_rgb = untilt_image(image_rgb, image_path)
+
         axes = create_layout(len(pipeline_process), plot_level)
 
         for step in pipeline_process:
