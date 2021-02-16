@@ -236,7 +236,7 @@ def main():
 
         # check image orientation and untilt it, if necessary.
         orientation = read_orientation(image_path)
-        if orientation:
+        if orientation not in (None, 1):  # orientation = 1 is already correct
             image_rgb = untilt_image(image_rgb, orientation)
 
         axes = create_layout(len(pipeline_process), plot_level)
