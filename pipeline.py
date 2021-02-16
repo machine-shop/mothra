@@ -116,9 +116,9 @@ def untilt_image(image, orientation):
     """
     # checking possible orientations for images.
     angles = {1: 0,  # (top, left)
-              6: 90,  # (left, bottom)
+              6: 90,  # (right, top)
               3: 180,  # (bottom, right)
-              8: 270}  # (right, top)
+              8: 270}  # (left, bottom)
     angle = angles.get(orientation, 0)
     return rotate(image, angle=angle, resize=True)
 
