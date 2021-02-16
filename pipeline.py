@@ -71,6 +71,18 @@ def create_layout(n_stages, plot_level):
 def untilt_image(image, image_path):
     """Check orientation according to EXIF info available on image.
 
+    Parameters
+    ----------
+    image_rgb : (M, N, 3) ndarray
+        RGB input image.
+    image_path : str
+        Path of the input image.
+
+    Returns
+    -------
+    image_untilt : (M, N, 3) ndarray
+        Input image tilted to (top, left) orientation.
+
     References
     ----------
     [1] https://www.impulseadventure.com/photo/exif-orientation.html
