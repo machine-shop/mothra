@@ -101,28 +101,6 @@ def read_orientation(image_path):
         return None
 
 
-def untilt_image(image, angle):
-    """Untilt image according to EXIF orientation.
-
-    Parameters
-    ----------
-    image_rgb : (M, N, 3) ndarray
-        RGB input image.
-    angle : int
-        Orientation of the input image in degrees.
-
-    Returns
-    -------
-    image_untilt : (M, N, 3) ndarray
-        Input image tilted to (top, left) orientation.
-
-    References
-    ----------
-    [1] https://www.impulseadventure.com/photo/exif-orientation.html
-    """
-    return rotate(image, angle=angle, resize=True)
-
-
 def main():
     # Assign description to the help doc
     parser = argparse.ArgumentParser(
@@ -237,7 +215,7 @@ def main():
         # check image orientation and untilt it, if necessary.
         angle = read_orientation(image_path)
         if angle not in (None, 0):  # angle == 0 does not need untilting
-            image_rgb = untilt_image(image_rgb, angle)
+            image_rgb = rotate(image_rgb, angle=angle, resize=True)
 
         axes = create_layout(len(pipeline_process), plot_level)
 

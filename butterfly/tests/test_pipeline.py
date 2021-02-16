@@ -67,16 +67,3 @@ def test_read_orientation():
     angle = pipeline.read_orientation(tilted_path)
 
     assert angle == 90
-
-
-def test_untilt_image():
-    """Checks if a tilted image received is correctly rotated by untilt_image.
-    """
-    tilted_path = 'butterfly/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
-    tilted_image = imread(tilted_path)
-
-    angle = pipeline.read_orientation(tilted_path)
-    fixed_image = pipeline.untilt_image(tilted_image, angle)
-
-    assert tilted_image.shape == (5184, 3456, 3)
-    assert fixed_image.shape == (3456, 5184, 3)
