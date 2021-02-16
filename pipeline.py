@@ -6,6 +6,8 @@ import csv
 from butterfly import (ruler_detection, tracing, measurement, binarization)
 import matplotlib.pyplot as plt
 from skimage.io import imread
+from skimage.transform import rotate
+from exif import Image
 
 WSPACE_SUBPLOTS = 0.7
 
@@ -64,6 +66,39 @@ def create_layout(n_stages, plot_level):
         elif n_stages == 3:
             return [ax_main, ax_bin, ax_poi, ax_structure, ax_signal,
                     ax_fourier, ax_tags]
+
+
+def read_orientation(image_path):
+    """Read orientation from image on path, according to EXIF data.
+
+    Parameters
+    ----------
+    image_path : str
+        Path of the input image.
+    
+    Returns
+    -------
+    angle : int or None
+        Current orientation of the image in degrees, or None if EXIF data
+        cannot be read.
+    """
+    metadata = Image(image_path)
+
+    try:
+        if metadata.has_exif:
+            orientation = metadata.orientation.value
+            # checking possible orientations for images.
+            angles = {1: 0,  # (top, left)
+                      6: 90,  # (right, top)
+                      3: 180,  # (bottom, right)
+                      8: 270}  # (left, bottom)
+            return angles.get(orientation, 0)
+        else:
+            print(f'Cannot evaluate orientation for {image_path}.')
+            return None
+    except ValueError:  # ... is not a valid TiffByteOrder
+        print(f'Cannot evaluate orientation for {image_path}.')
+        return None
 
 
 def main():
@@ -176,6 +211,12 @@ def main():
         print(f'Image {i+1}/{n} : {image_name}')
 
         image_rgb = imread(image_path)
+
+        # check image orientation and untilt it, if necessary.
+        angle = read_orientation(image_path)
+        if angle not in (None, 0):  # angle == 0 does not need untilting
+            image_rgb = rotate(image_rgb, angle=angle, resize=True)
+
         axes = create_layout(len(pipeline_process), plot_level)
 
         for step in pipeline_process:

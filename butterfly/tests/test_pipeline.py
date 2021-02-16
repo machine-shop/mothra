@@ -5,6 +5,9 @@ import pytest
 
 import pipeline
 
+from skimage.io import imread
+from skimage.util import img_as_float
+
 
 TIMEOUT_TIME = 60
 
@@ -54,3 +57,13 @@ def test_create_layout():
         assert ax
     for ax in axes[3:]:
         assert ax is None
+
+
+def test_read_orientation():
+    """Checks if orientation is extracted correctly from EXIF data.
+    Orientation for image in path is 6, (right, top); angle is 90 deg.
+    """
+    tilted_path = 'butterfly/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
+    angle = pipeline.read_orientation(tilted_path)
+
+    assert angle == 90
