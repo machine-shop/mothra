@@ -68,15 +68,42 @@ def create_layout(n_stages, plot_level):
                     ax_fourier, ax_tags]
 
 
-def untilt_image(image, image_path):
-    """Check orientation according to EXIF info available on image.
+def read_orientation(image_path):
+    """Read orientation from image on path, according to EXIF data.
+
+    Parameters
+    ----------
+    image_path : str
+        Path of the input image.
+    
+    Returns
+    -------
+    orientation : int or None
+        Current orientation of the image, or None if EXIF data cannot be read.
+    """
+    metadata = Image(image_path)
+
+    try:
+        if metadata.has_exif:
+            orientation = metadata.orientation.value
+            return orientation
+        else:
+            print(f'Cannot evaluate orientation for {image_path}.')
+            return None
+    except ValueError:  # ... is not a valid TiffByteOrder
+        print(f'Cannot evaluate orientation for {image_path}.')
+        return None
+
+
+def untilt_image(image, orientation):
+    """Untilt image according to EXIF orientation.
 
     Parameters
     ----------
     image_rgb : (M, N, 3) ndarray
         RGB input image.
-    image_path : str
-        Path of the input image.
+    orientation : int
+        Orientation of the input image.
 
     Returns
     -------
@@ -87,24 +114,13 @@ def untilt_image(image, image_path):
     ----------
     [1] https://www.impulseadventure.com/photo/exif-orientation.html
     """
-    exif_info = Image(image_path)
-
-    try:
-        if exif_info.has_exif:
-            orientation = exif_info.orientation.value
-            # checking possible orientations for images.
-            angles = {1: 0,  # (top, left)
-                      6: 90,  # (left, bottom)
-                      3: 180,  # (bottom, right)
-                      8: 270}  # (right, top)
-            angle = angles.get(orientation, 0)
-            return rotate(image, angle=angle, resize=True)
-        else:
-            print(f'Cannot evaluate orientation for {image_path}.')
-            return image
-    except ValueError:  # ... is not a valid TiffByteOrder
-        print(f'Cannot evaluate orientation for {image_path}.')
-        return image
+    # checking possible orientations for images.
+    angles = {1: 0,  # (top, left)
+              6: 90,  # (left, bottom)
+              3: 180,  # (bottom, right)
+              8: 270}  # (right, top)
+    angle = angles.get(orientation, 0)
+    return rotate(image, angle=angle, resize=True)
 
 
 def main():
@@ -218,8 +234,10 @@ def main():
 
         image_rgb = imread(image_path)
 
-        # check image and untilt it, if necessary.
-        image_rgb = untilt_image(image_rgb, image_path)
+        # check image orientation and untilt it, if necessary.
+        orientation = read_orientation(image_path)
+        if orientation:
+            image_rgb = untilt_image(image_rgb, orientation)
 
         axes = create_layout(len(pipeline_process), plot_level)
 
