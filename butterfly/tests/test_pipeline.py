@@ -61,12 +61,12 @@ def test_create_layout():
 
 def test_read_orientation():
     """Checks if orientation is extracted correctly from EXIF data.
+    Orientation for image in path is 6, (right, top); angle is 90 deg.
     """
     tilted_path = 'butterfly/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
-    # orientation for image in path is 6, (right, top)
-    orientation = pipeline.read_orientation(tilted_path)
+    angle = pipeline.read_orientation(tilted_path)
 
-    assert orientation == 6
+    assert angle == 90
 
 
 def test_untilt_image():
@@ -75,8 +75,8 @@ def test_untilt_image():
     tilted_path = 'butterfly/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
     tilted_image = imread(tilted_path)
 
-    orientation = pipeline.read_orientation(tilted_path)
-    fixed_image = pipeline.untilt_image(tilted_image, orientation)
+    angle = pipeline.read_orientation(tilted_path)
+    fixed_image = pipeline.untilt_image(tilted_image, angle)
 
     assert tilted_image.shape == (5184, 3456, 3)
     assert fixed_image.shape == (3456, 5184, 3)

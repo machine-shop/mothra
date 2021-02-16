@@ -78,15 +78,21 @@ def read_orientation(image_path):
     
     Returns
     -------
-    orientation : int or None
-        Current orientation of the image, or None if EXIF data cannot be read.
+    angle : int or None
+        Current orientation of the image in degrees, or None if EXIF data
+        cannot be read.
     """
     metadata = Image(image_path)
 
     try:
         if metadata.has_exif:
             orientation = metadata.orientation.value
-            return orientation
+            # checking possible orientations for images.
+            angles = {1: 0,  # (top, left)
+                      6: 90,  # (right, top)
+                      3: 180,  # (bottom, right)
+                      8: 270}  # (left, bottom)
+            return angles.get(orientation, 0)
         else:
             print(f'Cannot evaluate orientation for {image_path}.')
             return None
@@ -95,15 +101,15 @@ def read_orientation(image_path):
         return None
 
 
-def untilt_image(image, orientation):
+def untilt_image(image, angle):
     """Untilt image according to EXIF orientation.
 
     Parameters
     ----------
     image_rgb : (M, N, 3) ndarray
         RGB input image.
-    orientation : int
-        Orientation of the input image.
+    angle : int
+        Orientation of the input image in degrees.
 
     Returns
     -------
@@ -114,12 +120,6 @@ def untilt_image(image, orientation):
     ----------
     [1] https://www.impulseadventure.com/photo/exif-orientation.html
     """
-    # checking possible orientations for images.
-    angles = {1: 0,  # (top, left)
-              6: 90,  # (right, top)
-              3: 180,  # (bottom, right)
-              8: 270}  # (left, bottom)
-    angle = angles.get(orientation, 0)
     return rotate(image, angle=angle, resize=True)
 
 
@@ -235,9 +235,9 @@ def main():
         image_rgb = imread(image_path)
 
         # check image orientation and untilt it, if necessary.
-        orientation = read_orientation(image_path)
-        if orientation not in (None, 1):  # orientation == 1 does not need untilting
-            image_rgb = untilt_image(image_rgb, orientation)
+        angle = read_orientation(image_path)
+        if angle not in (None, 0):  # angle == 0 does not need untilting
+            image_rgb = untilt_image(image_rgb, angle)
 
         axes = create_layout(len(pipeline_process), plot_level)
 
