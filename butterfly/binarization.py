@@ -12,7 +12,7 @@ from joblib import Memory
 from fastai.vision import load_learner, open_image
 from pathlib import Path
 from skimage.io import imsave
-from . import connection
+from butterfly import connection
 
 location = './cachedir'
 memory = Memory(location, verbose=0)
@@ -174,7 +174,7 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     return bfly_grabcut_bin
 
 
-def unet_binarization(bfly_rgb):
+def unet_binarization(bfly_rgb, weights='./models/unet_butterfly.pkl'):
     """Extract shape of the butterfly using the U-net neural network.
 
     Arguments
@@ -187,21 +187,12 @@ def unet_binarization(bfly_rgb):
     bfly_unet_bin : (M, N) ndarray
         Resulting binarized image of butterfly after segmentation by U-net.
     """
-    WEIGHTS = Path('./models/unet_butterfly.pkl')
-    # check if WEIGHTS is in its folder. If not, download it.
-    if not WEIGHTS.is_file():
-        print(f'{WEIGHTS} not in the path. Downloading...')
-        connection.fetch_data(filename=WEIGHTS)
-    # file exists: check if we have the last version; download if not.
-    else:
-        if connection.has_internet():
-            local_hash = connection.read_hash_local()
-            online_hash = connection.read_hash_online()
-            if local_hash != online_hash:
-                print('New training data available. Downloading...')
-                connection.fetch_data(filename=WEIGHTS)
+    if isinstance(weights, str):
+        weights = Path(weights)
 
-    learner = load_learner(path=WEIGHTS.parent, file=WEIGHTS.name)
+    connection.download_weights(weights)
+
+    learner = load_learner(path=weights.parent, file=weights.name)
 
     # parameters here were defined when training the U-net.
     print('Processing U-net...')

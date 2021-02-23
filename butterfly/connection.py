@@ -16,6 +16,10 @@ def download_weights(weights):
     ----------
     weights : str or pathlib.Path
         Path of the file containing weights.
+
+    Returns
+    -------
+    None
     """
     # check if weights is in its folder. If not, download it.
     if not weights.is_file():
