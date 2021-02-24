@@ -174,7 +174,7 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     return bfly_grabcut_bin
 
 
-def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
+def unet_binarization(bfly_rgb, weights='./models/unet_butterfly.pkl'):
     """Extract shape of the butterfly using the U-net neural network.
 
     Arguments
@@ -191,6 +191,7 @@ def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
         weights = Path(weights)
 
     connection.download_weights(weights)
+
     learner = load_learner(path=weights.parent, file=weights.name)
 
     # parameters here were defined when training the U-net.
@@ -265,7 +266,7 @@ def main(image_rgb, top_ruler, grabcut=False, unet=False, axes=None):
     bfly_rgb = image_rgb[:top_ruler, :label_edge]
 
     if unet:
-        bfly_bin = unet_binarization(bfly_rgb, weights='./models/segmentation.pkl')
+        bfly_bin = unet_binarization(bfly_rgb)
     else:
         bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
         rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
