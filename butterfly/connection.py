@@ -4,9 +4,46 @@ from pooch import retrieve
 import socket
 
 
-# defining global variables.
-MODEL_ONLINE = 'https://gitlab.com/alexdesiqueira/butterfly-wings-data-unet/-/raw/master/unet_model/unet_butterfly.pkl'
-HASH_ONLINE = 'https://gitlab.com/alexdesiqueira/butterfly-wings-data-unet/-/raw/master/unet_model/SHA256SUM'
+# defining global constants.
+URL_MODEL = {
+    'id_gender' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/id_gender/id_gender.pkl',
+    'id_position' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/id_position/id_position.pkl',
+    'segmentation' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/segmentation/segmentation.pkl'
+    }
+
+URL_HASH = {
+    'id_gender' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/id_gender/.SHA256SUM_ONLINE-id_gender',
+    'id_position' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/id_position/.SHA256SUM_ONLINE-id_position',
+    'segmentation' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/segmentation/.SHA256SUM_ONLINE-segmentation'
+    }
+
+LOCAL_HASH = {
+    'id_gender' : Path('./models/SHA256SUM-id_gender'),
+    'id_position' : Path('./models/SHA256SUM-id_position'),
+    'segmentation' : Path('./models/SHA256SUM-segmentation')
+    }
+
+
+def _get_model_info(weights):
+    """Helper function. Returns info from the model according the filename of
+    its weights.
+
+    Parameters
+    ----------
+    weights : pathlib.Path
+        Path of the file containing weights.
+
+    Returns
+    -------
+    url_model : str
+        URL of the file for the latest model.
+    url_hash : str
+        URL of the hash file for the latest model.
+    local_hash : pathlib.Path
+        Path of the local hash file.
+    """
+    return (URL_MODEL.get(weights.stem), URL_HASH.get(weights.stem),
+            LOCAL_HASH.get(weights.stem))
 
 
 def download_weights(weights):
@@ -21,23 +58,25 @@ def download_weights(weights):
     -------
     None
     """
+    _, url_hash, local_hash = _get_model_info(weights)
     # check if weights is in its folder. If not, download it.
     if not weights.is_file():
         print(f'{weights} not in the path. Downloading...')
-        fetch_data(filename=weights)
-    # file exists: check if we have the last version; download if not.
+        fetch_data(weights)
+    # file exists: check if we have the last versioonlinen; download if not.
     else:
         if has_internet():
-            local_hash = read_hash_local()
-            online_hash = read_hash_online()
-            if local_hash != online_hash:
+            local_hash_val = read_hash_local(filename=local_hash)
+            url_hash_val = read_hash_from_url(path=local_hash.parent,
+                                                 url_hash=url_hash)
+            if local_hash_val != url_hash_val:
                 print('New training data available. Downloading...')
-                fetch_data(filename=weights)
+                fetch_data(weights)
 
     return None
 
 
-def download_hash_online(url_hash=HASH_ONLINE, filename='SHA256SUM'):
+def download_hash_from_url(url_hash, filename):
     """Downloads hash from `url_hash`.
 
     Parameters
@@ -45,7 +84,7 @@ def download_hash_online(url_hash=HASH_ONLINE, filename='SHA256SUM'):
     url_hash : str
         URL of the SHA256 hash.
     filename : str
-        Filename to save the SHA256 hash.
+        Filename to save the SHA256 hash locally.
 
     Returns
     -------
@@ -55,24 +94,29 @@ def download_hash_online(url_hash=HASH_ONLINE, filename='SHA256SUM'):
     return None
 
 
-def fetch_data(path='./models/', filename='unet_butterfly.pkl'):
-    """Downloads and checks the hash of `filename`.
+def fetch_data(weights):
+    """Downloads and checks the hash of `weights`, according to its filename.
 
     Parameters
     ----------
-    filename : str
-        Filename to save the model file.
+    weights : str
+        Weights containing the model file.
 
     Returns
     -------
     None
     """
-    FILE_HASH = Path(f'{path}/SHA256SUM')
+    url_model, url_hash, local_hash = _get_model_info(weights)
 
-    download_hash_online(filename=FILE_HASH)
-    LOCAL_HASH = read_hash_local()
-    retrieve(url=MODEL_ONLINE, known_hash=f'sha256:{LOCAL_HASH}',
-             fname=filename, path='.')
+    # creating filename to save url_hash.
+    filename = local_hash.parent/Path(url_hash).name
+
+    download_hash_from_url(url_hash=url_hash, filename=filename)
+    local_hash_val = read_hash_local(local_hash)
+    retrieve(url=url_model,
+             known_hash=f'sha256:{local_hash_val}',
+             fname=weights,
+             path='.')
 
     return None
 
@@ -91,15 +135,13 @@ def has_internet():
     return socket.gethostbyname(socket.gethostname()) != '127.0.0.1'
 
 
-def read_hash_local(path='./models/', filename='SHA256SUM'):
+def read_hash_local(filename):
     """Reads local SHA256 hash file.
 
     Parameters
     ----------
-    path : str
-        Where to look for the hash file.
-    filename : str
-        Filename of the hash file.
+    filename : pathlib.Path
+        Path of the hash file.
 
     Returns
     -------
@@ -110,10 +152,8 @@ def read_hash_local(path='./models/', filename='SHA256SUM'):
     -----
     Returns None if file is not found.
     """
-    HASH_LOCAL = Path(f'{path}/{filename}')
-
     try:
-        with open(HASH_LOCAL, 'r') as file_hash:
+        with open(filename, 'r') as file_hash:
             hashes = [line for line in file_hash]
         # expecting only one hash, and not interested in the filename:
         local_hash, _ = hashes[0].split()
@@ -122,24 +162,26 @@ def read_hash_local(path='./models/', filename='SHA256SUM'):
     return local_hash
 
 
-def read_hash_online(path='./models/', filename='.SHA256SUM_online'):
-    """Downloads and returns the SHA256 hash online for `filename`.
+def read_hash_from_url(path, url_hash):
+    """Downloads and returns the SHA256 hash online for the file in `url_hash`.
 
     Parameters
     ----------
     path : str
         Where to look for the hash file.
-    filename : str
-        Filename of the hash file.
+    url_hash : str
+        URL of the hash file for the latest model.
 
     Returns
     -------
     online_hash : str
+        SHA256 hash for the file in `url_hash`.
     """
-    HASH_ONLINE = Path(f'{path}/{filename}')
+    filename = Path(url_hash).name
+    latest_hash = Path(f'{path}/{filename}')
 
-    download_hash_online(filename=HASH_ONLINE)
-    with open(HASH_ONLINE, 'r') as file_hash:
+    download_hash_from_url(url_hash=url_hash, filename=filename)
+    with open(latest_hash, 'r') as file_hash:
         hashes = [line for line in file_hash]
 
     # expecting only one hash, and not interested in the filename:
