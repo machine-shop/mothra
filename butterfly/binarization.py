@@ -2,7 +2,7 @@ import numpy as np
 from skimage.filters import threshold_otsu
 from scipy import ndimage as ndi
 from skimage.measure import label, regionprops
-from skimage import color
+import skimage.color as color
 from skimage.exposure import rescale_intensity
 from skimage.morphology import binary_erosion, binary_dilation, selem
 from skimage.transform import rescale
