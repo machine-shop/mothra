@@ -9,30 +9,6 @@ MODEL_ONLINE = 'https://gitlab.com/alexdesiqueira/butterfly-wings-data-unet/-/ra
 HASH_ONLINE = 'https://gitlab.com/alexdesiqueira/butterfly-wings-data-unet/-/raw/master/unet_model/SHA256SUM'
 
 
-def download_weights(weights):
-    """Triggers functions to download weights.
-
-    Parameters
-    ----------
-    weights : str or pathlib.Path
-        Path of the file containing weights.
-    """
-    # check if weights is in its folder. If not, download it.
-    if not weights.is_file():
-        print(f'{weights} not in the path. Downloading...')
-        fetch_data(filename=weights)
-    # file exists: check if we have the last version; download if not.
-    else:
-        if has_internet():
-            local_hash = read_hash_local()
-            online_hash = read_hash_online()
-            if local_hash != online_hash:
-                print('New training data available. Downloading...')
-                fetch_data(filename=weights)
-
-    return None
-
-
 def download_hash_online(url_hash=HASH_ONLINE, filename='SHA256SUM'):
     """Downloads hash from `url_hash`.
 
