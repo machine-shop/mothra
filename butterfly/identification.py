@@ -25,7 +25,7 @@ def _classification(bfly_rgb, weights):
     Parameters
     ----------
     bfly_rgb : 3D array
-        RGB image of the Lepidoptera (ruler and tags cropped out).
+        RGB image of the Lepidoptera.
     weights : str or pathlib.Path
         Path of the file containing weights.
 
@@ -64,19 +64,19 @@ def predict_position(bfly_rgb, weights='./models/id_position.pkl'):
     Parameters
     ----------
     bfly_rgb : 3D array
-        RGB image of the Lepidoptera (ruler and tags cropped out).
+        RGB image of the entire picture
     weights : str or pathlib.Path, optional
         Path of the file containing weights.
 
     Returns
     -------
     prediction : str
-        Classification obtained from `bfly_rgb`, being "right-side_up" or
-        "upside_down".
+        Classification obtained from `bfly_rgb`, being "right-side up" or
+        "upside down".
     """
     position = {
-        0: 'upside_down',
-        1: 'right-side_up'
+        0: 'upside down',
+        1: 'right-side up'
     }
     prediction = _classification(bfly_rgb, weights)
 
@@ -89,7 +89,7 @@ def predict_gender(bfly_rgb, weights='./models/id_gender.pkl'):
     Parameters
     ----------
     bfly_rgb : 3D array
-        RGB image of the Lepidoptera (ruler and tags cropped out).
+        RGB image of the entire picture.
     weights : str or pathlib.Path, optional
         Path of the file containing weights.
 
@@ -121,9 +121,9 @@ def main(image_rgb, top_ruler, axes=None):
     Returns
     -------
     position : str
-        Position of the Lepidoptera: `right-side_up` or `upside_down`.
+        Position of the Lepidoptera: right-side up or upside down.
     gender : str
-        Gender of the Lepidoptera, or N/A if position is `upside_down`.
+        Gender of the Lepidoptera, or N/A if position is upside down.
     """
     label_edge = binarization.find_tags_edge(image_rgb, top_ruler, axes)
     bfly_rgb = image_rgb[:top_ruler, :label_edge]
@@ -132,7 +132,7 @@ def main(image_rgb, top_ruler, axes=None):
     position = predict_position(bfly_rgb, weights='./models/id_position.pkl')
     print(f'* Position: {position}')
 
-    if position == 'right-side_up':
+    if position == 'right-side up':
         print('Identifying gender...')
         gender = predict_gender(bfly_rgb, weights='./models/id_gender.pkl')
         print(f'* Gender: {gender}')
