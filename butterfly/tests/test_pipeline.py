@@ -9,7 +9,7 @@ from skimage.io import imread
 from skimage.util import img_as_float
 
 
-TIMEOUT_TIME = 180
+TIMEOUT_TIME = 60
 
 
 @pytest.mark.timeout(TIMEOUT_TIME)
