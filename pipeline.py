@@ -3,8 +3,7 @@
 import os
 import argparse
 import csv
-from butterfly import (ruler_detection, tracing, measurement, binarization,
-                       identification)
+from butterfly import (ruler_detection, tracing, measurement, binarization)
 import matplotlib.pyplot as plt
 from skimage.io import imread
 from skimage.transform import rotate
@@ -76,7 +75,7 @@ def read_orientation(image_path):
     ----------
     image_path : str
         Path of the input image.
-
+    
     Returns
     -------
     angle : int or None
@@ -189,8 +188,7 @@ def main():
         with open(args.path_csv, 'w') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerow(['image_id', 'left_wing (mm)', 'right_wing (mm)',
-                'left_wing_center (mm)', 'right_wing_center (mm)', 'wing_span (mm)',
-                'position', 'gender'])
+                'left_wing_center (mm)', 'right_wing_center (mm)', 'wing_span (mm)'])
 
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
@@ -232,19 +230,12 @@ def main():
                 points_interest = tracing.main(binary, axes)
                 dist_pix, dist_mm = measurement.main(points_interest, T_space,
                                                    axes)
-                # measuring position and gender
-                position, gender = identification.main(image_rgb, top_ruler)
 
                 with open(args.path_csv, 'a') as csv_file:
                     writer = csv.writer(csv_file)
-                    writer.writerow([image_name,
-                                     dist_mm["dist_l"],
-                                     dist_mm["dist_r"],
-                                     dist_mm["dist_l_center"],
-                                     dist_mm["dist_r_center"],
-                                     dist_mm["dist_span"],
-                                     position,
-                                     gender])
+                    writer.writerow([image_name, dist_mm["dist_l"], dist_mm["dist_r"], 
+                                    dist_mm["dist_l_center"], dist_mm["dist_r_center"], 
+                                    dist_mm["dist_span"]])
 
         if plot_level > 0:
             output_path = os.path.normpath(os.path.join(args.output_folder, image_name))
