@@ -46,6 +46,34 @@ def _get_model_info(weights):
             LOCAL_HASH.get(weights.stem))
 
 
+def _check_hashes(weights):
+    """Helping function. Downloads hashes for `weights` if they are not
+    present.
+
+    Parameters
+    ----------
+    weights : str or pathlib.Path
+        Path of the file containing weights.
+
+    Returns
+    -------
+    None
+    """
+    _, url_hash, local_hash = _get_model_info(weights)
+
+    if not local_hash.is_file():
+        download_hash_from_url(url_hash=url_hash, filename=local_hash)
+
+    # creating filename to save url_hash.
+    filename = local_hash.parent/Path(url_hash).name
+
+    if not filename.is_file():
+        download_hash_from_url(url_hash=url_hash, filename=filename)
+
+
+    return None
+
+
 def download_weights(weights):
     """Triggers functions to download weights.
 
@@ -58,12 +86,15 @@ def download_weights(weights):
     -------
     None
     """
+    # check if hashes are in disk, then get info from the model.
+    _check_hashes(weights)
     _, url_hash, local_hash = _get_model_info(weights)
-    # check if weights is in its folder. If not, download it.
+
+    # check if weights is in its folder. If not, download the file.
     if not weights.is_file():
         print(f'{weights} not in the path. Downloading...')
         fetch_data(weights)
-    # file exists: check if we have the last versioonlinen; download if not.
+    # file exists: check if we have the last version; download if not.
     else:
         if has_internet():
             local_hash_val = read_hash_local(filename=local_hash)
