@@ -1,6 +1,8 @@
 import numpy as np
 
 from skimage import draw
+from skimage.io import imread
+from skimage.util import img_as_bool
 from butterfly import binarization
 
 import pytest
@@ -90,6 +92,16 @@ def test_grabcut(fake_butterfly_layout):
     # assert the "butterfly" is included in the cropped and binarized result
     assert((rows - 10 <= y_where_max - y_where_min <= rows + 10) and
            (cols - 10 <= x_where_max - x_where_min <= cols + 10))
+
+
+def test_unet():
+    """Tests U-net segmentation."""
+    bfly_rgb = imread('./butterfly/tests/test_files/test_input/BMNHE_1297240_147563_dbf1346219110b416ff10347b45e070b1e0d116d.png.rgb')
+    bfly_bin = imread('./butterfly/tests/test_files/test_input/BMNHE_1297240_147563_dbf1346219110b416ff10347b45e070b1e0d116d.png.seg')
+
+    output = binarization.unet_binarization(bfly_rgb, weights='./models/segmentation.pkl')
+
+    assert np.allclose(img_as_bool(output), img_as_bool(bfly_bin))
 
 
 def test_main(fake_butterfly_layout):

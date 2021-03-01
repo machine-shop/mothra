@@ -12,4 +12,6 @@ outputs/
 **/*.png
 .ropeproject
 cachedir
-models/unet_butterfly.pkl  # file at https://gitlab.com/alexdesiqueira/butterfly-wings-data-unet/-/blob/master/unet_model/unet_butterfly.pkl
+models/id_gender.pkl  # file at https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/id_gender/id_gender.pkl
+models/id_position.pkl  # file at https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/id_position/id_position.pkl
+models/segmentation.pkl  # file at https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/segmentation/segmentation.pkl

@@ -2,7 +2,7 @@ import numpy as np
 from skimage.filters import threshold_otsu
 from scipy import ndimage as ndi
 from skimage.measure import label, regionprops
-import skimage.color as color
+from skimage import color
 from skimage.exposure import rescale_intensity
 from skimage.morphology import binary_erosion, binary_dilation, selem
 from skimage.transform import rescale
@@ -12,7 +12,7 @@ from joblib import Memory
 from fastai.vision import load_learner, open_image
 from pathlib import Path
 from skimage.io import imsave
-from . import connection
+from butterfly import connection
 
 location = './cachedir'
 memory = Memory(location, verbose=0)
@@ -174,7 +174,7 @@ def grabcut_binarization(bfly_rgb, bfly_bin):
     return bfly_grabcut_bin
 
 
-def unet_binarization(bfly_rgb):
+def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
     """Extract shape of the butterfly using the U-net neural network.
 
     Arguments
@@ -187,21 +187,11 @@ def unet_binarization(bfly_rgb):
     bfly_unet_bin : (M, N) ndarray
         Resulting binarized image of butterfly after segmentation by U-net.
     """
-    WEIGHTS = Path('./models/unet_butterfly.pkl')
-    # check if WEIGHTS is in its folder. If not, download it.
-    if not WEIGHTS.is_file():
-        print(f'{WEIGHTS} not in the path. Downloading...')
-        connection.fetch_data(filename=WEIGHTS)
-    # file exists: check if we have the last version; download if not.
-    else:
-        if connection.has_internet():
-            local_hash = connection.read_hash_local()
-            online_hash = connection.read_hash_online()
-            if local_hash != online_hash:
-                print('New training data available. Downloading...')
-                connection.fetch_data(filename=WEIGHTS)
+    if isinstance(weights, str):
+        weights = Path(weights)
 
-    learner = load_learner(path=WEIGHTS.parent, file=WEIGHTS.name)
+    connection.download_weights(weights)
+    learner = load_learner(path=weights.parent, file=weights.name)
 
     # parameters here were defined when training the U-net.
     print('Processing U-net...')
@@ -275,7 +265,7 @@ def main(image_rgb, top_ruler, grabcut=False, unet=False, axes=None):
     bfly_rgb = image_rgb[:top_ruler, :label_edge]
 
     if unet:
-        bfly_bin = unet_binarization(bfly_rgb)
+        bfly_bin = unet_binarization(bfly_rgb, weights='./models/segmentation.pkl')
     else:
         bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
         rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
