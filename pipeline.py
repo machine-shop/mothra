@@ -190,7 +190,7 @@ def main():
             writer = csv.writer(csv_file)
             writer.writerow(['image_id', 'left_wing (mm)', 'right_wing (mm)',
                 'left_wing_center (mm)', 'right_wing_center (mm)', 'wing_span (mm)',
-                'position', 'gender'])
+                'wing_shoulder (mm)', 'position', 'gender'])
 
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
@@ -231,7 +231,7 @@ def main():
             elif step == 'measurements':
                 points_interest = tracing.main(binary, axes)
                 dist_pix, dist_mm = measurement.main(points_interest, T_space,
-                                                   axes)
+                                                     axes)
                 # measuring position and gender
                 position, gender = identification.main(image_rgb, top_ruler)
 
@@ -243,6 +243,7 @@ def main():
                                      dist_mm["dist_l_center"],
                                      dist_mm["dist_r_center"],
                                      dist_mm["dist_span"],
+                                     dist_mm["dist_shoulder"],
                                      position,
                                      gender])
 
