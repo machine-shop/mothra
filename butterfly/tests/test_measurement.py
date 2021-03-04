@@ -18,14 +18,16 @@ def fake_points_of_interest():
         "dist_r": 4,
         "dist_l_center": 4,
         "dist_r_center": 5,
-        "dist_span": 9
+        "dist_span": 9,
+        "dist_shoulder": 2
     }
     dist_mm = {
         "dist_l": 1.5,
         "dist_r": 2,
         "dist_l_center": 2,
         "dist_r_center": 2.5,
-        "dist_span": 4.5
+        "dist_span": 4.5,
+        "dist_shoulder": 1
     }
     return points_interest, dist_pix, dist_mm
 

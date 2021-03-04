@@ -16,6 +16,7 @@ for details.
 from fastai.vision import load_learner, open_image
 from pathlib import Path
 from skimage.io import imsave
+from skimage.util import img_as_ubyte
 from butterfly import binarization, connection
 
 
@@ -48,7 +49,7 @@ def _classification(bfly_rgb, weights):
 
     # parameters here were defined when training the networks.
     aux_fname = Path('.bfly_aux.png')
-    imsave(fname=aux_fname, arr=bfly_rgb, check_contrast=False)
+    imsave(fname=aux_fname, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
     bfly_aux = open_image(aux_fname)
 
     _, prediction, _ = learner.predict(bfly_aux)

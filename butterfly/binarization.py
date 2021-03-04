@@ -196,7 +196,7 @@ def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
     # parameters here were defined when training the U-net.
     print('Processing U-net...')
     aux_fname = Path('.bfly_aux.png')
-    imsave(fname=aux_fname, arr=bfly_rgb, check_contrast=False)
+    imsave(fname=aux_fname, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
     bfly_aux = open_image(aux_fname)
 
     _, pred_classes, _ = learner.predict(bfly_aux)
