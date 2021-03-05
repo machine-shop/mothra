@@ -45,10 +45,11 @@ def _check_aux_file(filename):
     """
     while filename.is_file():
         try:
-            number = int(filename.stem[-1]) + 1
-            filename = Path(filename.stem[:-1] + str(number) + filename.suffix)
+            name, number = filename.stem.split('_')
+            number = int(number) + 1
+            filename = Path(f"{name}_{number}{filename.suffix}")
         except ValueError:
-            filename = Path(filename.stem + '_1' + filename.suffix)
+            filename = Path(f"{filename.stem}_1{filename.suffix}")
     return filename
 
 

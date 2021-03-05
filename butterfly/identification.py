@@ -20,6 +20,19 @@ from skimage.util import img_as_ubyte
 from butterfly import binarization, connection
 
 
+def _check_aux_file(filename):
+    """Helping function. Checks if filename exists; if yes, adds a number to it.
+    """
+    while filename.is_file():
+        try:
+            name, number = filename.stem.split('_')
+            number = int(number) + 1
+            filename = Path(f"{name}_{number}{filename.suffix}")
+        except ValueError:
+            filename = Path(f"{filename.stem}_1{filename.suffix}")
+    return filename
+
+
 def _classification(bfly_rgb, weights):
     """Helping function. Classifies the input image according to `weights`.
 
@@ -59,18 +72,6 @@ def _classification(bfly_rgb, weights):
     # removing auxiliary file.
     Path.unlink(aux_fname)
     return int(prediction)
-
-
-def _check_aux_file(filename):
-    """Helping function. Checks if filename exists; if yes, adds a number to it.
-    """
-    while filename.is_file():
-        try:
-            number = int(filename.stem[-1]) + 1
-            filename = Path(filename.stem[:-1] + str(number) + filename.suffix)
-        except ValueError:
-            filename = Path(filename.stem + '_1' + filename.suffix)
-    return filename
 
 
 def predict_position(bfly_rgb, weights='./models/id_position.pkl'):
