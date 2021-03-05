@@ -17,20 +17,9 @@ from fastai.vision import load_learner, open_image
 from pathlib import Path
 from skimage.io import imsave
 from skimage.util import img_as_ubyte
+from random import choice
+from string import ascii_letters, digits
 from butterfly import binarization, connection
-
-
-def _check_aux_file(filename):
-    """Helping function. Checks if filename exists; if yes, adds a number to it.
-    """
-    while filename.is_file():
-        try:
-            name, number = filename.stem.split('_')
-            number = int(number) + 1
-            filename = Path(f"{name}_{number}{filename.suffix}")
-        except ValueError:
-            filename = Path(f"{filename.stem}_1{filename.suffix}")
-    return filename
 
 
 def _classification(bfly_rgb, weights):
@@ -58,11 +47,9 @@ def _classification(bfly_rgb, weights):
 
     connection.download_weights(weights)
 
-    learner = load_learner(path=weights.parent, file=weights.name)
-
     # parameters here were defined when training the networks.
-    aux_fname = Path('.bfly_aux.png')
-    aux_fname = _check_aux_file(aux_fname)
+    learner = load_learner(path=weights.parent, file=weights.name)
+    aux_fname = _gen_filename()
 
     imsave(fname=aux_fname, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
     bfly_aux = open_image(aux_fname)
@@ -72,6 +59,17 @@ def _classification(bfly_rgb, weights):
     # removing auxiliary file.
     Path.unlink(aux_fname)
     return int(prediction)
+
+
+def _gen_filename():
+    """Auxiliary function. Generates a random filename.
+    """
+    RANDOM_STRING_SIZE = 16
+    chars = digits + ascii_letters
+    rand_str = ''.join(choice(chars) for x in range(RANDOM_STRING_SIZE))
+
+    filename = f".aux_{rand_str}.png"
+    return filename
 
 
 def predict_position(bfly_rgb, weights='./models/id_position.pkl'):

@@ -10,8 +10,10 @@ from skimage.util import img_as_bool, img_as_ubyte
 import cv2 as cv
 from joblib import Memory
 from fastai.vision import load_learner, open_image
+from random import choice
 from pathlib import Path
 from skimage.io import imsave
+from string import ascii_letters, digits
 from butterfly import connection
 
 location = './cachedir'
@@ -40,16 +42,14 @@ GRABCUT_RESCALE_FACTOR = 0.25
 GRABCUT_ITERATIONS = 10
 
 
-def _check_aux_file(filename):
-    """Helping function. Checks if filename exists; if yes, adds a number to it.
+def _gen_filename():
+    """Auxiliary function. Generates a random filename.
     """
-    while filename.is_file():
-        try:
-            name, number = filename.stem.split('_')
-            number = int(number) + 1
-            filename = Path(f"{name}_{number}{filename.suffix}")
-        except ValueError:
-            filename = Path(f"{filename.stem}_1{filename.suffix}")
+    RANDOM_STRING_SIZE = 16
+    chars = digits + ascii_letters
+    rand_str = ''.join(choice(chars) for x in range(RANDOM_STRING_SIZE))
+
+    filename = f".aux_{rand_str}.png"
     return filename
 
 
@@ -204,12 +204,11 @@ def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
         weights = Path(weights)
 
     connection.download_weights(weights)
+    # parameters here were defined when training the U-net.
     learner = load_learner(path=weights.parent, file=weights.name)
 
-    # parameters here were defined when training the U-net.
     print('Processing U-net...')
-    aux_fname = Path('.bfly_aux.png')
-    aux_fname = _check_aux_file(aux_fname)
+    aux_fname = _gen_filename()
 
     imsave(fname=aux_fname, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
     bfly_aux = open_image(aux_fname)
