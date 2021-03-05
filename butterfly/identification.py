@@ -68,7 +68,7 @@ def _gen_filename():
     chars = digits + ascii_letters
     rand_str = ''.join(choice(chars) for x in range(RANDOM_STRING_SIZE))
 
-    filename = f".aux_{rand_str}.png"
+    filename = Path(f".aux_{rand_str}.png")
     return filename
 
 
