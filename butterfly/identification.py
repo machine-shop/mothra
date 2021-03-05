@@ -49,6 +49,8 @@ def _classification(bfly_rgb, weights):
 
     # parameters here were defined when training the networks.
     aux_fname = Path('.bfly_aux.png')
+    aux_fname = _check_aux_file(aux_fname)
+
     imsave(fname=aux_fname, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
     bfly_aux = open_image(aux_fname)
 
@@ -57,6 +59,18 @@ def _classification(bfly_rgb, weights):
     # removing auxiliary file.
     Path.unlink(aux_fname)
     return int(prediction)
+
+
+def _check_aux_file(filename):
+    """Helping function. Checks if filename exists; if yes, adds a number to it.
+    """
+    while filename.is_file():
+        try:
+            number = int(filename.stem[-1]) + 1
+            filename = Path(filename.stem[:-1] + str(number) + filename.suffix)
+        except ValueError:
+            filename = Path(filename.stem + '_1' + filename.suffix)
+    return filename
 
 
 def predict_position(bfly_rgb, weights='./models/id_position.pkl'):

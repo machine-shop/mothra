@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from skimage.io import imread
 from skimage.transform import rotate
 from exif import Image
+from pathlib import Path
 
 WSPACE_SUBPLOTS = 0.7
 
@@ -102,6 +103,18 @@ def read_orientation(image_path):
         return None
 
 
+def _check_aux_file(filename):
+    """Helping function. Checks if filename exists; if yes, adds a number to it.
+    """
+    while filename.is_file():
+        try:
+            number = int(filename.stem[-1]) + 1
+            filename = Path(filename.stem[:-1] + str(number) + filename.suffix)
+        except ValueError:
+            filename = Path(filename.stem + '_1' + filename.suffix)
+    return filename
+
+
 def main():
     # Assign description to the help doc
     parser = argparse.ArgumentParser(
@@ -184,9 +197,11 @@ def main():
 
     # Initializing the csv file
     if args.stage == 'measurements':
-        if os.path.exists(args.path_csv):
-            os.remove(args.path_csv)
-        with open(args.path_csv, 'w') as csv_file:
+        # renaming csv file if it exists on disk already.
+        csv_fname = Path(args.path_csv)
+        csv_fname = _check_aux_file(csv_fname)
+
+        with open(csv_fname, 'w') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerow(['image_id', 'left_wing (mm)', 'right_wing (mm)',
                 'left_wing_center (mm)', 'right_wing_center (mm)', 'wing_span (mm)',
@@ -235,7 +250,7 @@ def main():
                 # measuring position and gender
                 position, gender = identification.main(image_rgb, top_ruler)
 
-                with open(args.path_csv, 'a') as csv_file:
+                with open(csv_fname, 'a') as csv_file:
                     writer = csv.writer(csv_file)
                     writer.writerow([image_name,
                                      dist_mm["dist_l"],

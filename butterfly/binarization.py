@@ -40,6 +40,18 @@ GRABCUT_RESCALE_FACTOR = 0.25
 GRABCUT_ITERATIONS = 10
 
 
+def _check_aux_file(filename):
+    """Helping function. Checks if filename exists; if yes, adds a number to it.
+    """
+    while filename.is_file():
+        try:
+            number = int(filename.stem[-1]) + 1
+            filename = Path(filename.stem[:-1] + str(number) + filename.suffix)
+        except ValueError:
+            filename = Path(filename.stem + '_1' + filename.suffix)
+    return filename
+
+
 def find_tags_edge(image_rgb, top_ruler, axes=None):
     """Find the edge between the tag area on the right and the butterfly area
     and returns the corresponding x coordinate of that vertical line
@@ -196,6 +208,8 @@ def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
     # parameters here were defined when training the U-net.
     print('Processing U-net...')
     aux_fname = Path('.bfly_aux.png')
+    aux_fname = _check_aux_file(aux_fname)
+
     imsave(fname=aux_fname, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
     bfly_aux = open_image(aux_fname)
 
