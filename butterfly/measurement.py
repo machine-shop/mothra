@@ -131,12 +131,12 @@ def main(points_interest, T_space, axes=None):
                      + ' mm',
                      size=textsize, color='orange')
 
-
-    print(f'left_wing : {dist_mm["dist_l"]} mm')
-    print(f'right_wing : {dist_mm["dist_r"]} mm')
-    print(f'left_wing_center : {dist_mm["dist_l_center"]} mm')
-    print(f'right_wing_center : {dist_mm["dist_r_center"]} mm')
-    print(f'wing_span : {dist_mm["dist_span"]} mm')
-    print(f'wing_shoulder : {dist_mm["dist_shoulder"]} mm')
+    print(f'Measurements:')
+    print(f'* left_wing: {dist_mm["dist_l"]} mm')
+    print(f'* right_wing: {dist_mm["dist_r"]} mm')
+    print(f'* left_wing_center: {dist_mm["dist_l_center"]} mm')
+    print(f'* right_wing_center: {dist_mm["dist_r_center"]} mm')
+    print(f'* wing_span: {dist_mm["dist_span"]} mm')
+    print(f'* wing_shoulder: {dist_mm["dist_shoulder"]} mm')
 
     return dist_pix, dist_mm
