@@ -10,10 +10,9 @@ from skimage.util import img_as_bool, img_as_ubyte
 import cv2 as cv
 from joblib import Memory
 from fastai.vision import load_learner, open_image
-from random import choice
 from pathlib import Path
 from skimage.io import imsave
-from string import ascii_letters, digits
+from tempfile import NamedTemporaryFile
 from butterfly import connection
 
 location = './cachedir'
@@ -40,17 +39,6 @@ GRABCUT_RESCALE_FACTOR = 0.25
 
 # Number of iterations used in grabcut
 GRABCUT_ITERATIONS = 10
-
-
-def _gen_filename():
-    """Auxiliary function. Generates a random filename.
-    """
-    RANDOM_STRING_SIZE = 16
-    chars = digits + ascii_letters
-    rand_str = ''.join(choice(chars) for x in range(RANDOM_STRING_SIZE))
-
-    filename = Path(f".aux_{rand_str}.png")
-    return filename
 
 
 def find_tags_edge(image_rgb, top_ruler, axes=None):
@@ -208,10 +196,9 @@ def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
     learner = load_learner(path=weights.parent, file=weights.name)
 
     print('Processing U-net...')
-    aux_fname = _gen_filename()
-
-    imsave(fname=aux_fname, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
-    bfly_aux = open_image(aux_fname)
+    with NamedTemporaryFile(suffix='.png') as aux_fname:
+        imsave(fname=aux_fname.name, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
+        bfly_aux = open_image(aux_fname.name)
 
     _, pred_classes, _ = learner.predict(bfly_aux)
 
@@ -220,9 +207,6 @@ def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
         pred_classes[0].shape)
     bfly_unet_bin = rescale(image=pred_classes[0].numpy().astype('float'),
                             scale=scale_ratio)
-
-    # removing auxiliary file.
-    Path.unlink(aux_fname)
 
     return bfly_unet_bin
 
