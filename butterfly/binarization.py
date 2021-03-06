@@ -12,6 +12,7 @@ from joblib import Memory
 from fastai.vision import load_learner, open_image
 from pathlib import Path
 from skimage.io import imsave
+from tempfile import NamedTemporaryFile
 from butterfly import connection
 
 location = './cachedir'
@@ -191,13 +192,13 @@ def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
         weights = Path(weights)
 
     connection.download_weights(weights)
+    # parameters here were defined when training the U-net.
     learner = load_learner(path=weights.parent, file=weights.name)
 
-    # parameters here were defined when training the U-net.
     print('Processing U-net...')
-    aux_fname = Path('.bfly_aux.png')
-    imsave(fname=aux_fname, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
-    bfly_aux = open_image(aux_fname)
+    with NamedTemporaryFile(suffix='.png') as aux_fname:
+        imsave(fname=aux_fname.name, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
+        bfly_aux = open_image(aux_fname.name)
 
     _, pred_classes, _ = learner.predict(bfly_aux)
 
@@ -206,9 +207,6 @@ def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
         pred_classes[0].shape)
     bfly_unet_bin = rescale(image=pred_classes[0].numpy().astype('float'),
                             scale=scale_ratio)
-
-    # removing auxiliary file.
-    Path.unlink(aux_fname)
 
     return bfly_unet_bin
 
