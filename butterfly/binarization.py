@@ -196,7 +196,7 @@ def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
     learner = load_learner(path=weights.parent, file=weights.name)
 
     print('Processing U-net...')
-    with NamedTemporaryFile(suffix='.png') as aux_fname:
+    with NamedTemporaryFile(suffix='.png', dir='.') as aux_fname:
         imsave(fname=aux_fname.name, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
         bfly_aux = open_image(aux_fname.name)
 
