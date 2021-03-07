@@ -6,13 +6,13 @@ from skimage import color
 from skimage.exposure import rescale_intensity
 from skimage.morphology import binary_erosion, binary_dilation, selem
 from skimage.transform import rescale
-from skimage.util import img_as_bool, img_as_ubyte
+from skimage.util import img_as_bool, img_as_float32, img_as_ubyte
 import cv2 as cv
 from joblib import Memory
-from fastai.vision import load_learner, open_image
+from fastai.vision import load_learner, Image
 from pathlib import Path
 from skimage.io import imsave
-from tempfile import NamedTemporaryFile
+from torch import from_numpy
 from butterfly import connection
 
 location = './cachedir'
@@ -39,6 +39,15 @@ GRABCUT_RESCALE_FACTOR = 0.25
 
 # Number of iterations used in grabcut
 GRABCUT_ITERATIONS = 10
+
+
+def _convert_image_to_tensor(image):
+    """Auxiliary function. Receives an RGB image and convert it to be processed
+    by fastai."""
+    image = img_as_float32(np.transpose(image, axes=(2, 0, 1)))
+    tensor = Image(from_numpy(image))
+
+    return tensor
 
 
 def find_tags_edge(image_rgb, top_ruler, axes=None):
@@ -196,10 +205,7 @@ def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
     learner = load_learner(path=weights.parent, file=weights.name)
 
     print('Processing U-net...')
-    with NamedTemporaryFile(suffix='.png', dir='.') as aux_fname:
-        imsave(fname=aux_fname.name, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
-        bfly_aux = open_image(aux_fname.name)
-
+    bfly_aux = _convert_image_to_tensor(bfly_rgb)
     _, pred_classes, _ = learner.predict(bfly_aux)
 
     # rescale the image back up.
