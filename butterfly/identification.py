@@ -13,11 +13,11 @@ please set recompute_scale_factor=True. See the documentation of nn.Upsample
 for details.
 """
 
-from fastai.vision import load_learner, open_image
+from fastai.vision import load_learner, Image
 from pathlib import Path
 from skimage.io import imsave
-from skimage.util import img_as_ubyte
-from tempfile import NamedTemporaryFile
+from skimage.util import img_as_float32, img_as_ubyte
+from torch import from_numpy
 from butterfly import binarization, connection
 
 
@@ -49,13 +49,19 @@ def _classification(bfly_rgb, weights):
     # parameters here were defined when training the networks.
     learner = load_learner(path=weights.parent, file=weights.name)
 
-    with NamedTemporaryFile(suffix='.png', dir='.') as aux_fname:
-        imsave(fname=aux_fname.name, arr=img_as_ubyte(bfly_rgb), check_contrast=False)
-        bfly_aux = open_image(aux_fname.name)
-
+    bfly_aux = _convert_image_to_tensor(bfly_rgb)
     _, prediction, _ = learner.predict(bfly_aux)
 
     return int(prediction)
+
+
+def _convert_image_to_tensor(image):
+    """Auxiliary function. Receives an RGB image and convert it to be processed
+    by fastai."""
+    image = img_as_float32(np.transpose(image, axes=(2, 0, 1)))
+    tensor = Image(from_numpy(image))
+
+    return tensor
 
 
 def predict_position(bfly_rgb, weights='./models/id_position.pkl'):
