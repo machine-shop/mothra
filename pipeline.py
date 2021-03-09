@@ -162,9 +162,6 @@ def _read_filenames_in_folder(folder):
     for path, _, items in os.walk(folder):
         for item in items:
             item = os.path.join(path, item)
-            if os.path.isdir(item):
-                aux_paths = _read_filenames_in_folder(item)
-                image_paths.extend(aux_paths)
             if not item.lower().endswith(SUPPORTED_IMAGE_EXT):
                 continue
             image_paths.append(item)
