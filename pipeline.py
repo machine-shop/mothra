@@ -144,7 +144,7 @@ def _read_paths_in_file(input_name):
     with open(input_name) as txt_file:
         for item in txt_file:
             try:
-                item = item.replace('\n', '')
+                item = item.strip()
                 if os.path.isdir(item):
                     aux_paths = _read_filenames_in_folder(item)
                 elif os.path.isfile(item) and item.lower().endswith(SUPPORTED_IMAGE_EXT):
