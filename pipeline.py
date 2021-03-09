@@ -104,7 +104,7 @@ def read_orientation(image_path):
 
 
 def _check_aux_file(filename):
-    """Helping function. Checks if filename exists; if yes, adds a number to
+    """Helper function. Checks if filename exists; if yes, adds a number to
     it."""
     while filename.is_file():
         try:
@@ -117,7 +117,7 @@ def _check_aux_file(filename):
 
 
 def _read_filenames_in_folder(folder):
-    """Helping function. Reads filenames in folder and appends them into a
+    """Helper function. Reads filenames in folder and appends them into a
     list."""
     image_names = os.listdir(folder)
     image_paths = []
