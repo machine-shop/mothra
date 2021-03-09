@@ -234,9 +234,11 @@ def main():
             image_paths = []
             with open(input_name) as txt_file:
                 for folder in txt_file:
-                    print(folder)
                     try:
-                        aux_paths = _read_filenames_in_folder(folder.replace('\n', ''))
+                        if os.path.isdir(folder):
+                            aux_paths = _read_filenames_in_folder(folder.replace('\n', ''))
+                        elif os.path.isfile(folder) and folder.lower().endswith(('.png', '.jpg', '.jpeg')):
+                            aux_paths = [input_name]
                     except FileNotFoundError:
                         continue
                     image_paths.extend(aux_paths)
