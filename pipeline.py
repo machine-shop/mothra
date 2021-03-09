@@ -152,7 +152,7 @@ def _read_paths_in_file(input_name):
                 continue
             image_paths.extend(aux_paths)
 
-    return image_paths
+    return list(set(image_paths))  # remove duplicated entries from list
 
 
 def _read_filenames_in_folder(folder):
