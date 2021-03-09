@@ -169,7 +169,6 @@ def _read_filenames_in_folder(folder):
                 continue
             image_paths.append(item)
 
-    print(image_paths)
     return image_paths
 
 
