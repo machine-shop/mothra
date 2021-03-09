@@ -116,6 +116,34 @@ def _check_aux_file(filename):
     return filename
 
 
+def _process_input(input_name):
+    """Helper function. Process the input argument and returns the images
+    in path."""
+    try:
+        if os.path.isfile(input_name):
+            if input_name.lower().endswith('.txt'):
+                image_paths = []
+                with open(input_name) as txt_file:
+                    for folder in txt_file:
+                        try:
+                            if os.path.isdir(folder):
+                                aux_paths = _read_filenames_in_folder(folder.replace('\n', ''))
+                            elif os.path.isfile(folder) and folder.lower().endswith(('.png', '.jpg', '.jpeg')):
+                                aux_paths = [folder]
+                        except FileNotFoundError:
+                            continue
+                        image_paths.extend(aux_paths)
+            elif input_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+                image_paths = [input_name]
+        elif(os.path.isdir(input_name)):
+            image_paths = _read_filenames_in_folder(input_name)
+    except:
+        print(f"Type of input not understood. Please enter path for single\
+                image, folder or text file containing paths.")
+        raise
+    return image_paths
+
+
 def _read_filenames_in_folder(folder):
     """Helper function. Reads filenames in folder and appends them into a
     list."""
@@ -228,27 +256,7 @@ def main():
 
     # reading and processing input path.
     input_name = args.input
-
-    if os.path.isfile(input_name):
-        if input_name.lower().endswith('.txt'):
-            image_paths = []
-            with open(input_name) as txt_file:
-                for folder in txt_file:
-                    try:
-                        if os.path.isdir(folder):
-                            aux_paths = _read_filenames_in_folder(folder.replace('\n', ''))
-                        elif os.path.isfile(folder) and folder.lower().endswith(('.png', '.jpg', '.jpeg')):
-                            aux_paths = [folder]
-                    except FileNotFoundError:
-                        continue
-                    image_paths.extend(aux_paths)
-        elif input_name.lower().endswith(('.png', '.jpg', '.jpeg')):
-            image_paths = [input_name]
-    elif(os.path.isdir(input_name)):
-        image_paths = _read_filenames_in_folder(input_name)
-    else:
-        print(f"Type of input not understood. Please enter path for single\
-                image, folder or text file containing paths.")
+    image_paths = _process_input(input_name)
 
     n = len(image_paths)
 
