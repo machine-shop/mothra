@@ -104,8 +104,8 @@ def read_orientation(image_path):
 
 
 def _check_aux_file(filename):
-    """Helping function. Checks if filename exists; if yes, adds a number to it.
-    """
+    """Helping function. Checks if filename exists; if yes, adds a number to
+    it."""
     while filename.is_file():
         try:
             name, number = filename.stem.split('_')
@@ -114,6 +114,20 @@ def _check_aux_file(filename):
         except ValueError:
             filename = Path(f"{filename.stem}_1{filename.suffix}")
     return filename
+
+
+def _read_filenames_in_folder(folder):
+    """Helping function. Reads filenames in folder and appends them into a
+    list."""
+    image_names = os.listdir(folder)
+    image_paths = []
+    for image_name in image_names:
+        if not image_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+            continue
+        image_path = os.path.join(folder, image_name)
+        image_paths.append(image_path)
+
+    return image_paths
 
 
 def main():
@@ -135,7 +149,8 @@ def main():
     # Input path
     parser.add_argument('-i', '--input',
                         type=str,
-                        help='Input path for folder or single image',
+                        help='Input path for single image, folder or text\
+                        file containing paths',
                         required=False,
                         default='raw_images')
 
@@ -211,17 +226,28 @@ def main():
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
 
-    raw_image_path = args.input
-    if(os.path.isdir(raw_image_path)):
-        image_names = os.listdir(raw_image_path)
-        image_paths = []
-        for image_name in image_names:
-            if not image_name.lower().endswith(('.png', '.jpg', '.jpeg')):
-                continue
-            image_path = os.path.join(raw_image_path, image_name)
-            image_paths.append(image_path)
+    # reading and processing input path.
+    input_name = args.input
+
+    if os.path.isfile(input_name):
+        if input_name.lower().endswith('.txt'):
+            image_paths = []
+            with open(input_name) as txt_file:
+                for folder in txt_file:
+                    print(folder)
+                    try:
+                        aux_paths = _read_filenames_in_folder(folder.replace('\n', ''))
+                    except FileNotFoundError:
+                        continue
+                    image_paths.extend(aux_paths)
+        elif input_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+            image_paths = [input_name]
+    elif(os.path.isdir(input_name)):
+        image_paths = _read_filenames_in_folder(input_name)
     else:
-        image_paths = [raw_image_path]
+        print(f"Type of input not understood. Please enter path for single\
+                image, folder or text file containing paths.")
+
     n = len(image_paths)
 
     for i, image_path in enumerate(image_paths):
