@@ -238,7 +238,7 @@ def main():
                         if os.path.isdir(folder):
                             aux_paths = _read_filenames_in_folder(folder.replace('\n', ''))
                         elif os.path.isfile(folder) and folder.lower().endswith(('.png', '.jpg', '.jpeg')):
-                            aux_paths = [input_name]
+                            aux_paths = [folder]
                     except FileNotFoundError:
                         continue
                     image_paths.extend(aux_paths)
