@@ -12,6 +12,8 @@ from exif import Image
 from pathlib import Path
 
 WSPACE_SUBPLOTS = 0.7
+SUPPORTED_IMAGE_EXT = ('.png', '.jpg', '.jpeg', '.tiff', '.tif')
+SUPPORTED_TEXT_EXT = ('.txt', '.text')
 
 """
 Example :
@@ -104,8 +106,8 @@ def read_orientation(image_path):
 
 
 def _check_aux_file(filename):
-    """Helping function. Checks if filename exists; if yes, adds a number to it.
-    """
+    """Helper function. Checks if filename exists; if yes, adds a number to
+    it."""
     while filename.is_file():
         try:
             name, number = filename.stem.split('_')
@@ -114,6 +116,58 @@ def _check_aux_file(filename):
         except ValueError:
             filename = Path(f"{filename.stem}_1{filename.suffix}")
     return filename
+
+
+def _process_paths_in_input(input_name):
+    """Helper function. Process the input argument and returns the images
+    in path."""
+    try:
+        if os.path.isfile(input_name):
+            # if input is a text file, reads paths listed in it.
+            if input_name.lower().endswith(SUPPORTED_TEXT_EXT):
+                image_paths = _read_paths_in_file(input_name)
+            # if input is an image, add it to image_paths.
+            elif input_name.lower().endswith(SUPPORTED_IMAGE_EXT):
+                image_paths = [input_name]
+        elif(os.path.isdir(input_name)):
+            image_paths = _read_filenames_in_folder(input_name)
+    except:
+        print(f"Type of input not understood. Please enter path for single\
+                image, folder or text file containing paths.")
+        raise
+    return image_paths
+
+
+def _read_paths_in_file(input_name):
+    """Helper function. Reads image paths in input file."""
+    image_paths = []
+    with open(input_name) as txt_file:
+        for item in txt_file:
+            try:
+                item = item.strip()
+                if os.path.isdir(item):
+                    aux_paths = _read_filenames_in_folder(item)
+                elif os.path.isfile(item) and item.lower().endswith(SUPPORTED_IMAGE_EXT):
+                    aux_paths = [item]
+            except FileNotFoundError:
+                continue
+            image_paths.extend(aux_paths)
+
+    return list(set(image_paths))  # remove duplicated entries from list
+
+
+def _read_filenames_in_folder(folder):
+    """Helper function. Reads filenames in folder and appends them into a
+    list."""
+    image_paths = []
+    for path, _, items in os.walk(folder):
+        for item in items:
+            item = os.path.join(path, item)
+            if not item.lower().endswith(SUPPORTED_IMAGE_EXT):
+                continue
+            image_paths.append(item)
+
+    return image_paths
 
 
 def main():
@@ -135,7 +189,8 @@ def main():
     # Input path
     parser.add_argument('-i', '--input',
                         type=str,
-                        help='Input path for folder or single image',
+                        help='Input path for single image, folder or text\
+                        file (extension txt) containing paths',
                         required=False,
                         default='raw_images')
 
@@ -211,17 +266,10 @@ def main():
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
 
-    raw_image_path = args.input
-    if(os.path.isdir(raw_image_path)):
-        image_names = os.listdir(raw_image_path)
-        image_paths = []
-        for image_name in image_names:
-            if not image_name.lower().endswith(('.png', '.jpg', '.jpeg')):
-                continue
-            image_path = os.path.join(raw_image_path, image_name)
-            image_paths.append(image_path)
-    else:
-        image_paths = [raw_image_path]
+    # reading and processing input path.
+    input_name = args.input
+    image_paths = _process_paths_in_input(input_name)
+
     n = len(image_paths)
 
     for i, image_path in enumerate(image_paths):
