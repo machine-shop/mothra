@@ -38,13 +38,13 @@ The following parameters can be used as input arguments for `pipeline.py`:
 
 The file with measurement results (default: `results.csv`), returned by this pipeline, contains the following measurements:
 
-* `image_name`, the filename of the processed image.
-* `dist_mm["dist_l"]`, distance from the tip of the left wing to the left shoulder.
-* `dist_mm["dist_r"]`, distance from the tip of the right wing to the right shoulder.
-* `dist_mm["dist_l_center"]`, distance from the left wing to the center.
-* `dist_mm["dist_r_center"]`, distance from the right wing to the center.
-* `dist_mm["dist_span"]`, distance from the tip of the left wing to the tip of the right wing.
-* `dist_mm["dist_shoulder"]`, distance from the left shoulder to the right shoulder.
+* `image_id`, the filename of the processed image.
+* `left_wing (mm)`, distance from the tip of the left wing to the left shoulder.
+* `right_wing (mm)`, distance from the tip of the right wing to the right shoulder.
+* `left_wing_center (mm)`, distance from the left wing to the center.
+* `right_wing_center (mm)`, distance from the right wing to the center.
+* `wing_span (mm)`, distance from the tip of the left wing to the tip of the right wing.
+* `wing_shoulder (mm)`, distance from the left shoulder to the right shoulder.
 * `position`, position of the butterfly being `right-side_up` or `upside_down`.
 * `gender`, gender of the butterfly being `female` or `male`, returned if `position` is `right-side_up`.
 
