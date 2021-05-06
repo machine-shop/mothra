@@ -1,4 +1,6 @@
-# Butterfly Wings
+![](mothra_logo-text.png)
+
+# Mothra
 
 This software analyzes images of butterflies and measures their wing lengths. Using binarization techniques and calculating the resolution of ruler ticks, we read in images of butterflies and output the millimeter lengths of their wings.
 
@@ -50,19 +52,19 @@ The file with measurement results (default: `results.csv`), returned by this pip
 
 ## Example
 
-Example data can be found at [github.com/machine-shop/butterfly-wings-data](https://github.com/machine-shop/butterfly-wings-data). For this example, clone the repository alongside `butterfly-wings`.
+Example data can be found at [github.com/machine-shop/mothra-data](https://github.com/machine-shop/mothra-data). For this example, clone the repository alongside the folder `mothra`.
 
 ```
-git clone https://github.com/machine-shop/butterfly-wings.git
-git clone https://github.com/machine-shop/butterfly-wings-data.git
+git clone https://github.com/machine-shop/mothra.git
+git clone https://github.com/machine-shop/mothra-data.git
 ```
 Resulting files:
 ```
-/butterfly-wings
+/mothra
     ...
     pipeline.py
     ...
-/butterfly-wings-data
+/mothra-data
     image1.jpg
     image2.jpg
     ...
@@ -70,15 +72,15 @@ Resulting files:
 
 Running the command
 ```
-$ python pipeline.py -p -u -i ../butterfly-wings-data -o ../test_output -csv ../test_output/results.csv
+$ python pipeline.py -p -u -i ../mothra-data -o ../test_output -csv ../test_output/results.csv
 ```
-in `/butterfly-wings` will run the pipeline using the U-net deep neural network on the example data in the folder `/butterfly-wings-data`. The file locations should look like this:
+in `/mothra` will run the pipeline using the U-net deep neural network on the example data in the folder `/mothra-data`. The file locations should look like this:
 ```
-/butterfly-wings
+/mothra
     ...
     pipeline.py
     ...
-/butterfly-wings-data
+/mothra-data
     image1.jpg
     image2.jpg
     ...
@@ -93,7 +95,7 @@ in `/butterfly-wings` will run the pipeline using the U-net deep neural network 
 
 ## Miscellaneous
 
-The testing suite can be run with `PYTHONPATH=. pytest` from `/butterfly-wings`.
+The testing suite can be run with `PYTHONPATH=. pytest` from `/mothra`.
 
 # Result Plotting
 
@@ -129,7 +131,7 @@ Example files:
     BMNHE_1354218.JPG
     ...
     ...
-/butterfly-wings
+/mothra
     result_plotting.py
     h_comma_wing_lengths.xlsx
     results.csv
@@ -155,7 +157,7 @@ python result_plotting.py -a "h_comma_wing_lengths.xlsx" -n "full name" -l "Left
 File results:
 
 ```
-/butterfly-wings
+/mothra
     result_plotting.py
     h_comma_wing_lengths.xlsx
     results.csv
