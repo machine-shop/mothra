@@ -1,5 +1,6 @@
-![](mothra_logo-text.PNG)
-
+<p align="center">
+    <img src="./mothra_logo-text.PNG" width="300">
+</p>
 # Mothra
 
 This software analyzes images of butterflies and measures their wing lengths. Using binarization techniques and calculating the resolution of ruler ticks, we read in images of butterflies and output the millimeter lengths of their wings.
