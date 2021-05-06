@@ -8,15 +8,15 @@ import socket
 
 # defining global constants.
 URL_MODEL = {
-    'id_gender' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/id_gender/id_gender.pkl',
-    'id_position' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/id_position/id_position.pkl',
-    'segmentation' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/segmentation/segmentation.pkl'
+    'id_gender' : 'https://github.com/machine-shop/mothra-data/blob/main/models/id_gender/id_gender.pkl?raw=true',
+    'id_position' : 'https://github.com/machine-shop/mothra-data/blob/main/models/id_position/id_position.pkl?raw=true',
+    'segmentation' : 'https://github.com/machine-shop/mothra-data/blob/main/models/segmentation/segmentation.pkl?raw=true'
     }
 
 URL_HASH = {
-    'id_gender' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/id_gender/SHA256SUM-id_gender',
-    'id_position' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/id_position/SHA256SUM-id_position',
-    'segmentation' : 'https://gitlab.com/alexdesiqueira/mothra-models/-/raw/main/models/segmentation/SHA256SUM-segmentation'
+    'id_gender' : 'https://raw.githubusercontent.com/machine-shop/mothra-data/main/models/id_gender/SHA256SUM-id_gender',
+    'id_position' : 'https://raw.githubusercontent.com/machine-shop/mothra-data/main/models/id_position/SHA256SUM-id_position',
+    'segmentation' : 'https://raw.githubusercontent.com/machine-shop/mothra-data/main/models/segmentation/SHA256SUM-segmentation'
     }
 
 
