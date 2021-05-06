@@ -2,7 +2,7 @@
 
 This software analyzes images of butterflies and measures their wing lengths. Using binarization techniques and calculating the resolution of ruler ticks, we read in images of butterflies and output the millimeter lengths of their wings.
 
-![example output](result-plot-BMNHE_500607.JPG)
+![example output](examples/result-plot-BMNHE_500607.JPG)
 
 ## Usage
 
@@ -23,7 +23,7 @@ The following parameters can be used as input arguments for `pipeline.py`:
 * `-pp`, `--detailed_plot` : Outputs detailed plots to help debugging. Included in the detailed plot are the various points of interest of the image marked in seperate plots, as well as the method we are using to measure the pixels per millimeter on the ruler. This option can also be ommitted to improve runtime and save space. An example of the `-pp` option follows:
 
 <p align="center">
-    <img src="./result-detailed_plot-BMNHE_500607.JPG" width="400">
+    <img src="./examples/result-detailed_plot-BMNHE_500607.JPG" width="400">
 </p>
 
 * `-i`, `--input` : A single image input or a directory of images to be analyzed. (Default is `raw_images`).
