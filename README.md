@@ -1,4 +1,4 @@
-![](mothra_logo-text.png)
+![](mothra_logo-text.PNG)
 
 # Mothra
 
