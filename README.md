@@ -2,9 +2,7 @@
     <img src="./mothra_logo-text.PNG" width="300">
 </p>
 
-# Mothra
-
-This software analyzes images of butterflies and measures their wing lengths. Using binarization techniques and calculating the resolution of ruler ticks, we read in images of butterflies and output the millimeter lengths of their wings.
+Mothra analyzes images of butterflies and measures their wing lengths. Using binarization techniques and calculating the resolution of ruler ticks, we read in images of butterflies and output the millimeter lengths of their wings.
 
 ![example output](examples/result-plot-BMNHE_500607.JPG)
 
