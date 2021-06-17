@@ -105,6 +105,27 @@ def read_orientation(image_path):
         return None
 
 
+def separate_binary_elements(img_binary):
+    """Separate the elements constutient of the binary input image.
+
+    Parameters
+    ----------
+    img_binary : (M, N) ndarray
+        Binary input image.
+
+    Returns
+    -------
+    bin_lepidoptera : (M, N) ndarray
+        Image contaning the Lepidoptera.
+    bin_ruler : (M, N) ndarray
+        Image contaning the ruler.
+    bin_tags : (M, N) ndarray
+        Image contaning the tags.
+    """
+
+    return bin_lepidoptera, bin_ruler, bin_tags
+
+
 def _check_aux_file(filename):
     """Helper function. Checks if filename exists; if yes, adds a number to
     it."""
@@ -285,15 +306,21 @@ def main():
 
         axes = create_layout(len(pipeline_process), plot_level)
 
+        # binarizing ruler, tags and Lepidoptera.
+        img_binary = binarization.main(image_rgb, top_ruler, args.grabcut, args.unet, axes)
+
+        # separating elements in the input image.
+        bin_lepidoptera, bin_ruler, bin_tags = _sep_binary_elements(img_binary)
+
         for step in pipeline_process:
             if step == 'ruler_detection':
-                T_space, top_ruler = ruler_detection.main(image_rgb, axes)
+                T_space, top_ruler = ruler_detection.main(image_rgb, bin_ruler, axes)
 
-            elif step == 'binarization':
-                binary = binarization.main(image_rgb, top_ruler, args.grabcut, args.unet, axes)
+            # elif step == 'binarization':
+
 
             elif step == 'measurements':
-                points_interest = tracing.main(binary, axes)
+                points_interest = tracing.main(img_binary, axes)
                 dist_pix, dist_mm = measurement.main(points_interest, T_space,
                                                      axes)
                 # measuring position and gender
