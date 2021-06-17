@@ -16,52 +16,34 @@ FIRST_INDEX_THRESHOLD = 0.9
 LINE_WIDTH = 40
 
 
-def binarize(img):
-    ''' Returns a binarized version of the image.
-
-    Parameters
-    ----------
-    img : array
-        array that represents the image
-
-    Returns
-    -------
-    binary : array
-        array that represents the binarized image
-    '''
-    gray = color.rgb2gray(img)
-    thresh = threshold_otsu(gray)
-    binary = gray > thresh
-    return binary
-
-
-def binarize_rect(up_rectangle, binary, axes=None):
+def binarize_rect(up_rectangle, bin_ruler, axes=None):
     '''Returns binary rectangle of segment of ruler were interested in
 
         Parameters
         ----------
         up_rectangle : integer
             This is the height of the rectangle we are fetching.
-        binary : array
-            array that represents the binarized image
+        bin_ruler : array
+            Array representing the binary ruler.
 
         Returns
         -------
         rectangle_binary : array
-            array that represents just the rectangle area of the image we want
+            Array representing the rectangular area of interest.
         '''
-    left_rectangle = int(binary.shape[1] * RULER_LEFT)
-    right_rectangle = int(binary.shape[1] * RULER_RIGHT)
+    left_rectangle = int(bin_ruler.shape[1] * RULER_LEFT)
+    right_rectangle = int(bin_ruler.shape[1] * RULER_RIGHT)
 
-    rectangle_binary = binary[up_rectangle:, left_rectangle: right_rectangle]
+    rectangle_binary = bin_ruler[up_rectangle:, left_rectangle: right_rectangle]
     if axes and axes[3]:
         rect = patches.Rectangle((left_rectangle, up_rectangle),
                                  right_rectangle - left_rectangle,
-                                 binary.shape[0] - up_rectangle,
+                                 bin_ruler.shape[0] - up_rectangle,
                                  linewidth=1, edgecolor='g', facecolor='none')
         axes[3].add_patch(rect)
 
     return rectangle_binary
+
 
 def remove_numbers(focus):
     ''' Returns a ruler image but with the numbers stripped away, to improve ruler
@@ -126,12 +108,12 @@ def fourier(signal, axes=None):
 
 
 @memory.cache(ignore=['axes'])
-def main(img, axes=None):
-    '''Finds the distance between ticks
+def main(img_rgb, bin_ruler, axes=None):
+    '''Detects ruler and finds the distance between ticks.
 
     Parameters
     ----------
-    img : array
+    img_rgb : array
         array representing the image
     ax : array
         array of Axes that show subplots
@@ -141,20 +123,18 @@ def main(img, axes=None):
     t_space : float
         distance between two ticks (.5 mm)
     '''
-    binary = binarize(img)
-
     if axes and axes[0]:
         axes[0].set_title('Final output')
-        axes[0].imshow(img)
+        axes[0].imshow(img_rgb)
         if axes[3]:
             axes[3].set_title('Image structure')
             axes[4].set_title('Ruler signal')
             axes[5].set_title('Fourier transform of ruler signal')
-            axes[3].imshow(img)
+            axes[3].imshow(img_rgb)
 
     # Detecting top ruler
-    up_rectangle = int(binary.shape[0] * RULER_TOP)
-    rectangle_binary = binarize_rect(up_rectangle, binary, axes)
+    up_rectangle = int(bin_ruler.shape[0] * RULER_TOP)
+    rectangle_binary = binarize_rect(up_rectangle, bin_ruler, axes)
     markers, nb_labels = ndi.label(rectangle_binary,
                                    ndi.generate_binary_structure(2, 1))
 
@@ -168,7 +148,7 @@ def main(img, axes=None):
 
     # Focusing on the ruler
     up_focus = up_rectangle + offset
-    focus = ~binary[up_focus:]
+    focus = ~bin_ruler[up_focus:]
 
     # Removing the numbers in the ruler to denoise the fourier transform analysis
     focus_numbers_filled = remove_numbers(focus)
