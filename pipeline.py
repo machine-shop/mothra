@@ -206,7 +206,6 @@ def main():
                         action='store_true',
                         help='If entered detailed images are plotted to the\
                         output folder')
-
     # Input path
     parser.add_argument('-i', '--input',
                         type=str,
@@ -214,7 +213,6 @@ def main():
                         file (extension txt) containing paths',
                         required=False,
                         default='raw_images')
-
     # Output path
     parser.add_argument('-o', '--output_folder',
                         type=str,
@@ -239,11 +237,6 @@ def main():
                         type=str,
                         help='Path of the resulting csv file',
                         default='results.csv')
-
-    # Grabcut
-    parser.add_argument('-g', '--grabcut',
-                        action='store_true',
-                        help='Use grabcut in binarization step')
 
     # U-nets
     parser.add_argument('-u', '--unet',
@@ -307,7 +300,7 @@ def main():
         axes = create_layout(len(pipeline_process), plot_level)
 
         # binarizing ruler, tags and Lepidoptera.
-        img_binary = binarization.main(image_rgb, top_ruler, args.grabcut, args.unet, axes)
+        img_binary = binarization.main(image_rgb, top_ruler, args.unet, axes)
 
         # separating elements in the input image.
         bin_lepidoptera, bin_ruler, bin_tags = _sep_binary_elements(img_binary)
