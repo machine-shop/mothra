@@ -29,16 +29,6 @@ RULER_CROP_MARGIN = 0.025
 # Used in find_tags_edge. Percent of width of the image
 REGION_CUTOFF = 1/3
 
-# Size of disk used in dilation to get connect butterfly regions
-# Used during getting butterfly bounding box in grabcut
-DILATION_SIZE = 10
-
-# Image downsize percentage used to improve grabcut speed
-GRABCUT_RESCALE_FACTOR = 0.25
-
-# Number of iterations used in grabcut
-GRABCUT_ITERATIONS = 10
-
 
 def _convert_image_to_tensor(image):
     """Auxiliary function. Receives an RGB image and convert it to be processed
@@ -186,7 +176,7 @@ def return_largest_region(img_bin):
 
 
 @memory.cache(ignore=['axes'])
-def main(image_rgb, top_ruler, grabcut=False, unet=False, axes=None):
+def main(image_rgb, top_ruler, unet=False, axes=None):
     """Binarizes and crops properly image_rgb
 
     Arguments
