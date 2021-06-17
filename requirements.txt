@@ -1,6 +1,5 @@
 matplotlib
 scikit-image
-opencv-python
 numpy
 scipy
 pandas
