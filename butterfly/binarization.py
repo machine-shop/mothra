@@ -115,38 +115,39 @@ def find_tags_edge(image_rgb, top_ruler, axes=None):
     return label_edge
 
 
-def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
-    """Extract shape of the elements in an input image using the U-net deep
-    learning architecture.
+def segmentation(image_rgb, weights='./models/segmentation.pkl'):
+    """Extract the shape of the elements in an input image using the U-net
+    deep learning architecture.
 
     Arguments
     ---------
-    bfly_rgb : (M, N, 3) ndarray
+    image_rgb : (M, N, 3) ndarray
         Input RGB image of Lepidoptera, with ruler and tags.
 
     Returns
     -------
-    bfly_unet_bin : (M, N) ndarray
+    img_binary : (M, N) ndarray
         Image binarized after segmentation.
     """
     if isinstance(weights, str):
         weights = Path(weights)
 
+    # download weights if necessary.
     connection.download_weights(weights)
     # parameters here were defined when training the U-net.
     learner = load_learner(file=weights)
 
     print('Processing U-net...')
-    bfly_aux = _convert_image_to_tensor(bfly_rgb)
-    _, pred_classes, _ = learner.predict(bfly_aux)
+    image_aux = _convert_image_to_tensor(image_rgb)
+    _, pred_classes, _ = learner.predict(image_aux)
 
     # rescale the image back up.
-    scale_ratio = np.asarray(bfly_rgb.shape[:2]) / np.asarray(
+    scale_ratio = np.asarray(image_rgb.shape[:2]) / np.asarray(
         pred_classes[0].shape)
-    bfly_unet_bin = rescale(image=pred_classes[0].numpy().astype('float'),
-                            scale=scale_ratio)
+    img_binary = rescale(image=pred_classes[0].numpy().astype('float'),
+                         scale=scale_ratio)
 
-    return bfly_unet_bin
+    return img_binary
 
 
 def return_largest_region(img_bin):
@@ -196,7 +197,9 @@ def main(image_rgb, top_ruler, unet=False, axes=None):
         Binarized and cropped version of imge_rgb
     """
 
-    img_binary = unet_binarization(image_rgb, weights='./models/segmentation.pkl')
+    img_binary = segmentation(image_rgb, weights='./models/segmentation.pkl')
+
+    # maybe the division between elements should be done here.
 
     label_edge = find_tags_edge(image_rgb, top_ruler, axes)
 
