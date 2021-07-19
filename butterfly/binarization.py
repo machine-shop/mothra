@@ -7,7 +7,6 @@ from skimage.exposure import rescale_intensity
 from skimage.morphology import binary_erosion, binary_dilation, selem
 from skimage.transform import rescale
 from skimage.util import img_as_bool, img_as_float32, img_as_ubyte
-import cv2 as cv
 from joblib import Memory
 from fastai.vision import load_learner, Image
 from pathlib import Path
@@ -29,16 +28,6 @@ RULER_CROP_MARGIN = 0.025
 # Distance from right-hand edge of the image in which we consider regions to be tags.
 # Used in find_tags_edge. Percent of width of the image
 REGION_CUTOFF = 1/3
-
-# Size of disk used in dilation to get connect butterfly regions
-# Used during getting butterfly bounding box in grabcut
-DILATION_SIZE = 10
-
-# Image downsize percentage used to improve grabcut speed
-GRABCUT_RESCALE_FACTOR = 0.25
-
-# Number of iterations used in grabcut
-GRABCUT_ITERATIONS = 10
 
 
 def _convert_image_to_tensor(image):
@@ -128,62 +117,6 @@ def find_tags_edge(image_rgb, top_ruler, axes=None):
     return label_edge
 
 
-def grabcut_binarization(bfly_rgb, bfly_bin):
-    """Extract shape of the butterfly using OpenCV's grabcut. Greatly improves
-    binarization of blue-colored butterflies.
-
-    Arguments
-    ---------
-    bfly_rgb : (M, N, 3) ndarray
-        Input RGB image of butterfly (ruler and tags cropped out)
-    bfly_bin : (M, N) ndarray
-        Binarizaed image of butterfly (ruler and tags cropped out) Expected
-        to be binarized saturation channel of bfly_rgb.
-
-    Returns
-    -------
-    bfly_grabcut_bin : (M, N) ndarray
-        Resulting binarized image of butterfly after segmentation by grabcut.
-    """
-
-    # Dilation of image to capture butterfly region
-    selem_arr = selem.disk(DILATION_SIZE)
-    bfly_bin_dilated = binary_dilation(bfly_bin, selem_arr)
-    bfly_bin_dilated_markers, _ = ndi.label(bfly_bin_dilated, ndi.generate_binary_structure(2, 1))
-    bfly_bin_dilated_regions = regionprops(bfly_bin_dilated_markers)
-    bfly_bin_dilated_regions_sorted = sorted(bfly_bin_dilated_regions, key=lambda r: r.area, reverse=True)
-    bfly_region = bfly_bin_dilated_regions_sorted[0]
-
-    # Downscale image to improve grabcut speed
-    bfly_rgb_rescale = rescale(bfly_rgb, GRABCUT_RESCALE_FACTOR,
-                               multichannel=True)
-    bfly_rgb_rescale = img_as_ubyte(bfly_rgb_rescale)
-
-    # Determine grabcut highlight region using butterfly region (after rescaling)
-    padding = 0
-    rect = (int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[1]-padding),
-            int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[0]-padding),
-            int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[3]+padding),
-            int(GRABCUT_RESCALE_FACTOR*bfly_region.bbox[2]+padding))
-
-    # Grabcut
-    mask = np.zeros(bfly_rgb_rescale.shape[:2], np.uint8)
-    bgd_model = np.zeros((1,65), np.float64)
-    fgd_model = np.zeros((1,65), np.float64)
-
-    cv.grabCut(bfly_rgb_rescale, mask, rect,
-        bgd_model, fgd_model, GRABCUT_ITERATIONS, cv.GC_INIT_WITH_RECT)
-
-    mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
-    bfly_grabcut_rescale = bfly_rgb_rescale*mask2[:, :, np.newaxis]
-
-    # Rescale the image back up and get binary of result
-    bfly_grabcut = rescale(bfly_grabcut_rescale, bfly_rgb.shape[0]/bfly_rgb_rescale.shape[0])
-    bfly_grabcut_bin = np.max(bfly_grabcut, axis=2)>0
-
-    return bfly_grabcut_bin
-
-
 def unet_binarization(bfly_rgb, weights='./models/segmentation.pkl'):
     """Extract shape of the butterfly using the U-net neural network.
 
@@ -244,7 +177,7 @@ def return_largest_region(img_bin):
 
 
 @memory.cache(ignore=['axes'])
-def main(image_rgb, top_ruler, grabcut=False, unet=False, axes=None):
+def main(image_rgb, top_ruler, axes=None):
     """Binarizes and crops properly image_rgb
 
     Arguments
@@ -268,15 +201,8 @@ def main(image_rgb, top_ruler, grabcut=False, unet=False, axes=None):
 
     bfly_rgb = image_rgb[:top_ruler, :label_edge]
 
-    if unet:
-        bfly_bin = unet_binarization(bfly_rgb, weights='./models/segmentation.pkl')
-    else:
-        bfly_hsv = color.rgb2hsv(bfly_rgb)[:, :, 1]
-        rescaled = rescale_intensity(bfly_hsv, out_range=(0, 255))
-        thresh_hsv = threshold_otsu(rescaled)
-        bfly_bin = rescaled > thresh_hsv
-        if grabcut:
-            bfly_bin = grabcut_binarization(bfly_rgb, bfly_bin)
+    # binarizing the input image using U-Net.
+    bfly_bin = unet_binarization(bfly_rgb, weights='./models/segmentation.pkl')
 
     # if the binary image has more than one region, returns the largest one.
     bfly_bin = return_largest_region(bfly_bin)
