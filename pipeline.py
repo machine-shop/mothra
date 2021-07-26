@@ -173,7 +173,8 @@ def _read_filenames_in_folder(folder):
 def main():
     # Assign description to the help doc
     parser = argparse.ArgumentParser(
-        description='Script to automate butterfly wings measurment')
+        description='This is mothra, a software to automate different\
+        measurements on images of Lepidopterae.')
     # Add arguments
     # Plotting
     parser.add_argument('-p', '--plot',
