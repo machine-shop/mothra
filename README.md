@@ -33,8 +33,6 @@ The following parameters can be used as input arguments for `pipeline.py`:
 * `-s`, `--stage` : The stage which to run the pipeline until. Options are `'ruler_detection'`, `'binarization'`, and `'measurements'`. Default is `measurement` (running to completion). Running the pipeline and stopping at an earlier stage can be useful for debugging.
 * `-csv`, `--path_csv` :  Path of `.csv` file for the measurement results. (Default is `results.csv`).
 * `-dpi` : Optional argument to specify resolution of the output image. (Default is `300`.)
-* `-g`, `--grabcut` : Use OpenCV's grabcut method in order to improve binarization on blue butterflies.
-* `-u`, `--unet` : Use the U-net deep neural network in the binarization step.
 
 ## Measurement results
 
@@ -72,9 +70,9 @@ Resulting files:
 
 Running the command
 ```
-$ python pipeline.py -p -u -i ../mothra-data -o ../test_output -csv ../test_output/results.csv
+$ python pipeline.py -p -i ../mothra-data -o ../test_output -csv ../test_output/results.csv
 ```
-in `/mothra` will run the pipeline using the U-net deep neural network on the example data in the folder `/mothra-data`. The file locations should look like this:
+in `./mothra` will run the pipeline on the example data in the folder `/mothra-data`. The file locations should look like this:
 ```
 /mothra
     ...
