@@ -72,7 +72,7 @@ Running the command
 ```
 $ python pipeline.py -p -i ../mothra-data -o ../test_output -csv ../test_output/results.csv
 ```
-in `/mothra` will run the pipeline on the example data in the folder `/mothra-data`. The file locations should look like this:
+in `./mothra` will run the pipeline on the example data in the folder `/mothra-data`. The file locations should look like this:
 ```
 /mothra
     ...
