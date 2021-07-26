@@ -83,11 +83,13 @@ in `./mothra` will run the pipeline on the example data in the folder `/mothra-d
     image2.jpg
     ...
 /test_output
-    image1.jpg (result image for image1.jpg)
+    image1.jpg
     image2.jpg
     ...
     results.csv
 ```
+
+`/test_output` contains the resulting images, i.e. `/test_output/image1.jpg` contains the results of `/mothra-data/image1.jpg`, `/test_output/image2.jpg` has the results of `/mothra-data/image2.jpg`, and so on.
 
  For a larger repository of test data (~15 GB), please check [Wilson et al. (2020)](https://doi.org/10.5281/zenodo.3732132).
 
