@@ -72,6 +72,39 @@ def create_layout(n_stages, plot_level):
                     ax_fourier, ax_tags]
 
 
+def initialize_csv_file(csv_fname):
+    """Sets up a CSV file to store the measurement results.
+
+    Parameters
+    ----------
+    csv_fname : str or pathlib.Path
+        The filename of the CSV file.
+
+    Returns
+    -------
+    None
+    """
+    csv_fname = Path(csv_fname)
+    # renaming csv file if it exists on disk already.
+    csv_fname = _check_aux_file(csv_fname)
+
+    # setting up the data columns that will be in the file.
+    DATA_COLS = ['image_id',
+                 'left_wing (mm)',
+                 'right_wing (mm)',
+                 'left_wing_center (mm)',
+                 'right_wing_center (mm)',
+                 'wing_span (mm)',
+                 'wing_shoulder (mm)',
+                 'position',
+                 'gender']
+
+    with open(csv_fname, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(DATA_COLS)
+    return csv_fname
+
+
 def read_orientation(image_path):
     """Read orientation from image on path, according to EXIF data.
 
@@ -156,6 +189,21 @@ def _read_paths_in_file(input_name):
     return list(set(image_paths))  # remove duplicated entries from list
 
 
+def _write_csv_data(csv_file, image_name, dist_mm, position, gender):
+    """Helper function. Writes data on the CSV input file."""
+    writer = csv.writer(csv_file)
+    writer.writerow([image_name,
+                     dist_mm["dist_l"],
+                     dist_mm["dist_r"],
+                     dist_mm["dist_l_center"],
+                     dist_mm["dist_r_center"],
+                     dist_mm["dist_span"],
+                     dist_mm["dist_shoulder"],
+                     position,
+                     gender])
+    return None
+
+
 def _read_filenames_in_folder(folder):
     """Helper function. Reads filenames in folder and appends them into a
     list."""
@@ -204,7 +252,7 @@ def main():
     # Stage
     parser.add_argument('-s', '--stage',
                         type=str,
-                        help="Stage name: 'ruler_detection', 'binarization',\
+                        help="Stage name: 'binarization', 'ruler_detection',\
                         'measurements'",
                         required=False,
                         default='measurements')
@@ -243,17 +291,9 @@ def main():
     if args.detailed_plot:
         plot_level = 2
 
-    # Initializing the csv file
+    # initializing the csv file.
     if args.stage == 'measurements':
-        # renaming csv file if it exists on disk already.
-        csv_fname = Path(args.path_csv)
-        csv_fname = _check_aux_file(csv_fname)
-
-        with open(csv_fname, 'w') as csv_file:
-            writer = csv.writer(csv_file)
-            writer.writerow(['image_id', 'left_wing (mm)', 'right_wing (mm)',
-                'left_wing_center (mm)', 'right_wing_center (mm)', 'wing_span (mm)',
-                'wing_shoulder (mm)', 'position', 'gender'])
+        initialize_csv_file(csv_path=args.path_csv)
 
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
@@ -262,11 +302,14 @@ def main():
     input_name = args.input
     image_paths = _process_paths_in_input(input_name)
 
-    n = len(image_paths)
+    number_of_images = len(image_paths)
 
     for i, image_path in enumerate(image_paths):
+        # creating axes layout for plotting.
+        axes = create_layout(len(pipeline_process), plot_level)
+
         image_name = os.path.basename(image_path)
-        print(f'Image {i+1}/{n} : {image_name}')
+        print(f'Image {i+1}/{number_of_images} : {image_name}')
 
         image_rgb = imread(image_path)
 
@@ -275,36 +318,30 @@ def main():
         if angle not in (None, 0):  # angle == 0 does not need untilting
             image_rgb = rotate(image_rgb, angle=angle, resize=True)
 
-        axes = create_layout(len(pipeline_process), plot_level)
-
         for step in pipeline_process:
-            if step == 'ruler_detection':
-                T_space, top_ruler = ruler_detection.main(image_rgb, axes)
+            if step == 'binarization':
+                # binarizing input image and returning its components.
+                lepidop_bin, ruler_bin, _ = binarization.main(image_rgb, axes)
 
-            elif step == 'binarization':
-                binary = binarization.main(image_rgb, top_ruler, axes)
+            elif step == 'ruler_detection':
+                T_space, top_ruler = ruler_detection.main(ruler_bin, axes)
 
             elif step == 'measurements':
-                points_interest = tracing.main(binary, axes)
-                dist_pix, dist_mm = measurement.main(points_interest, T_space,
-                                                     axes)
+                points_interest = tracing.main(lepidop_bin, axes)
+                _, dist_mm = measurement.main(points_interest,
+                                              T_space,
+                                              axes)
                 # measuring position and gender
                 position, gender = identification.main(image_rgb, top_ruler)
 
-                with open(csv_fname, 'a') as csv_file:
-                    writer = csv.writer(csv_file)
-                    writer.writerow([image_name,
-                                     dist_mm["dist_l"],
-                                     dist_mm["dist_r"],
-                                     dist_mm["dist_l_center"],
-                                     dist_mm["dist_r_center"],
-                                     dist_mm["dist_span"],
-                                     dist_mm["dist_shoulder"],
-                                     position,
-                                     gender])
+                with open(args.path_csv, 'a') as csv_file:
+                    _write_csv_data(csv_file, image_name, dist_mm, position,
+                                    gender)
 
         if plot_level > 0:
-            output_path = os.path.normpath(os.path.join(args.output_folder, image_name))
+            output_path = os.path.normpath(
+                os.path.join(args.output_folder, image_name)
+                )
             dpi = args.dpi
             if plot_level == 2:
                 dpi = int(1.5 * args.dpi)
