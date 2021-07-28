@@ -8,13 +8,13 @@ import socket
 
 # defining global constants.
 URL_MODEL = {
-    'id_gender' : 'https://gitlab.com/mothra/mothra-data/-/raw/main/models/id_gender/id_gender_test-3classes.pkl',
-    'segmentation' : 'https://gitlab.com/mothra/mothra-data/-/raw/main/models/segmentation/segmentation_test-4classes.pkl'
+    'id_gender_test-3classes' : 'https://gitlab.com/mothra/mothra-data/-/raw/main/models/id_gender/id_gender_test-3classes.pkl',
+    'segmentation_test-4classes' : 'https://gitlab.com/mothra/mothra-data/-/raw/main/models/segmentation/segmentation_test-4classes.pkl'
     }
 
 URL_HASH = {
-    'id_gender' : 'https://gitlab.com/mothra/mothra-data/-/raw/main/models/id_gender/SHA256SUM-id_gender_test-3classes',
-    'segmentation' : 'https://gitlab.com/mothra/mothra-data/-/raw/main/models/segmentation/SHA256SUM-segmentation_test-4classes'
+    'id_gender_test-3classes' : 'https://gitlab.com/mothra/mothra-data/-/raw/main/models/id_gender/SHA256SUM-id_gender_test-3classes',
+    'segmentation_test-4classes' : 'https://gitlab.com/mothra/mothra-data/-/raw/main/models/segmentation/SHA256SUM-segmentation_test-4classes'
     }
 
 
