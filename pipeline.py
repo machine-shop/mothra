@@ -105,6 +105,11 @@ def initialize_csv_file(csv_fname):
     return csv_fname
 
 
+def label_func(image):
+    """Function used to label images while training. Required by fastai."""
+    return path/"labels"/f"{image.stem}{LABEL_EXT}"
+
+
 def read_orientation(image_path):
     """Read orientation from image on path, according to EXIF data.
 
@@ -293,7 +298,7 @@ def main():
 
     # initializing the csv file.
     if args.stage == 'measurements':
-        initialize_csv_file(csv_path=args.path_csv)
+        initialize_csv_file(csv_fname=args.path_csv)
 
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
