@@ -278,7 +278,7 @@ def main():
     else:
         os.mkdir(args.output_folder)
 
-    stages = ['ruler_detection', 'binarization', 'measurements']
+    stages = ['binarization', 'ruler_detection', 'measurements']
 
     if args.stage not in stages:
         print("ERROR : Stage can only be 'ruler_detection', 'binarization',\
