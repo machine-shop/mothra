@@ -1,11 +1,10 @@
 matplotlib
 scikit-image
-opencv-python
 numpy
 scipy
 pandas
 pytest-timeout
 joblib
-fastai < 2
+fastai == 2.4.1
 pooch
 exif
