@@ -1,11 +1,10 @@
 import numpy as np
+import pytest
 
+from butterfly import binarization
 from skimage import draw
 from skimage.io import imread
 from skimage.util import img_as_bool
-from butterfly import binarization
-
-import pytest
 
 
 @pytest.fixture(scope="module")
@@ -60,7 +59,9 @@ def test_find_tags_edge(fake_butterfly_layout):
     picture_3d = np.dstack((picture_2d,
                             1/2 * picture_2d,
                             1/4 * picture_2d))  # fake RGB image
+
     result = binarization.find_tags_edge(picture_3d, 230)
+    print(result)
     assert (250 <= result <= 260)  # assert the tags edge is in a proper place
 
 
@@ -70,17 +71,8 @@ def test_missing_tags(fake_butterfly_no_tags):
     picture_3d = np.dstack((picture_2d,
                             1/2 * picture_2d,
                             1/4 * picture_2d))  # fake RGB image
+
     result = binarization.find_tags_edge(picture_3d, 230)
     # such a crop will probably throw off measurement process
     # but the program won't crash
     assert (result >= 399)
-
-
-def test_unet():
-    """Tests U-net segmentation."""
-    bfly_rgb = imread('./butterfly/tests/test_files/test_input/BMNHE_1297240_147563_dbf1346219110b416ff10347b45e070b1e0d116d.png.rgb')
-    bfly_bin = imread('./butterfly/tests/test_files/test_input/BMNHE_1297240_147563_dbf1346219110b416ff10347b45e070b1e0d116d.png.seg')
-
-    output = binarization.unet_binarization(bfly_rgb, weights='./models/segmentation.pkl')
-
-    assert np.allclose(img_as_bool(output), img_as_bool(bfly_bin))
