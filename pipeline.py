@@ -348,7 +348,7 @@ def main():
         for step in pipeline_process:
             if step == 'binarization':
                 # binarizing input image and returning its components.
-                lepidop_bin, ruler_bin, _ = binarization.main(image_rgb, axes)
+                _, ruler_bin, lepidop_bin = binarization.main(image_rgb, axes)
 
             elif step == 'ruler_detection':
                 T_space, top_ruler = ruler_detection.main(image_rgb, ruler_bin, axes)

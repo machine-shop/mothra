@@ -23,17 +23,7 @@ RULER_CROP_MARGIN = 0.025
 
 # Testing weights for segmentation of four classes (background, tags, ruler,
 # Lepidoptera).
-WEIGHTS_SEGMENTATION = './models/segmentation_test-4classes.pkl'
-
-
-def _convert_image_to_tensor(image):
-    """Auxiliary function. Receives an RGB image and convert it to be processed
-    by fastai."""
-    #image = img_as_float32(np.transpose(image, axes=(2, 0, 1)))
-    tensor = to_image(img_as_float32(image))
-    #tensor = PILImage.create(from_numpy(image))
-
-    return tensor
+WEIGHTS_BIN = './models/segmentation_test-4classes.pkl'
 
 
 def _rescale_image(image_refer, image_to_rescale):
@@ -83,7 +73,7 @@ def find_tags_edge(tags_bin, top_ruler, axes=None):
     return first_tag_edge
 
 
-def binarization(image_rgb, weights=WEIGHTS_SEGMENTATION):
+def binarization(image_rgb, weights=WEIGHTS_BIN):
     """Extract the shape of the elements in an input image using the U-net
     deep learning architecture.
 
@@ -94,8 +84,12 @@ def binarization(image_rgb, weights=WEIGHTS_SEGMENTATION):
 
     Returns
     -------
-    image_bin : (M, N) ndarray
-        Input image binarized.
+    tags_bin : (M, N) ndarray
+        Binary image containing tags in the input image.
+    ruler_bin : (M, N) ndarray
+        Binary image containing the ruler in the input image.
+    lepidop_bin : (M, N) ndarray
+        Binary image containing the Lepidoptera in the input image.
     """
     if isinstance(weights, str):
         weights = Path(weights)
@@ -158,11 +152,16 @@ def main(image_rgb, axes=None):
 
     Returns
     -------
-    image_bin : 2D array
-        Binarized version of image_rgb.
+    tags_bin : (M, N) ndarray
+        Binary image containing tags in image_rgb.
+    ruler_bin : (M, N) ndarray
+        Binary image containing the ruler in image_rgb.
+    lepidop_bin : (M, N) ndarray
+        Binary image containing the Lepidoptera in image_rgb.
     """
     # binarizing the input image and separating its elements.
-    tags_bin, ruler_bin, lepidop_bin = binarization(image_rgb, weights=WEIGHTS_SEGMENTATION)
+    tags_bin, ruler_bin, lepidop_bin = binarization(image_rgb,
+                                                    weights=WEIGHTS_BIN)
 
     # if the binary image has more than one region, returns the largest one.
     lepidop_bin = return_largest_region(lepidop_bin)
@@ -182,4 +181,4 @@ def main(image_rgb, axes=None):
     if axes and axes[3]:
         axes[3].axvline(x=first_tag_edge, color='c', linestyle='dashed')
 
-    return lepidop_bin, ruler_bin, tags_bin
+    return tags_bin, ruler_bin, lepidop_bin
