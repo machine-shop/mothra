@@ -162,13 +162,13 @@ def main(image_rgb, axes=None):
         Binarized version of image_rgb.
     """
     # binarizing the input image and separating its elements.
-    lepidop_bin, ruler_bin, tags_bin = binarization(image_rgb, weights=WEIGHTS_SEGMENTATION)
+    tags_bin, ruler_bin, lepidop_bin = binarization(image_rgb, weights=WEIGHTS_SEGMENTATION)
 
     # if the binary image has more than one region, returns the largest one.
     lepidop_bin = return_largest_region(lepidop_bin)
 
     # detecting where the ruler starts.
-    _, top_ruler = ruler_detection.main(ruler_bin, axes)
+    _, top_ruler = ruler_detection.main(image_rgb, ruler_bin, axes)
 
     # detecting where the tags start.
     first_tag_edge = find_tags_edge(tags_bin, top_ruler, axes)
