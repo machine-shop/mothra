@@ -9,6 +9,7 @@ from butterfly import (ruler_detection, tracing, measurement, binarization,
 import matplotlib.pyplot as plt
 from skimage.io import imread
 from skimage.transform import rotate
+from skimage.util import img_as_ubyte
 from exif import Image
 from pathlib import Path
 from fastai.vision.augment import RandTransform
@@ -344,7 +345,7 @@ def main():
         angle = read_orientation(image_path)
 
         if angle not in (None, 0):  # angle == 0 does not need untilting
-            image_rgb = rotate(image_rgb, angle=angle, resize=True)
+            image_rgb = img_as_ubyte(rotate(image_rgb, angle=angle, resize=True))
 
         for step in pipeline_process:
             # first, binarize the input image and return its components.
