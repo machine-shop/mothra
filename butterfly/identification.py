@@ -25,7 +25,7 @@ from butterfly import binarization, connection
 WEIGHTS_GENDER = './models/id_gender_test-3classes.pkl'
 
 
-def _classification(bfly_rgb, weights):
+def _classification(image_rgb, weights):
     """Helping function. Classifies the input image according to `weights`.
 
     Parameters
@@ -53,8 +53,7 @@ def _classification(bfly_rgb, weights):
     # parameters here were defined when training the networks.
     learner = load_learner(fname=weights)
 
-    bfly_aux = binarization._convert_image_to_tensor(bfly_rgb)
-    _, prediction, _ = learner.predict(bfly_aux)
+    _, prediction, _ = learner.predict(image_rgb)
 
     return int(prediction)
 
@@ -113,6 +112,6 @@ def main(image_rgb):
         position = 'right-side_up'
         gender = pos_and_gender
 
-        print(f'* Position: {position}\n * Gender: {gender}')
+        print(f'* Position: {position}\n* Gender: {gender}')
 
     return position, gender
