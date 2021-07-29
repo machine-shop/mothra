@@ -133,20 +133,14 @@ def main(image_rgb, ruler_bin, axes=None):
             axes[3].imshow(image_rgb)
 
     # detecting the top of the ruler.
-    up_rectangle = int(ruler_bin.shape[0] * RULER_TOP)
-    regions = regionprops(label(ruler_bin))
-    areas = [region.area for region in regions]
-
-    idx_max = np.argmax(areas)
-    coords = regions[idx_max].coords
-    offset = np.min(coords[:, 0])
-    top_ruler = up_rectangle + offset
+    ruler_row, ruler_col = np.nonzero(ruler_bin)
+    up_rectangle = int(ruler_row.min())
+    top_ruler = up_rectangle
 
     # returning a binary version of the ruler, numbers and ticks included.
-    up_focus = up_rectangle + offset
-    ruler_x, ruler_y = np.nonzero(ruler_bin)
-    focus = ~binarize_ruler(image_rgb[ruler_x.min():ruler_x.max(),
-                                      ruler_y.min():ruler_y.max()])
+    up_focus = up_rectangle
+    focus = ~binarize_ruler(image_rgb[ruler_row.min():ruler_row.max(),
+                                      ruler_col.min():ruler_col.max()])
 
     # Removing the numbers in the ruler to denoise the fourier transform analysis
     focus_numbers_filled = remove_numbers(focus)
