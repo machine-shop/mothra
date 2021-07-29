@@ -1,5 +1,6 @@
 #!/bin/env python
 
+import numpy as np
 import os
 import argparse
 import csv
@@ -10,6 +11,9 @@ from skimage.io import imread
 from skimage.transform import rotate
 from exif import Image
 from pathlib import Path
+from fastai.vision.augment import RandTransform
+from fastai.vision.core import PILImage
+from fastcore.basics import store_attr
 
 WSPACE_SUBPLOTS = 0.7
 SUPPORTED_IMAGE_EXT = ('.png', '.jpg', '.jpeg', '.tiff', '.tif')
@@ -103,6 +107,23 @@ def initialize_csv_file(csv_fname):
         writer = csv.writer(csv_file)
         writer.writerow(DATA_COLS)
     return csv_fname
+
+
+# functions required by fastai:
+class AlbumentationsTransform(RandTransform):
+    "A transform handler for multiple `Albumentation` transforms"
+    split_idx,order=None,2
+    def __init__(self, train_aug, valid_aug): store_attr()
+
+    def before_call(self, b, split_idx):
+        self.idx = split_idx
+
+    def encodes(self, img: PILImage):
+        if self.idx == 0:
+            aug_img = self.train_aug(image=np.array(img))['image']
+        else:
+            aug_img = self.valid_aug(image=np.array(img))['image']
+        return PILImage.create(aug_img)
 
 
 def label_func(image):
@@ -320,6 +341,7 @@ def main():
 
         # check image orientation and untilt it, if necessary.
         angle = read_orientation(image_path)
+
         if angle not in (None, 0):  # angle == 0 does not need untilting
             image_rgb = rotate(image_rgb, angle=angle, resize=True)
 
@@ -329,7 +351,7 @@ def main():
                 lepidop_bin, ruler_bin, _ = binarization.main(image_rgb, axes)
 
             elif step == 'ruler_detection':
-                T_space, top_ruler = ruler_detection.main(ruler_bin, axes)
+                T_space, top_ruler = ruler_detection.main(image_rgb, ruler_bin, axes)
 
             elif step == 'measurements':
                 points_interest = tracing.main(lepidop_bin, axes)
@@ -337,7 +359,7 @@ def main():
                                               T_space,
                                               axes)
                 # measuring position and gender
-                position, gender = identification.main(image_rgb, top_ruler)
+                position, gender = identification.main(image_rgb)
 
                 with open(args.path_csv, 'a') as csv_file:
                     _write_csv_data(csv_file, image_name, dist_mm, position,
