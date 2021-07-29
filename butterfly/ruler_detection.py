@@ -134,11 +134,9 @@ def main(image_rgb, ruler_bin, axes=None):
 
     # detecting the top of the ruler.
     ruler_row, ruler_col = np.nonzero(ruler_bin)
-    up_rectangle = int(ruler_row.min())
-    top_ruler = up_rectangle
+    top_ruler = int(ruler_row.min())
 
     # returning a binary version of the ruler, numbers and ticks included.
-    up_focus = up_rectangle
     focus = ~binarize_ruler(image_rgb[ruler_row.min():ruler_row.max(),
                                       ruler_col.min():ruler_col.max()])
 
@@ -159,10 +157,12 @@ def main(image_rgb, ruler_bin, axes=None):
     sums = np.sum(focus_numbers_filled, axis=0)
     t_space = 2 * fourier(sums, axes)
 
-    x_single = [left_focus + first_index, left_focus + first_index +
+    x_single = [left_focus + first_index,
+                left_focus + first_index +
                 t_space]
-    y = np.array([up_focus, up_focus])
-    x_mult = [left_focus + first_index, left_focus + first_index +
+    y = np.array([top_ruler, top_ruler])
+    x_mult = [left_focus + first_index,
+              left_focus + first_index +
               t_space * 10]
 
     # plotting.
@@ -171,7 +171,7 @@ def main(image_rgb, ruler_bin, axes=None):
         axes[0].fill_between(x_mult, y - LINE_WIDTH, y, color='blue', linewidth=0)
 
     if axes and axes[3]:
-        rect = patches.Rectangle((left_focus, up_focus+up_trim),
+        rect = patches.Rectangle((left_focus, top_ruler+up_trim),
                                  right_focus - left_focus,
                                  down_trim,
                                  linewidth=1, edgecolor='r', facecolor='none')
