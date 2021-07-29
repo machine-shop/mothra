@@ -294,7 +294,7 @@ def main():
     parser.add_argument('-csv', '--path_csv',
                         type=str,
                         help='Path of the resulting csv file',
-                        default='results.csv')
+                        default='outputs/results.csv')
 
     args = parser.parse_args()
 
