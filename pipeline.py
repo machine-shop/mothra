@@ -109,7 +109,7 @@ def initialize_csv_file(csv_fname):
     return csv_fname
 
 
-# functions required by fastai:
+# required by fastai while predicting:
 class AlbumentationsTransform(RandTransform):
     "A transform handler for multiple `Albumentation` transforms"
     split_idx,order=None,2
@@ -126,6 +126,7 @@ class AlbumentationsTransform(RandTransform):
         return PILImage.create(aug_img)
 
 
+# required by fastai while predicting:
 def label_func(image):
     """Function used to label images while training. Required by fastai."""
     return path/"labels"/f"{image.stem}{LABEL_EXT}"
@@ -304,12 +305,12 @@ def main():
     else:
         os.mkdir(args.output_folder)
 
-    stages = ['binarization', 'ruler_detection', 'measurements']
+    stages = ['ruler_detection', 'binarization', 'measurements']
 
     if args.stage not in stages:
-        print("ERROR : Stage can only be 'ruler_detection', 'binarization',\
-               or 'measurements'")
-        return 0
+        print((f"* mothra expects stage to be 'ruler_detection', "
+               f"binarization', or 'measurements'. Received '{args.stage}'"))
+        return None
 
     plot_level = 0
     if args.plot:
@@ -346,12 +347,15 @@ def main():
             image_rgb = rotate(image_rgb, angle=angle, resize=True)
 
         for step in pipeline_process:
-            if step == 'binarization':
-                # binarizing input image and returning its components.
-                _, ruler_bin, lepidop_bin = binarization.main(image_rgb, axes)
+            # first, binarize the input image and return its components.
+            _, ruler_bin, lepidop_bin = binarization.main(image_rgb, axes)
 
-            elif step == 'ruler_detection':
+            if step == 'ruler_detection':
                 T_space, top_ruler = ruler_detection.main(image_rgb, ruler_bin, axes)
+
+            elif step == 'binarization':
+                # already binarized in the beginning. Moving on...
+                pass
 
             elif step == 'measurements':
                 points_interest = tracing.main(lepidop_bin, axes)
