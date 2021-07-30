@@ -8,7 +8,7 @@ memory = Memory(location, verbose=0)
 @memory.cache(ignore=['axes'])
 def main(points_interest, T_space, axes=None):
     ''' Calculates the length and draws the lines for length
-    of the butterfly wings.
+    of the lepidopteran wings.
 
     Parameters
     ----------
