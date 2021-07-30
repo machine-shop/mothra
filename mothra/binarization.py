@@ -12,7 +12,7 @@ from fastai.vision.core import PILImage, to_image
 from fastai.vision.learner import load_learner
 from pathlib import Path
 from torch import from_numpy
-from butterfly import connection, ruler_detection
+from mothra import connection, ruler_detection
 
 location = './cachedir'
 memory = Memory(location, verbose=0)

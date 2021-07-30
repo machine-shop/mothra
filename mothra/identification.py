@@ -19,7 +19,7 @@ from pathlib import Path
 from skimage.io import imsave
 from skimage.util import img_as_float32, img_as_ubyte
 from torch import from_numpy
-from butterfly import binarization, connection
+from mothra import binarization, connection
 
 
 WEIGHTS_GENDER = './models/id_gender_test-3classes.pkl'

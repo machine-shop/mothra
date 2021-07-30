@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from butterfly import binarization
+from mothra import binarization
 from skimage import draw
 from skimage.io import imread
 from skimage.util import img_as_bool

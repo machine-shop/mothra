@@ -4,8 +4,8 @@ import numpy as np
 import os
 import argparse
 import csv
-from butterfly import (ruler_detection, tracing, measurement, binarization,
-                       identification)
+from mothra import (ruler_detection, tracing, measurement, binarization,
+                    identification)
 import matplotlib.pyplot as plt
 from skimage.io import imread
 from skimage.transform import rotate
