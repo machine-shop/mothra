@@ -12,7 +12,7 @@ def _classification(image_rgb, weights):
     Parameters
     ----------
     bfly_rgb : 3D array
-        RGB image of the Lepidoptera (ruler and tags cropped out).
+        RGB image of the lepidopteran (ruler and tags cropped out).
     weights : str or pathlib.Path
         Path of the file containing weights.
 
@@ -40,12 +40,12 @@ def _classification(image_rgb, weights):
 
 
 def predict_gender(image_rgb, weights=WEIGHTS_GENDER):
-    """Predicts position and gender of the Lepidoptera in `image_rgb`.
+    """Predicts position and gender of the lepidopteran in `image_rgb`.
 
     Parameters
     ----------
     image_rgb : (M, N, 3) ndarray
-        RGB input image contaning Lepidoptera, ruler and tags.
+        RGB input image contaning lepidopteran, ruler and tags.
     weights : str or pathlib.Path, optional
         Path of the file containing weights.
 
@@ -66,7 +66,7 @@ def predict_gender(image_rgb, weights=WEIGHTS_GENDER):
 
 
 def main(image_rgb):
-    """Identifies position and gender of the Lepidoptera in `image_rgb`.
+    """Identifies position and gender of the lepidopteran in `image_rgb`.
 
     Parameters
     ---------
@@ -76,9 +76,9 @@ def main(image_rgb):
     Returns
     -------
     position : str
-        Position of the Lepidoptera: `right-side_up` or `upside_down`.
+        Position of the lepidopteran: `right-side_up` or `upside_down`.
     gender : str
-        Gender of the Lepidoptera, or N/A if position is `upside_down`.
+        Gender of the lepidopteran, or N/A if position is `upside_down`.
     """
     print('Identifying position and gender...')
     pos_and_gender = predict_gender(image_rgb, weights=WEIGHTS_GENDER)

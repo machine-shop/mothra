@@ -15,7 +15,7 @@ memory = Memory(location, verbose=0)
 RULER_CROP_MARGIN = 0.025
 
 # Testing weights for segmentation of four classes (background, tags, ruler,
-# Lepidoptera).
+# lepidopteran).
 WEIGHTS_BIN = './models/segmentation_test-4classes.pkl'
 
 
@@ -27,8 +27,8 @@ def _rescale_image(image_refer, image_to_rescale):
 
 
 def find_tags_edge(tags_bin, top_ruler, axes=None):
-    """Find the edge between the tag area on the right and the butterfly area
-    and returns the corresponding x coordinate of that vertical line
+    """Find the edge between the tag area on the right and the lepidopteran
+    area, returning the corresponding X coordinate of that vertical line.
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ def find_tags_edge(tags_bin, top_ruler, axes=None):
     -------
     first_tag_edge : int
         X coordinate of the vertical line separating the tags area from the
-        butterfly area.
+        lepidopteran area.
     """
     # Make sure ruler is cropped out with some extra margin.
     tags_bin = tags_bin[:top_ruler - int(RULER_CROP_MARGIN * tags_bin.shape[0])]
@@ -73,7 +73,7 @@ def binarization(image_rgb, weights=WEIGHTS_BIN):
     Parameters
     ----------
     image_rgb : (M, N, 3) ndarray
-        Input RGB image of Lepidoptera, with ruler and tags.
+        Input RGB image of a lepidopteran, with ruler and tags.
 
     Returns
     -------
@@ -82,7 +82,7 @@ def binarization(image_rgb, weights=WEIGHTS_BIN):
     ruler_bin : (M, N) ndarray
         Binary image containing the ruler in the input image.
     lepidop_bin : (M, N) ndarray
-        Binary image containing the Lepidoptera in the input image.
+        Binary image containing the lepidopteran in the input image.
     """
     if isinstance(weights, str):
         weights = Path(weights)
@@ -131,7 +131,7 @@ def return_largest_region(image_bin):
 
 @memory.cache(ignore=['axes'])
 def main(image_rgb, axes=None):
-    """Binarizes and crops the Lepidoptera in image_rgb.
+    """Binarizes and crops the lepidopteran in image_rgb.
 
     Parameters
     ----------
@@ -150,7 +150,7 @@ def main(image_rgb, axes=None):
     ruler_bin : (M, N) ndarray
         Binary image containing the ruler in image_rgb.
     lepidop_bin : (M, N) ndarray
-        Binary image containing the Lepidoptera in image_rgb.
+        Binary image containing the lepidopteran in image_rgb.
     """
     # binarizing the input image and separating its elements.
     tags_bin, ruler_bin, lepidop_bin = binarization(image_rgb,
@@ -165,12 +165,12 @@ def main(image_rgb, axes=None):
     # detecting where the tags start.
     first_tag_edge = find_tags_edge(tags_bin, top_ruler, axes)
 
-    # cropping the Lepidoptera.
+    # cropping the lepidopteran.
     lepidop_bin = lepidop_bin[:top_ruler, :first_tag_edge]
 
     if axes and axes[1]:
         axes[1].imshow(lepidop_bin)
-        axes[1].set_title('Binarized Lepidoptera')
+        axes[1].set_title('Binarized lepidopteran')
     if axes and axes[3]:
         axes[3].axvline(x=first_tag_edge, color='c', linestyle='dashed')
 
