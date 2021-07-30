@@ -47,12 +47,12 @@ def remove_numbers(focus):
     Parameters
     ----------
     focus : 2D array
-        Binary image of the ruler
+        Binary image of the ruler.
 
     Returns
     -------
-    focus_nummbers_filled : 2D array
-        Binary image of the ruler without numbers
+    focus_numbers_filled : 2D array
+        Binary image of the ruler without numbers.
 
     Notes
     -----
