@@ -1,18 +1,3 @@
-import numpy as np
-import warnings
-
-warnings.simplefilter('ignore', UserWarning)
-"""
-Ignoring user warning until fastai/pytorch upgrade. Current one:
-
-torch/nn/functional.py:3103: UserWarning: The default behavior for
-interpolate/upsample with float scale_factor changed in 1.6.0 to align with
-other frameworks/libraries, and now uses scale_factor directly, instead of
-relying on the computed output size. If you wish to restore the old behavior,
-please set recompute_scale_factor=True. See the documentation of nn.Upsample
-for details.
-"""
-
 from fastai.vision.learner import load_learner
 from pathlib import Path
 from mothra import connection
