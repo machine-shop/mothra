@@ -1,4 +1,3 @@
-from pathlib import Path
 from pooch import retrieve
 from urllib import request
 

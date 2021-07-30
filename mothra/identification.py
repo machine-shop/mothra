@@ -13,13 +13,9 @@ please set recompute_scale_factor=True. See the documentation of nn.Upsample
 for details.
 """
 
-from fastai.vision.data import Image
 from fastai.vision.learner import load_learner
 from pathlib import Path
-from skimage.io import imsave
-from skimage.util import img_as_float32, img_as_ubyte
-from torch import from_numpy
-from mothra import binarization, connection
+from mothra import connection
 
 
 WEIGHTS_GENDER = './models/id_gender_test-3classes.pkl'
@@ -74,10 +70,10 @@ def predict_gender(image_rgb, weights=WEIGHTS_GENDER):
         Classification obtained from `image_rgb`, being "female",
         "male", or "upside_down".
     """
-    pos_and_gender = {  # TODO: check if gender/position match!
-        0: 'female',
-        1: 'male',
-        2: 'upside_down'
+    pos_and_gender = {
+        0: 'upside_down',
+        1: 'female',
+        2: 'male'
     }
     prediction = _classification(image_rgb, weights)
 

@@ -1,5 +1,5 @@
 from skimage.filters import threshold_otsu
-from skimage.measure import label, regionprops
+from skimage.measure import regionprops
 from skimage import color
 import numpy as np
 from scipy import ndimage as ndi

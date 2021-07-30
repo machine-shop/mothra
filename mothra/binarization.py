@@ -1,17 +1,10 @@
 import numpy as np
-from skimage.filters import threshold_otsu
-from scipy import ndimage as ndi
 from skimage.measure import label, regionprops
-from skimage import color
-from skimage.exposure import rescale_intensity
-from skimage.morphology import binary_erosion, binary_dilation, selem
 from skimage.transform import rescale
-from skimage.util import img_as_bool, img_as_float32, img_as_ubyte
+from skimage.util import img_as_bool
 from joblib import Memory
-from fastai.vision.core import PILImage, to_image
 from fastai.vision.learner import load_learner
 from pathlib import Path
-from torch import from_numpy
 from mothra import connection, ruler_detection
 
 location = './cachedir'
