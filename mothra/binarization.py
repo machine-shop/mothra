@@ -51,6 +51,11 @@ def find_tags_edge(tags_bin, top_ruler, axes=None):
     # Calculate regionprops
     tags_regions = regionprops(label(tags_bin))
 
+    # if labels are not identified, tags_regions will be empty.
+    # in that case, return the last column of the input image as a result:
+    if not tags_regions:
+        return tags_bin.shape[-1]
+
     # checking where the first tag starts.
     tags_leftedges = [region.bbox[1] for region in tags_regions]
     first_tag_edge = np.min(tags_leftedges)
