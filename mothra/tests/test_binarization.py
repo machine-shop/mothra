@@ -80,11 +80,11 @@ def fake_bfly_no_tags():
 
 
 def test_rescale_image(fake_bfly_layout):
-    """Testing function butterfly._rescale_image.
+    """Testing function binarization.binarization.
 
     Summary
     -------
-    We decimate an input image, rescale it using butterfly._rescale_image
+    We decimate an input image, rescale it using binarization.binarization
     and compare their sizes.
 
     Expected
@@ -101,7 +101,7 @@ def test_rescale_image(fake_bfly_layout):
 
 
 def test_find_tags_edge(fake_bfly_layout):
-    """Testing function butterfly.find_tags_edge.
+    """Testing function binarization.binarization.
 
     Summary
     -------
@@ -122,7 +122,7 @@ def test_find_tags_edge(fake_bfly_layout):
 
 
 def test_missing_tags(fake_bfly_no_tags):
-    """Testing function butterfly.find_tags_edge.
+    """Testing function binarization.binarization.
 
     Summary
     -------
@@ -142,3 +142,43 @@ def test_missing_tags(fake_bfly_no_tags):
     result = binarization.find_tags_edge(tags_bin=bfly_no_tags, top_ruler=230)
 
     assert (result >= 399)
+
+
+def test_return_largest_region():
+    """Testing function binarization.return_largest_region.
+
+    Summary
+    -------
+    We pass a binary input image with three regions and check if the result
+    image from binarization.return_largest_region contains only the largest
+    one.
+
+    Expected
+    --------
+    Resulting image has only the largest region.
+    """
+    img_test = np.asarray([[0, 0, 1, 1, 0, 0, 0, 0, 1, 0],
+                           [0, 1, 1, 1, 1, 0, 0, 0, 1, 1],
+                           [1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+                           [1, 1, 1, 1, 1, 1, 0, 0, 1, 0],
+                           [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+                           [0, 1, 1, 1, 1, 0, 0, 1, 1, 0],
+                           [0, 1, 1, 1, 1, 0, 0, 1, 1, 1],
+                           [1, 1, 1, 1, 1, 0, 0, 1, 1, 1],
+                           [0, 1, 1, 1, 0, 0, 0, 0, 1, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype='bool')
+
+    img_expect = np.asarray([[0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
+                             [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                             [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+                             [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+                             [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+                             [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                             [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                             [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                             [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype='bool')
+
+    img_result = binarization.return_largest_region(img_test)
+
+    assert (img_expect.all() == img_result.all())
