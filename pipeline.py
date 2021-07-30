@@ -269,7 +269,7 @@ def main():
                         help='Input path for single image, folder or text\
                         file (extension txt) containing paths',
                         required=False,
-                        default='raw_images')
+                        default='input_images')
 
     # Output path
     parser.add_argument('-o', '--output_folder',

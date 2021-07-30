@@ -2,7 +2,7 @@
 *~
 pictures/
 **/__pycache__
-raw_images/
+input_images/
 figures/
 outputs/
 *.csv

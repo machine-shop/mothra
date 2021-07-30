@@ -13,7 +13,7 @@ $ python pipeline.py -p -i [input directory or image path] -o [output directory]
 ```
 The pipeline script combines four modules to analyze an image: ruler detection, binarization, tracing, and final measurement. These modules are located in `/mothra`. Python module requirements are listed in `requirements.txt`.
 
-Run the `pipeline.py` file with the arguments to read in raw images and output result images and `.csv` file with the measurements.
+Run the `pipeline.py` file with the arguments to read input images, and output result images and a `.csv` file with the measurements.
 
 The results are cached in `cachedir` so that if the same methods are re-run with the same inputs, the computation will simply be retrieved from memory instead of being recomputed. Delete `cachedir` to remove the cache and to recompute all results. If the source files for any part of the pipeline are tweaked, then results will be recomputed automatically.
 
@@ -28,7 +28,7 @@ The following parameters can be used as input arguments for `pipeline.py`:
     <img src="./examples/result-detailed_plot-BMNHE_500607.JPG" width="400">
 </p>
 
-* `-i`, `--input` : A single image input or a directory of images to be analyzed. (Default is `raw_images`).
+* `-i`, `--input` : A single image input or a directory of images to be analyzed. (Default is `input_images`).
 * `-o`, `--output_folder` : The output directory in which the result images will be outputted. (Default is `outputs`).
 * `-s`, `--stage` : The stage which to run the pipeline until. Options are `'ruler_detection'`, `'binarization'`, and `'measurements'`. Default is `measurement` (running to completion). Running the pipeline and stopping at an earlier stage can be useful for debugging.
 * `-csv`, `--path_csv` :  Path of `.csv` file for the measurement results. (Default is `results.csv`).
