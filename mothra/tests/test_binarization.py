@@ -3,20 +3,35 @@ import pytest
 
 from mothra import binarization
 from skimage import draw
-from skimage.io import imread
-from skimage.util import img_as_bool
+
+# defining labels for classes in the processed images.
+TAGS_LABEL = 1
 
 
 @pytest.fixture(scope="module")
-def fake_butterfly_layout():
+def fake_bfly_layout():
+    """Implements a "fake butterfly" input image containing ruler and
+    identification tags, that mimics the others on the actual lepidopteran
+    datasets.
+
+    Notes
+    -----
+    Starting from mothra 1.0, the pipeline processing images will return
+    labels corresponding to the classes of the elements in the input image,
+    instead of a binary image.
+    These classes are 0 (background), 1 (tags), 2 (ruler), 3 (lepidopteran).
+    """
     M, N = (300, 400)
+    img_classes = np.zeros((M, N))
 
-    binary = np.zeros((M, N))
-    binary[230:] = 1  # ruler
-    binary[30:100, 250:380] = 1  # tag 1
-    binary[120:200, 260:370] = 1  # tag 2
+    # creating tags.
+    img_classes[30:100, 250:380] = 1  # tag 1
+    img_classes[120:200, 260:370] = 1  # tag 2
 
-    # "butterfly"
+    # creating ruler.
+    img_classes[230:] = 2
+
+    # creating "butterfly".
     bfly_upper, bfly_lower = 50, 180
     bfly_left, bfly_right = 50, 220
     bfly_height = bfly_lower - bfly_upper
@@ -26,19 +41,30 @@ def fake_butterfly_layout():
         [bfly_upper, bfly_upper, bfly_lower],
         [bfly_left, bfly_right, (bfly_left + bfly_right) / 2]
     )
-    binary[rr, cc] = 1
+    img_classes[rr, cc] = 3
 
-    return binary, (bfly_height, bfly_width)
+    return img_classes, (bfly_height, bfly_width)
 
 
 @pytest.fixture(scope="module")
-def fake_butterfly_no_tags():
+def fake_bfly_no_tags():
+    """Implements a "fake butterfly" input image containing ruler, but no
+    tags, that mimics the others on the actual lepidopteran datasets.
+
+    Notes
+    -----
+    Starting from mothra 1.0, the pipeline processing images will return
+    labels corresponding to the classes of the elements in the input image,
+    instead of a binary image.
+    These classes are 0 (background), 1 (tags), 2 (ruler), 3 (lepidopteran).
+    """
     M, N = (300, 400)
+    img_classes = np.zeros((M, N))
 
-    binary = np.zeros((M, N))
-    binary[230:] = 1  # ruler
+    # creating ruler.
+    img_classes[230:] = 2
 
-    # "butterfly"
+    # creating "butterfly".
     bfly_upper, bfly_lower = 50, 180
     bfly_left, bfly_right = 50, 220
     bfly_height = bfly_lower - bfly_upper
@@ -48,31 +74,71 @@ def fake_butterfly_no_tags():
         [bfly_upper, bfly_upper, bfly_lower],
         [bfly_left, bfly_right, (bfly_left + bfly_right) / 2]
     )
-    binary[rr, cc] = 1
+    img_classes[rr, cc] = 3
 
-    return binary, (bfly_height, bfly_width)
-
-
-def test_find_tags_edge(fake_butterfly_layout):
-    butterfly, (rows, cols) = fake_butterfly_layout
-    picture_2d = butterfly.astype(np.uint8)
-    picture_3d = np.dstack((picture_2d,
-                            1/2 * picture_2d,
-                            1/4 * picture_2d))  # fake RGB image
-
-    result = binarization.find_tags_edge(picture_3d, 230)
-    print(result)
-    assert (250 <= result <= 260)  # assert the tags edge is in a proper place
+    return img_classes, (bfly_height, bfly_width)
 
 
-def test_missing_tags(fake_butterfly_no_tags):
-    butterfly, (rows, cols) = fake_butterfly_no_tags
-    picture_2d = butterfly.astype(np.uint8)
-    picture_3d = np.dstack((picture_2d,
-                            1/2 * picture_2d,
-                            1/4 * picture_2d))  # fake RGB image
+def test_rescale_image(fake_bfly_layout):
+    """Testing function butterfly._rescale_image.
 
-    result = binarization.find_tags_edge(picture_3d, 230)
-    # such a crop will probably throw off measurement process
-    # but the program won't crash
+    Summary
+    -------
+    We decimate an input image, rescale it using butterfly._rescale_image
+    and compare their sizes.
+
+    Expected
+    --------
+    The input image and it's decimated/rescaled version should have the same
+    size.
+    """
+    bfly, _ = fake_bfly_layout
+    bfly_dec = bfly[::4]
+    bfly_dec_rescaled = binarization._rescale_image(image_refer=bfly,
+                                                    image_to_rescale=bfly_dec)
+
+    assert (bfly_dec_rescaled.shape == bfly.shape)
+
+
+def test_find_tags_edge(fake_bfly_layout):
+    """Testing function butterfly.find_tags_edge.
+
+    Summary
+    -------
+    Since the current segmentation algorithm returns tags, ruler and
+    lepidopteran, we obtain the tags from an input image and check if the
+    coordinate generated from binarization.find_tags_edge is correct.
+
+    Expected
+    --------
+    Edge of the tags, returned as an X coordinate, is in a proper place.
+    """
+    bfly, _ = fake_bfly_layout
+    # returning a binary image containing only tags.
+    bfly_tags = bfly * (bfly == TAGS_LABEL)
+
+    result = binarization.find_tags_edge(tags_bin=bfly_tags, top_ruler=230)
+    assert (250 <= result <= 260)
+
+
+def test_missing_tags(fake_bfly_no_tags):
+    """Testing function butterfly.find_tags_edge.
+
+    Summary
+    -------
+    We pass an input image without tags to binarization.find_tags_edge.
+
+    Expected
+    --------
+    first_tag_edge, in this case, should be the last column of the input
+    image. That could probably impair the measurement process, but the
+    pipeline won't crash.
+    """
+    bfly, _ = fake_bfly_no_tags
+    # returning a binary image containing no tags.
+    bfly_no_tags = bfly * (bfly == TAGS_LABEL)
+    print(bfly_no_tags, bfly_no_tags.shape)
+
+    result = binarization.find_tags_edge(tags_bin=bfly_no_tags, top_ruler=230)
+
     assert (result >= 399)
