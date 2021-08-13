@@ -74,7 +74,8 @@ def remove_numbers(focus):
 
 
 def fourier(signal, axes=None):
-    """Performs a Fourier transform to find the frequency and t space
+    """Performs a Fourier transform to find the distance in pixels
+    between two ticks of the ruler.
 
     Parameters
     ----------
