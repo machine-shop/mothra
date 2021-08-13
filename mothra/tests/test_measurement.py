@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from butterfly import measurement
+from mothra import measurement
 
 import pytest
 

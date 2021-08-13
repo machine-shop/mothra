@@ -8,7 +8,7 @@ import numpy as np
 import argparse
 
 # Argument parsing
-parser = argparse.ArgumentParser(description='Script to plot differences between actual butterfly measurements versus predicted measurements.')
+parser = argparse.ArgumentParser(description='Script to plot differences between actual lepidopteran measurements versus predicted measurements.')
 parser.add_argument('-a', '--actual',
                     type=str,
                     help='File name with actual measurements',

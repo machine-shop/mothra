@@ -16,68 +16,50 @@ FIRST_INDEX_THRESHOLD = 0.9
 LINE_WIDTH = 40
 
 
-def binarize(img):
-    ''' Returns a binarized version of the image.
+def binarize_ruler(ruler_rgb):
+    """Returns a binarized version of the image.
 
     Parameters
     ----------
-    img : array
-        array that represents the image
+    ruler_rgb : (M, N) ndarray
+        Input image containing the ruler.
 
     Returns
     -------
-    binary : array
-        array that represents the binarized image
-    '''
-    gray = color.rgb2gray(img)
+    ruler : (M, N) ndarray
+        Ruler as a binarized image.
+
+    Notes
+    -----
+    This performs differently than the U-net; while the U-net returns the
+    location of the ruler, this returns the binarized ruler and its elements.
+    """
+    gray = color.rgb2gray(ruler_rgb)
     thresh = threshold_otsu(gray)
-    binary = gray > thresh
-    return binary
+    ruler = gray > thresh
 
+    return ruler
 
-def binarize_rect(up_rectangle, binary, axes=None):
-    '''Returns binary rectangle of segment of ruler were interested in
-
-        Parameters
-        ----------
-        up_rectangle : integer
-            This is the height of the rectangle we are fetching.
-        binary : array
-            array that represents the binarized image
-
-        Returns
-        -------
-        rectangle_binary : array
-            array that represents just the rectangle area of the image we want
-        '''
-    left_rectangle = int(binary.shape[1] * RULER_LEFT)
-    right_rectangle = int(binary.shape[1] * RULER_RIGHT)
-
-    rectangle_binary = binary[up_rectangle:, left_rectangle: right_rectangle]
-    if axes and axes[3]:
-        rect = patches.Rectangle((left_rectangle, up_rectangle),
-                                 right_rectangle - left_rectangle,
-                                 binary.shape[0] - up_rectangle,
-                                 linewidth=1, edgecolor='g', facecolor='none')
-        axes[3].add_patch(rect)
-
-    return rectangle_binary
 
 def remove_numbers(focus):
-    ''' Returns a ruler image but with the numbers stripped away, to improve ruler
-    fourier transform analysis
+    """Returns a ruler image with the numbers stripped away.
 
     Parameters
     ----------
     focus : 2D array
-        Binary image of the ruler
+        Binary image of the ruler.
 
     Returns
     -------
-    focus_nummbers_filled : 2D array
-        Binary image of the ruler without numbers
-    '''
-    focus_numbers_markers, focus_numbers_nb_labels = ndi.label(focus, ndi.generate_binary_structure(2, 1))
+    focus_numbers_filled : 2D array
+        Binary image of the ruler without numbers.
+
+    Notes
+    -----
+    The numbers are stripped away to improve the results of the Fourier
+    transform, which will process the ruler ticks.
+    """
+    focus_numbers_markers, _ = ndi.label(focus, ndi.generate_binary_structure(2, 1))
     focus_numbers_regions = regionprops(focus_numbers_markers)
     focus_numbers_region_areas = [region.filled_area for region in focus_numbers_regions]
     focus_numbers_avg_area = np.mean(focus_numbers_region_areas)
@@ -92,21 +74,21 @@ def remove_numbers(focus):
 
 
 def fourier(signal, axes=None):
-    '''Performs a fourier transform to find the frequency and t space
+    """Performs a Fourier transform to find the distance in pixels
+    between two ticks of the ruler.
 
     Parameters
     ----------
     signal : 1D array
-        array representing the value of the ticks in space
+        Array representing the value of the ticks in space.
 
     Returns
     -------
-    t_space : float
-        distance in pixels between two ticks (.5 mm)
-    '''
-
-    # thresholding the signal so the fourier transform results better correlate to
-    # frequency and not amplitude of the signal
+    T_space : float
+        Distance in pixels between two ticks (0.5 mm).
+    """
+    # thresholding the signal so the fourier transform results better
+    # correlate to frequency, and not amplitude, of the signal
     signal_thresholded = signal > 0
 
     fourier = np.fft.rfft(signal_thresholded)
@@ -126,12 +108,12 @@ def fourier(signal, axes=None):
 
 
 @memory.cache(ignore=['axes'])
-def main(img, axes=None):
-    '''Finds the distance between ticks
+def main(image_rgb, ruler_bin, axes=None):
+    """Finds the distance between ticks
 
     Parameters
     ----------
-    img : array
+    image_rgb : array
         array representing the image
     ax : array
         array of Axes that show subplots
@@ -140,35 +122,24 @@ def main(img, axes=None):
     -------
     t_space : float
         distance between two ticks (.5 mm)
-    '''
-    binary = binarize(img)
-
+    """
+    # preparing figure.
     if axes and axes[0]:
         axes[0].set_title('Final output')
-        axes[0].imshow(img)
+        axes[0].imshow(image_rgb)
         if axes[3]:
             axes[3].set_title('Image structure')
             axes[4].set_title('Ruler signal')
             axes[5].set_title('Fourier transform of ruler signal')
-            axes[3].imshow(img)
+            axes[3].imshow(image_rgb)
 
-    # Detecting top ruler
-    up_rectangle = int(binary.shape[0] * RULER_TOP)
-    rectangle_binary = binarize_rect(up_rectangle, binary, axes)
-    markers, nb_labels = ndi.label(rectangle_binary,
-                                   ndi.generate_binary_structure(2, 1))
+    # detecting the top of the ruler.
+    ruler_row, ruler_col = np.nonzero(ruler_bin)
+    top_ruler = int(ruler_row.min())
 
-    regions = regionprops(markers)
-    areas = [region.area for region in regions]
-
-    idx_max = np.argmax(areas)
-    coords = regions[idx_max].coords
-    offset = np.min(coords[:, 0])
-    top_ruler = up_rectangle + offset
-
-    # Focusing on the ruler
-    up_focus = up_rectangle + offset
-    focus = ~binary[up_focus:]
+    # returning a binary version of the ruler, numbers and ticks included.
+    focus = ~binarize_ruler(image_rgb[ruler_row.min():ruler_row.max(),
+                                      ruler_col.min():ruler_col.max()])
 
     # Removing the numbers in the ruler to denoise the fourier transform analysis
     focus_numbers_filled = remove_numbers(focus)
@@ -187,19 +158,21 @@ def main(img, axes=None):
     sums = np.sum(focus_numbers_filled, axis=0)
     t_space = 2 * fourier(sums, axes)
 
-    x_single = [left_focus + first_index, left_focus + first_index +
+    x_single = [left_focus + first_index,
+                left_focus + first_index +
                 t_space]
-    y = np.array([up_focus, up_focus])
-    x_mult = [left_focus + first_index, left_focus + first_index +
+    y = np.array([top_ruler, top_ruler])
+    x_mult = [left_focus + first_index,
+              left_focus + first_index +
               t_space * 10]
 
-    # Plotting
+    # plotting.
     if axes and axes[0]:
         axes[0].fill_between(x_single, y, y + LINE_WIDTH, color='red', linewidth=0)
         axes[0].fill_between(x_mult, y - LINE_WIDTH, y, color='blue', linewidth=0)
 
     if axes and axes[3]:
-        rect = patches.Rectangle((left_focus, up_focus+up_trim),
+        rect = patches.Rectangle((left_focus, top_ruler+up_trim),
                                  right_focus - left_focus,
                                  down_trim,
                                  linewidth=1, edgecolor='r', facecolor='none')
