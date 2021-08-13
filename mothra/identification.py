@@ -7,11 +7,11 @@ WEIGHTS_GENDER = './models/id_gender_test-3classes.pkl'
 
 
 def _classification(image_rgb, weights):
-    """Helping function. Classifies the input image according to `weights`.
+    """Helper function. Classifies the input image according to `weights`.
 
     Parameters
     ----------
-    bfly_rgb : 3D array
+    image_rgb : 3D array
         RGB image of the lepidopteran (ruler and tags cropped out).
     weights : str or pathlib.Path
         Path of the file containing weights.
