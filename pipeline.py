@@ -112,7 +112,8 @@ def initialize_csv_file(csv_fname):
 
 # required by fastai while predicting:
 class AlbumentationsTransform(RandTransform):
-    "A transform handler for multiple `Albumentation` transforms"
+    """A handler for multiple transforms from the package `albumentations`.
+    Required by fastai."""
     split_idx,order=None,2
     def __init__(self, train_aug, valid_aug): store_attr()
 
