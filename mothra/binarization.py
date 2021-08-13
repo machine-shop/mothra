@@ -124,13 +124,9 @@ def return_largest_region(image_bin):
     """
     props = regionprops(label(image_bin))
 
-    # largest_reg will receive the largest region label and its area.
-    largest_reg = [0, 0]
-    for prop in props:
-            if prop.area > largest_reg[1]:
-                largest_reg = [prop.label, prop.area]
-
-    image_bin[label(image_bin) != largest_reg[0]] = 0
+    # largest_reg will receive the largest region properties.
+    largest_reg = max(props, key=lambda x: x.area)
+    image_bin[label(image_bin) != largest_reg.label] = 0
 
     return img_as_bool(image_bin)
 
