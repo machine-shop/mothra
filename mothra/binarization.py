@@ -79,6 +79,8 @@ def binarization(image_rgb, weights=WEIGHTS_BIN):
     ----------
     image_rgb : (M, N, 3) ndarray
         Input RGB image of a lepidopteran, with ruler and tags.
+    weights : str or pathlib.Path
+        Path of the file containing weights for segmentation.
 
     Returns
     -------
@@ -93,7 +95,6 @@ def binarization(image_rgb, weights=WEIGHTS_BIN):
         weights = Path(weights)
 
     connection.download_weights(weights)
-    # parameters here were defined when training the U-net.
     learner = load_learner(fname=weights)
 
     print('Processing U-net...')
@@ -142,9 +143,6 @@ def main(image_rgb, axes=None):
     ----------
     image_rgb : 3D array
         RGB image of the entire picture
-    top_ruler: integer
-        Y-coordinate of the height of the ruler top edge as
-        found by ruler_detection.py
     axes : obj
         If any, the binarization result will be plotted on it.
 
