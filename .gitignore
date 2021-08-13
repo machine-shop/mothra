@@ -12,5 +12,9 @@ outputs/
 **/*.png
 .ropeproject
 cachedir
+# Ignoring deep learning models.
+models/
 models/*.pkl  # files at https://gitlab.com/mothra/mothra-data/-/tree/main/models
-settings.json  # VSCode/VSCodium files
+# Ignoring VSCode/VSCodium files and folders.
+.vscode/*
+settings.json  
