@@ -18,6 +18,10 @@ RULER_CROP_MARGIN = 0.025
 # lepidopteran).
 WEIGHTS_BIN = './models/segmentation_test-4classes.pkl'
 
+# Setting a tolerance in pixels on where ruler, tags can start, according to
+# the lepidopteran.
+TOL_ELEM = 50
+
 
 def _rescale_image(image_refer, image_to_rescale):
     """Helper function. Rescale image back to original size, according to
@@ -109,6 +113,27 @@ def binarization(image_rgb, weights=WEIGHTS_BIN):
     return tags_bin, ruler_bin, lepidop_bin
 
 
+def return_bbox_largest_region(image_bin):
+    """Returns the bounding box of the largest region in the input image.
+
+    Parameters
+    ----------
+    image_bin : (M, N) ndarray
+        A binary image.
+
+    Returns
+    -------
+    image_bbox : (min_row, min_col, max_row, max_col) list
+        A list containing the coordinates of the bounding box.
+    """
+    props = regionprops(label(image_bin))
+
+    # largest_reg will receive the largest region properties.
+    largest_reg = max(props, key=lambda x: x.area)
+
+    return largest_reg.bbox
+
+
 def return_largest_region(image_bin):
     """Returns the largest region in the input image.
 
@@ -158,14 +183,16 @@ def main(image_rgb, axes=None):
     # if the binary image has more than one region, returns the largest one.
     lepidop_bin = return_largest_region(lepidop_bin)
 
+    # removing possible noise from ruler and tags before proceeding.
+    _, _, max_row, max_col = return_bbox_largest_region(lepidop_bin)
+    ruler_bin[:max_row-TOL_ELEM, :max_col-TOL_ELEM] = False
+    tags_bin[:max_row-TOL_ELEM, :max_col-TOL_ELEM] = False
+
     # detecting where the ruler starts.
     _, top_ruler = ruler_detection.main(image_rgb, ruler_bin, axes)
 
     # detecting where the tags start.
     first_tag_edge = find_tags_edge(tags_bin, top_ruler, axes)
-
-    # cropping the lepidopteran.
-    lepidop_bin = lepidop_bin[:top_ruler, :first_tag_edge]
 
     if axes and axes[1]:
         axes[1].imshow(lepidop_bin)
