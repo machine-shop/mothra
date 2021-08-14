@@ -334,52 +334,56 @@ def main():
     number_of_images = len(image_paths)
 
     for i, image_path in enumerate(image_paths):
-        # creating axes layout for plotting.
-        axes = create_layout(len(pipeline_process), plot_level)
+        try:
+            # creating axes layout for plotting.
+            axes = create_layout(len(pipeline_process), plot_level)
 
-        image_name = os.path.basename(image_path)
-        print(f'Image {i+1}/{number_of_images} : {image_name}')
+            image_name = os.path.basename(image_path)
+            print(f'Image {i+1}/{number_of_images} : {image_name}')
 
-        image_rgb = imread(image_path)
+            image_rgb = imread(image_path)
 
-        # check image orientation and untilt it, if necessary.
-        angle = read_orientation(image_path)
+            # check image orientation and untilt it, if necessary.
+            angle = read_orientation(image_path)
 
-        if angle not in (None, 0):  # angle == 0 does not need untilting
-            image_rgb = img_as_ubyte(rotate(image_rgb, angle=angle, resize=True))
+            if angle not in (None, 0):  # angle == 0 does not need untilting
+                image_rgb = img_as_ubyte(rotate(image_rgb, angle=angle, resize=True))
 
-        for step in pipeline_process:
-            # first, binarize the input image and return its components.
-            _, ruler_bin, lepidop_bin = binarization.main(image_rgb, axes)
+            for step in pipeline_process:
+                # first, binarize the input image and return its components.
+                _, ruler_bin, lepidop_bin = binarization.main(image_rgb, axes)
 
-            if step == 'ruler_detection':
-                T_space, top_ruler = ruler_detection.main(image_rgb, ruler_bin, axes)
+                if step == 'ruler_detection':
+                    T_space, top_ruler = ruler_detection.main(image_rgb, ruler_bin, axes)
 
-            elif step == 'binarization':
-                # already binarized in the beginning. Moving on...
-                pass
+                elif step == 'binarization':
+                    # already binarized in the beginning. Moving on...
+                    pass
 
-            elif step == 'measurements':
-                points_interest = tracing.main(lepidop_bin, axes)
-                _, dist_mm = measurement.main(points_interest,
-                                              T_space,
-                                              axes)
-                # measuring position and gender
-                position, gender = identification.main(image_rgb)
+                elif step == 'measurements':
+                    points_interest = tracing.main(lepidop_bin, axes)
+                    _, dist_mm = measurement.main(points_interest,
+                                                  T_space,
+                                                  axes)
+                    # measuring position and gender
+                    position, gender = identification.main(image_rgb)
 
-                with open(args.path_csv, 'a') as csv_file:
-                    _write_csv_data(csv_file, image_name, dist_mm, position,
-                                    gender)
+                    with open(args.path_csv, 'a') as csv_file:
+                        _write_csv_data(csv_file, image_name, dist_mm, position,
+                                        gender)
 
-        if plot_level > 0:
-            output_path = os.path.normpath(
-                os.path.join(args.output_folder, image_name)
-                )
-            dpi = args.dpi
-            if plot_level == 2:
-                dpi = int(1.5 * args.dpi)
-            plt.savefig(output_path, dpi=dpi)
-            plt.close()
+            if plot_level > 0:
+                output_path = os.path.normpath(
+                    os.path.join(args.output_folder, image_name)
+                    )
+                dpi = args.dpi
+                if plot_level == 2:
+                    dpi = int(1.5 * args.dpi)
+                plt.savefig(output_path, dpi=dpi)
+                plt.close()
+        except Exception as exc:
+            print(f"* Sorry, could not process {image_path}. More details:\n {exc}")
+            continue
 
 
 if __name__ == "__main__":
