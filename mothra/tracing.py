@@ -133,13 +133,11 @@ def split_picture(binary):
     Currently, this is calculated by finding the center
     of gravity of the butterfly.
     """
-
-    means = np.mean(binary, 0)
-    normalized = means / np.sum(means)
-    sum_values = 0
-    for i, value in enumerate(normalized):
-        sum_values += i * value
-    return int(sum_values)
+    column_weights = np.sum(binary, axis=0)
+    column_weights_normalized = column_weights / np.sum(column_weights)
+    column_idxs = np.arange(binary.shape[1])
+    column_centroid = np.sum(column_weights_normalized * column_idxs)
+    return int(column_centroid)
 
 
 @memory.cache(ignore=['axes'])
