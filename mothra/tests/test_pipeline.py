@@ -62,7 +62,16 @@ def test_create_layout():
 
 def test_read_orientation():
     """Checks if orientation is extracted correctly from EXIF data.
-    Orientation for image in path is 6, (right, top); angle is 90 deg.
+
+    Summary
+    -------
+    We provide an input image with known angle and compare its angle
+    read by pipeline.read_orientation().
+
+    Expected
+    --------
+    Orientation for the input image is 6, (right, top);
+    pipeline.read_orientation() should return angle equals 90 deg.
     """
     tilted_path = 'mothra/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
     angle = pipeline.read_orientation(tilted_path)
