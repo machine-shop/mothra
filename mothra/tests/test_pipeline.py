@@ -53,7 +53,7 @@ def test_create_layout():
 
     Summary
     -------
-    We pass different stages and plot levels to pipeline.create_layout(),
+    We pass different stages and plot levels to pipeline.create_layout,
     and check the resulting axes.
 
     Expected
@@ -82,12 +82,12 @@ def test_read_orientation():
     Summary
     -------
     We provide an input image with known angle and compare its angle
-    read by pipeline.read_orientation().
+    read by pipeline.read_orientation.
 
     Expected
     --------
     Orientation for the input image is 6, (right, top);
-    pipeline.read_orientation() should return angle equals 90 deg.
+    pipeline.read_orientation should return angle equals 90 deg.
     """
     tilted_path = 'mothra/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
     angle = pipeline.read_orientation(tilted_path)
@@ -107,7 +107,7 @@ def test_check_aux_file():
 
     Expected
     --------
-    "result.csv.test" already exists in disk; pipeline._check_aux_file()
+    "result.csv.test" already exists in disk; pipeline._check_aux_file
     should return "result.csv_1.test".
     """
     expected_fname = Path('result.csv_1.test')
@@ -116,3 +116,24 @@ def test_check_aux_file():
     result_fname = pipeline._check_aux_file(filename)
 
     assert result_fname == expected_fname
+
+
+def test_process_paths_in_input():
+    """Checks if files from a folder within an input text file are correctly
+    read.
+
+    Summary
+    -------
+    We provide the path for a text file containing the path for a folder, and
+    check if the filenames are read by pipeline._process_paths_in_input.
+
+    Expected
+    --------
+    expected_paths and image_paths should contain the same filenames.
+    """
+    input_name = 'mothra/tests/test_files/input_file.txt'
+    expected_paths = ['mothra/tests/test_files/test_input/BMNHE_500607.JPG',
+                      'mothra/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG']
+    image_paths = pipeline._process_paths_in_input(input_name)
+
+    assert image_paths.sort() == expected_paths.sort()
