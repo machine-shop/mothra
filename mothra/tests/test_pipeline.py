@@ -48,6 +48,22 @@ def test_pipeline_main():
 
 
 def test_create_layout():
+    """Checks if axes for regular and detailed plots were created
+    properly.
+
+    Summary
+    -------
+    We pass different stages and plot levels to pipeline.create_layout(),
+    and check the resulting axes.
+
+    Expected
+    --------
+    - pipeline.create_layout(1, 0) should not return axes.
+    - pipeline.create_layout(3, 2) should return all seven axes
+    (ax_main, ax_bin, ax_poi, ax_structure, ax_signal, ax_fourier, ax_tags).
+    - pipeline.create_layout(3, 1) should return a list with three axes and
+    four None.
+    """
     axes = pipeline.create_layout(1, 0)
     assert axes is None
     axes = pipeline.create_layout(3, 2)
