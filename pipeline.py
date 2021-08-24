@@ -203,7 +203,7 @@ def _process_paths_in_input(input_name):
 
 def _read_paths_in_file(input_name):
     """Helper function. Reads image paths in input file."""
-    image_paths = []
+    image_paths, aux_paths = [], []
     with open(input_name) as txt_file:
         for item in txt_file:
             try:
