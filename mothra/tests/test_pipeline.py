@@ -15,8 +15,8 @@ TIMEOUT_TIME = 180
 @pytest.mark.timeout(TIMEOUT_TIME)
 def test_pipeline_main():
 
-    test_input_dir = 'butterfly/tests/test_files/test_input/'
-    test_output_dir = 'butterfly/tests/test_files/test_output/'
+    test_input_dir = 'mothra/tests/test_files/test_input/'
+    test_output_dir = 'mothra/tests/test_files/test_output/'
     test_command = [
         'python', 'pipeline.py', '-p',
         '-i', test_input_dir,
@@ -63,7 +63,7 @@ def test_read_orientation():
     """Checks if orientation is extracted correctly from EXIF data.
     Orientation for image in path is 6, (right, top); angle is 90 deg.
     """
-    tilted_path = 'butterfly/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
+    tilted_path = 'mothra/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
     angle = pipeline.read_orientation(tilted_path)
 
     assert angle == 90
