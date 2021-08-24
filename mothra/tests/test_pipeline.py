@@ -5,6 +5,7 @@ import pytest
 
 import pipeline
 
+from pathlib import Path
 from skimage.io import imread
 from skimage.util import img_as_float
 
@@ -67,3 +68,26 @@ def test_read_orientation():
     angle = pipeline.read_orientation(tilted_path)
 
     assert angle == 90
+
+
+def test_check_aux_file():
+    """Checks if filename is updated correctly if file already exists
+    in disk.
+
+    Summary
+    -------
+    We provide the path of a file that exists in disk, and check
+    if result_fname was updated correctly (a number was added to
+    the end of the filename).
+
+    Expected
+    --------
+    "result.csv.test" already exists in disk; pipeline._check_aux_file()
+    should return "result.csv_1.test".
+    """
+    expected_fname = Path('result.csv_1.test')
+
+    filename = Path('mothra/tests/test_files/result.csv.test')
+    result_fname = pipeline._check_aux_file(filename)
+
+    assert result_fname == expected_fname
