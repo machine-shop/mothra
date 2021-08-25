@@ -5,6 +5,7 @@ import pytest
 
 import pipeline
 
+from csv import reader
 from pathlib import Path
 from skimage.io import imread
 from skimage.util import img_as_float
@@ -184,3 +185,41 @@ def test_process_paths_in_input():
     image_paths = pipeline._process_paths_in_input(input_name)
 
     assert image_paths.sort() == expected_paths.sort()
+
+
+def test_write_csv_data():
+    """ Check if 
+    """
+    csv_fname = 'mothra/tests/test_files/test.csv'
+    image_name = 'test_image'
+    dist_mm = {
+        "dist_l": 'test_l',
+        "dist_r": 'test_r',
+        "dist_l_center": 'test_dcl',
+        "dist_r_center": 'test_dcr',
+        "dist_span": 'test_span',
+        "dist_shoulder": 'test_shoulder'
+    }
+    position = 'test_pos'
+    gender = 'test_gender'
+
+    expected_lines = [
+        ['image_id', 'left_wing (mm)', 'right_wing (mm)',
+         'left_wing_center (mm)', 'right_wing_center (mm)',
+         'wing_span (mm)', 'wing_shoulder (mm)', 'position',
+         'gender'],
+        ['test_image', 'test_l', 'test_r', 'test_dcl',
+         'test_dcr', 'test_span', 'test_shoulder',
+         'test_pos', 'test_gender']
+        ]
+
+    result_csv = pipeline.initialize_csv_file(csv_fname)
+    with open(csv_fname, 'a') as csv:
+        pipeline._write_csv_data(csv, image_name, dist_mm, position, gender)
+
+    with open(csv_fname, newline='') as csv:
+        for idx, row in enumerate(reader(csv)):
+            assert expected_lines[idx] == row
+
+    # deleting file, else next round of tests will have more rows
+    result_csv.unlink()
