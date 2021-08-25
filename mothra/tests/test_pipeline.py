@@ -6,19 +6,25 @@ import pytest
 import pipeline
 
 from csv import reader
+from glob import glob
 from pathlib import Path
 from skimage.io import imread
 from skimage.util import img_as_float
 
 
+PATH_TEST_FILES = 'mothra/tests/test_files/'
+TEST_CSV_FILE = f'{PATH_TEST_FILES}/test_file.csv'
+TEST_INPUT_FILE = f'{PATH_TEST_FILES}/input_file.txt'
+TEST_INPUT_IMAGES = glob(f'{PATH_TEST_FILES}/test_input/*.JPG')
+TEST_TILTED_IMAGE =  f'{PATH_TEST_FILES}/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
 TIMEOUT_TIME = 180
 
 
 @pytest.mark.timeout(TIMEOUT_TIME)
 def test_pipeline_main():
 
-    test_input_dir = 'mothra/tests/test_files/test_input/'
-    test_output_dir = 'mothra/tests/test_files/test_output/'
+    test_input_dir = f'{PATH_TEST_FILES}/test_input/'
+    test_output_dir = f'{PATH_TEST_FILES}/test_output/'
     test_command = [
         'python', 'pipeline.py', '-p',
         '-i', test_input_dir,
@@ -90,14 +96,14 @@ def test_initialize_csv_file():
     --------
     result_csv is a file on disk, and its name is equal to expected_csv.
     """
-    csv_fname = 'mothra/tests/test_files/test_file.csv'
+    csv_fname = TEST_CSV_FILE
     result_csv = pipeline.initialize_csv_file(csv_fname)
 
     assert result_csv.is_file()
 
     # deleting file, else next round of tests will have a different filename
     result_csv.unlink()
-    expected_csv = Path('mothra/tests/test_files/test_file.csv')
+    expected_csv = Path(TEST_CSV_FILE)
 
     assert expected_csv == result_csv
 
@@ -115,8 +121,7 @@ def test_read_orientation():
     Orientation for the input image is 6, (right, top);
     pipeline.read_orientation should return angle equals 90 deg.
     """
-    tilted_path = 'mothra/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
-    angle = pipeline.read_orientation(tilted_path)
+    angle = pipeline.read_orientation(TEST_TILTED_IMAGE)
 
     assert angle == 90
 
@@ -138,7 +143,7 @@ def test_check_aux_file():
     """
     expected_fname = Path('result.csv_1.test')
 
-    filename = Path('mothra/tests/test_files/result.csv.test')
+    filename = Path(f'{PATH_TEST_FILES}/result.csv.test')
     result_fname = pipeline._check_aux_file(filename)
 
     assert result_fname == expected_fname
@@ -155,14 +160,11 @@ def test_process_paths_in_input():
 
     Expected
     --------
-    expected_paths and image_paths should contain the same filenames.
+    TEST_INPUT_IMAGES and image_paths should contain the same filenames.
     """
-    input_name = 'mothra/tests/test_files/input_file.txt'
-    expected_paths = ['mothra/tests/test_files/test_input/BMNHE_500607.JPG',
-                      'mothra/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG']
-    image_paths = pipeline._process_paths_in_input(input_name)
+    image_paths = pipeline._process_paths_in_input(TEST_INPUT_FILE)
 
-    assert image_paths.sort() == expected_paths.sort()
+    assert image_paths.sort() == TEST_INPUT_IMAGES.sort()
 
 
 def test_read_paths_in_file():
@@ -176,14 +178,11 @@ def test_read_paths_in_file():
 
     Expected
     --------
-    expected_paths and image_paths should contain the same filenames.
+    TEST_INPUT_IMAGES and image_paths should contain the same filenames.
     """
-    input_name = 'mothra/tests/test_files/input_file.txt'
-    expected_paths = ['mothra/tests/test_files/test_input/BMNHE_500607.JPG',
-                      'mothra/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG']
-    image_paths = pipeline._read_paths_in_file(input_name)
+    image_paths = pipeline._read_paths_in_file(TEST_INPUT_FILE)
 
-    assert image_paths.sort() == expected_paths.sort()
+    assert image_paths.sort() == TEST_INPUT_IMAGES.sort()
 
 
 def test_write_csv_data():
@@ -199,7 +198,7 @@ def test_write_csv_data():
     --------
     Rows in expected_lines and csv_fname are equal.
     """
-    csv_fname = 'mothra/tests/test_files/test.csv'
+    csv_fname = f'{PATH_TEST_FILES}/test.csv'
     image_name = 'test_image'
     dist_mm = {
         "dist_l": 'test_l',
