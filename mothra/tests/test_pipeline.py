@@ -94,9 +94,11 @@ def test_initialize_csv_file():
 
     assert result_csv.is_file()
 
+    # deleting file, else next round of tests will have a different filename
     result_csv.unlink()
 
     expected_csv = Path('mothra/tests/test_files/test_file.csv')
+
     assert expected_csv == result_csv
 
 
