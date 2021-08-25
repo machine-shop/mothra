@@ -231,3 +231,22 @@ def test_write_csv_data():
 
     # deleting file, else next round of tests will have more rows
     result_csv.unlink()
+
+
+def test_read_filenames_in_folder():
+    """Check if filenames in folder are read properly.
+
+    Summary
+    -------
+    We pass a folder containing a number of known input images, and
+    check if pipeline._read_filenames_in_folders reads their filenames
+    properly.
+
+    Expected
+    --------
+    result_fnames and TEST_INPUT_IMAGES contain the same filenames.
+    """
+    test_folder = f'{PATH_TEST_FILES}/test_input/'
+    result_fnames = pipeline._read_filenames_in_folder(test_folder)
+
+    assert result_fnames.sort() == TEST_INPUT_IMAGES.sort()
