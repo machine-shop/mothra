@@ -187,7 +187,16 @@ def test_read_paths_in_file():
 
 
 def test_write_csv_data():
-    """ Check if 
+    """ Check if data is written properly in the CSV file.
+
+    Summary
+    -------
+    We create a CSV file with test data and check if the data
+    was written properly to the file.
+
+    Expected
+    --------
+    Rows in expected_lines and csv_fname are equal.
     """
     csv_fname = 'mothra/tests/test_files/test.csv'
     image_name = 'test_image'
