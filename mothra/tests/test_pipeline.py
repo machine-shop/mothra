@@ -191,8 +191,9 @@ def test_write_csv_data():
 
     Summary
     -------
-    We create a CSV file with test data and check if the data
-    was written properly to the file.
+    We create a CSV file with test data and check if the
+    function pipeline._write_csv_data writes the data
+    properly to the file.
 
     Expected
     --------
