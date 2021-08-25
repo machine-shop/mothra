@@ -97,7 +97,6 @@ def test_initialize_csv_file():
 
     # deleting file, else next round of tests will have a different filename
     result_csv.unlink()
-
     expected_csv = Path('mothra/tests/test_files/test_file.csv')
 
     assert expected_csv == result_csv
@@ -145,27 +144,6 @@ def test_check_aux_file():
     assert result_fname == expected_fname
 
 
-def test_read_paths_in_file():
-    """Checks if files from a folder within an input text file are correctly
-    read.
-
-    Summary
-    -------
-    We provide the path for a text file containing the path for a folder, and
-    check if the filenames are read by pipeline._read_paths_in_file.
-
-    Expected
-    --------
-    expected_paths and image_paths should contain the same filenames.
-    """
-    input_name = 'mothra/tests/test_files/input_file.txt'
-    expected_paths = ['mothra/tests/test_files/test_input/BMNHE_500607.JPG',
-                      'mothra/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG']
-    image_paths = pipeline._read_paths_in_file(input_name)
-
-    assert image_paths.sort() == expected_paths.sort()
-
-
 def test_process_paths_in_input():
     """Checks if files from a folder within an input text file are correctly
     read.
@@ -183,6 +161,27 @@ def test_process_paths_in_input():
     expected_paths = ['mothra/tests/test_files/test_input/BMNHE_500607.JPG',
                       'mothra/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG']
     image_paths = pipeline._process_paths_in_input(input_name)
+
+    assert image_paths.sort() == expected_paths.sort()
+
+
+def test_read_paths_in_file():
+    """Checks if files from a folder within an input text file are correctly
+    read.
+
+    Summary
+    -------
+    We provide the path for a text file containing the path for a folder, and
+    check if the filenames are read by pipeline._read_paths_in_file.
+
+    Expected
+    --------
+    expected_paths and image_paths should contain the same filenames.
+    """
+    input_name = 'mothra/tests/test_files/input_file.txt'
+    expected_paths = ['mothra/tests/test_files/test_input/BMNHE_500607.JPG',
+                      'mothra/tests/test_files/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG']
+    image_paths = pipeline._read_paths_in_file(input_name)
 
     assert image_paths.sort() == expected_paths.sort()
 
