@@ -76,6 +76,30 @@ def test_create_layout():
         assert ax is None
 
 
+def test_initialize_csv_file():
+    """Checks if CSV file is initialized properly, and if its filename
+    is correct.
+
+    Summary
+    -------
+    We pass a filename to pipeline.initialize_csv_file, check if the
+    file is created in disk, and if the name is the same as expected.
+
+    Expected
+    --------
+    result_csv is a file on disk, and its name is equal to expected_csv.
+    """
+    csv_fname = 'mothra/tests/test_files/test_file.csv'
+    result_csv = pipeline.initialize_csv_file(csv_fname)
+
+    assert result_csv.is_file()
+
+    result_csv.unlink()
+
+    expected_csv = Path('mothra/tests/test_files/test_file.csv')
+    assert expected_csv == result_csv
+
+
 def test_read_orientation():
     """Checks if orientation is extracted correctly from EXIF data.
 
