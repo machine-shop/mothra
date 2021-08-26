@@ -89,7 +89,7 @@ def test_rescale_image(fake_bfly_layout):
 
     Expected
     --------
-    The input image and it's decimated/rescaled version should have the same
+    The input image and its decimated/rescaled version should have the same
     size.
     """
     bfly, _ = fake_bfly_layout

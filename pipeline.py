@@ -183,6 +183,7 @@ def _check_aux_file(filename):
 def _process_paths_in_input(input_name):
     """Helper function. Process the input argument and returns the images
     in path."""
+    image_paths = []
     try:
         if os.path.isfile(input_name):
             # if input is a text file, reads paths listed in it.
@@ -202,7 +203,7 @@ def _process_paths_in_input(input_name):
 
 def _read_paths_in_file(input_name):
     """Helper function. Reads image paths in input file."""
-    image_paths = []
+    image_paths, aux_paths = [], []
     with open(input_name) as txt_file:
         for item in txt_file:
             try:
