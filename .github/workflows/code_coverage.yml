@@ -1,7 +1,5 @@
 name: Checking coverage and CodeCov
 on: [push, pull_request]
-ignore:
-  - "**/tests/*"
 jobs:
   run:
     runs-on: ubuntu-latest
