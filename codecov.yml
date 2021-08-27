@@ -1,2 +1,2 @@
-# As seen in https://about.codecov.io/blog/python-code-coverage-using-github-actions-and-codecov/,
-# The file can be empty, it just needs to exist.
+ignore:
+  - "**/tests/*"
