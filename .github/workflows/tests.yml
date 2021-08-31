@@ -12,10 +12,8 @@ jobs:
            python-version: [3.7, 3.8, 3.9]
 
     steps:
-        - name: Setup Python
+        - name: Checkout mothra
         - uses: actions/checkout@v2
-            with:
-            fetch-depth: 2
 
         - name: Setup Python
           uses: actions/setup-python@v2
