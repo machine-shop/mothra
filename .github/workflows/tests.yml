@@ -6,23 +6,24 @@ jobs:
   test_mothra_on_linux:
     name: Linux — Python ${{ matrix.python-version }}
     runs-on: ubuntu-20.04
-  strategy:
-    fail-fast: false
-    matrix:
-      python-version: [3.7, 3.8, 3.9]
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
 
   steps:
+  - name: Checkout mothra
     uses: actions/checkout@v2
     with:
       fetch-depth: 2
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version}}
+  - name: Setup Python
+    uses: actions/setup-python@v2
+    with:
+      python-version: ${{ matrix.python-version}}
 
-    - name: Run tests
-      run: |
-           pip install coverage pytest
-           pip install -r requirements.txt
-           PYTHONPATH=. pytest
+  - name: Run tests
+    run: |
+         pip install coverage pytest
+         pip install -r requirements.txt
+         PYTHONPATH=. pytest
