@@ -13,9 +13,7 @@ jobs:
 
   steps:
     - name: Checkout mothra
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
+      uses: actions/checkout@v1
 
     - name: Setup Python
       uses: actions/setup-python@v2
