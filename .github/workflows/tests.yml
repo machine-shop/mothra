@@ -14,14 +14,16 @@ jobs:
     steps:
         - name: Checkout mothra
         - uses: actions/checkout@v2
+          with:
+              fetch-depth: 2
 
         - name: Setup Python
           uses: actions/setup-python@v2
           with:
               python-version: ${{ matrix.python-version}}
 
-    - name: Run tests
-      run: |
-        pip install coverage pytest
-        pip install -r requirements.txt
-        PYTHONPATH=. pytest
+        - name: Run tests
+          run: |
+            pip install coverage pytest
+            pip install -r requirements.txt
+            PYTHONPATH=. pytest
