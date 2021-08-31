@@ -3,13 +3,15 @@ name: Running tests
 on: [push, pull_request]
 
 jobs:
-  test_mothra_on_linux:
-    name: Linux — Python ${{ matrix.python-version }}
-    runs-on: ubuntu-20.04
+  # starting test suite:
+  test_suite:
+    name: ${{ matrix.os }} — py ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
+        [ubuntu-20.04, macos-latest, windows-latest]
         python-version: [3.7, 3.8, 3.9]
 
     steps:
