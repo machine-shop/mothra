@@ -32,13 +32,12 @@ jobs:
            PYTHONPATH=. pytest
 
   test_suite_for_win:
-    name: ${{ matrix.os }} — py ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
+    name: windows-latest — py ${{ matrix.python-version }}
+    runs-on: windows-latest
 
     strategy:
       fail-fast: false
       matrix:
-        os: windows-latest
         python-version: [3.7, 3.8, 3.9]
 
     steps:
