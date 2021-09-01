@@ -28,3 +28,6 @@ jobs:
         pip install -r requirements.txt
         PYTHONPATH=. coverage run -m pytest
         coverage report -m
+
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v2
