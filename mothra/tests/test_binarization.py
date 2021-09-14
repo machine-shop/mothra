@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from mothra import binarization
-from pipeline import label_func
+from mothra.binarization import label_func
 from skimage import draw
 from skimage.io import imread
 from skimage.util import img_as_bool
@@ -20,13 +20,6 @@ TAGS_SEG = './mothra/tests/test_files/test_input/BMNHE_500607-tags.png.seg'
 
 # prediction weights.
 WEIGHTS_BIN = './models/segmentation_test-4classes.pkl'
-
-
-# required by fastai while predicting:
-@pytest.fixture(scope="module")
-def label_func(image):
-    """Function used to label images while training. Required by fastai."""
-    return path/"labels"/f"{image.stem}{LABEL_EXT}"
 
 
 @pytest.fixture(scope="module")
