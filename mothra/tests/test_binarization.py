@@ -2,10 +2,31 @@ import numpy as np
 import pytest
 
 from mothra import binarization
+from pipeline import label_func
 from skimage import draw
+from skimage.io import imread
+from skimage.util import img_as_bool
 
 # defining labels for classes in the processed images.
 TAGS_LABEL = 1
+
+# defining RGB test image.
+IMAGE_RGB = './mothra/tests/test_files/test_input/BMNHE_500607.JPG'
+
+# binarized images.
+LEPID_SEG = './mothra/tests/test_files/test_input/BMNHE_500607-lepid.png.seg'
+RULER_SEG = './mothra/tests/test_files/test_input/BMNHE_500607-ruler.png.seg'
+TAGS_SEG = './mothra/tests/test_files/test_input/BMNHE_500607-tags.png.seg'
+
+# prediction weights.
+WEIGHTS_BIN = './models/segmentation_test-4classes.pkl'
+
+
+# required by fastai while predicting:
+@pytest.fixture(scope="module")
+def label_func(image):
+    """Function used to label images while training. Required by fastai."""
+    return path/"labels"/f"{image.stem}{LABEL_EXT}"
 
 
 @pytest.fixture(scope="module")
@@ -142,6 +163,29 @@ def test_find_tags_edge_missing_tags(fake_lepid_no_tags):
     result = binarization.find_tags_edge(tags_bin=lepid_no_tags, top_ruler=230)
 
     assert (result >= 399)
+
+
+def test_binarization():
+    """Testing function binarization.binarization.
+
+    Summary
+    -------
+
+
+    Expected
+    --------
+    """
+
+    lepid_rgb = imread(IMAGE_RGB)
+    tags_result, ruler_result, lepid_result = binarization.binarization(
+        image_rgb=lepid_rgb,
+        weights=WEIGHTS_BIN)
+
+    tags_expected = img_as_bool(imread(TAGS_SEG))
+    ruler_expected = img_as_bool(imread(RULER_SEG))
+    lepid_expected = img_as_bool(imread(LEPID_SEG))
+
+    assert (lepid_expected.all() == lepid_result.all())
 
 
 def test_return_bbox_largest_region(fake_lepid_layout):
