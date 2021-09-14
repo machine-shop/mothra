@@ -144,6 +144,29 @@ def test_missing_tags(fake_lepid_no_tags):
     assert (result >= 399)
 
 
+def test_return_bbox_largest_region(fake_lepid_layout):
+    """Testing function binarization.return_bbox_largest_region.
+
+    Summary
+    -------
+    We pass a binary input image with a region and compare the resulting
+    bounding box from binarization.return_bbox_largest_region with the expected
+    result.
+
+    Expected
+    --------
+    Resulting and expected bounding boxes are equal.
+    """
+    lepid, _ = fake_lepid_layout
+    lepid = (lepid == 3)  # getting only the lepidopteran
+
+    bbox_result = binarization.return_bbox_largest_region(lepid)
+
+    bbox_expected = (50, 50, 181, 221)
+
+    assert bbox_result == bbox_expected
+
+
 def test_return_largest_region(fake_lepid_layout):
     """Testing function binarization.return_largest_region.
 
