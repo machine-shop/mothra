@@ -2,10 +2,19 @@ import numpy as np
 import pytest
 
 from mothra import binarization
-from mothra.binarization import label_func
 from skimage import draw
 from skimage.io import imread
 from skimage.util import img_as_bool
+
+
+# required by fastai while predicting:
+def label_func(image):
+    """Function used to label images while training. Required by fastai."""
+    return path/"labels"/f"{image.stem}{LABEL_EXT}"
+
+# a dirty trick, so pytorch sees label_func
+import __main__; __main__.label_func = label_func
+
 
 # defining labels for classes in the processed images.
 TAGS_LABEL = 1

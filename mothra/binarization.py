@@ -23,12 +23,6 @@ WEIGHTS_BIN = './models/segmentation_test-4classes.pkl'
 TOL_ELEM = 50
 
 
-# required by fastai while predicting:
-def label_func(image):
-    """Function used to label images while training. Required by fastai."""
-    return path/"labels"/f"{image.stem}{LABEL_EXT}"
-
-
 def _rescale_image(image_refer, image_to_rescale):
     """Helper function. Rescale image back to original size, according to
     reference."""
