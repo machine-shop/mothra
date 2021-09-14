@@ -121,7 +121,7 @@ def test_find_tags_edge(fake_lepid_layout):
     assert (250 <= result <= 260)
 
 
-def test_missing_tags(fake_lepid_no_tags):
+def test_find_tags_edge_missing_tags(fake_lepid_no_tags):
     """Testing function binarization.find_tags_edge.
 
     Summary
