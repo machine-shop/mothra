@@ -80,10 +80,11 @@ def fake_lepid_no_tags():
 
 
 def test_rescale_image(fake_lepid_layout):
+    """Testing function binarization._rescale_image.
 
     Summary
     -------
-    We decimate an input image, rescale it using binarization.binarization
+    We decimate an input image, rescale it using binarization._rescale_image
     and compare their sizes.
 
     Expected
@@ -121,6 +122,7 @@ def test_find_tags_edge(fake_lepid_layout):
 
 
 def test_missing_tags(fake_lepid_no_tags):
+    """Testing function binarization.find_tags_edge.
 
     Summary
     -------
@@ -147,7 +149,7 @@ def test_return_largest_region():
 
     Summary
     -------
-    We pass a binary input image with three regions and check if the result
+    We pass a binary input image with three regions and check if the resulting
     image from binarization.return_largest_region contains only the largest
     one.
 
