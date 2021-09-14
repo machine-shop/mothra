@@ -144,7 +144,7 @@ def test_missing_tags(fake_lepid_no_tags):
     assert (result >= 399)
 
 
-def test_return_largest_region():
+def test_return_largest_region(fake_lepid_layout):
     """Testing function binarization.return_largest_region.
 
     Summary
@@ -157,28 +157,9 @@ def test_return_largest_region():
     --------
     Resulting image has only the largest region.
     """
-    img_test = np.asarray([[0, 0, 1, 1, 0, 0, 0, 0, 1, 0],
-                           [0, 1, 1, 1, 1, 0, 0, 0, 1, 1],
-                           [1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
-                           [1, 1, 1, 1, 1, 1, 0, 0, 1, 0],
-                           [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-                           [0, 1, 1, 1, 1, 0, 0, 1, 1, 0],
-                           [0, 1, 1, 1, 1, 0, 0, 1, 1, 1],
-                           [1, 1, 1, 1, 1, 0, 0, 1, 1, 1],
-                           [0, 1, 1, 1, 0, 0, 0, 0, 1, 0],
-                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype='bool')
+    lepid, _ = fake_lepid_layout
+    img_result = binarization.return_largest_region(lepid)
 
-    img_expect = np.asarray([[0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
-                             [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-                             [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-                             [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-                             [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-                             [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-                             [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-                             [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-                             [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype='bool')
-
-    img_result = binarization.return_largest_region(img_test)
+    img_expect = (lepid == 3)  # getting only the lepidopteran
 
     assert (img_expect.all() == img_result.all())
