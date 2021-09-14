@@ -9,8 +9,8 @@ TAGS_LABEL = 1
 
 
 @pytest.fixture(scope="module")
-def fake_bfly_layout():
-    """Implements a "fake butterfly" input image containing ruler and
+def fake_lepid_layout():
+    """Implements a "fake lepidopteran" input image containing ruler and
     identification tags, that mimics the others on the actual lepidopteran
     datasets.
 
@@ -31,24 +31,24 @@ def fake_bfly_layout():
     # creating ruler.
     img_classes[230:] = 2
 
-    # creating "butterfly".
-    bfly_upper, bfly_lower = 50, 180
-    bfly_left, bfly_right = 50, 220
-    bfly_height = bfly_lower - bfly_upper
-    bfly_width = bfly_right - bfly_left
+    # creating "lepidopteran".
+    lepid_upper, lepid_lower = 50, 180
+    lepid_left, lepid_right = 50, 220
+    lepid_height = lepid_lower - lepid_upper
+    lepid_width = lepid_right - lepid_left
 
     rr, cc = draw.polygon(
-        [bfly_upper, bfly_upper, bfly_lower],
-        [bfly_left, bfly_right, (bfly_left + bfly_right) / 2]
+        [lepid_upper, lepid_upper, lepid_lower],
+        [lepid_left, lepid_right, (lepid_left + lepid_right) / 2]
     )
     img_classes[rr, cc] = 3
 
-    return img_classes, (bfly_height, bfly_width)
+    return img_classes, (lepid_height, lepid_width)
 
 
 @pytest.fixture(scope="module")
-def fake_bfly_no_tags():
-    """Implements a "fake butterfly" input image containing ruler, but no
+def fake_lepid_no_tags():
+    """Implements a "fake lepidopteran" input image containing ruler, but no
     tags, that mimics the others on the actual lepidopteran datasets.
 
     Notes
@@ -64,23 +64,22 @@ def fake_bfly_no_tags():
     # creating ruler.
     img_classes[230:] = 2
 
-    # creating "butterfly".
-    bfly_upper, bfly_lower = 50, 180
-    bfly_left, bfly_right = 50, 220
-    bfly_height = bfly_lower - bfly_upper
-    bfly_width = bfly_right - bfly_left
+    # creating "lepidopteran".
+    lepid_upper, lepid_lower = 50, 180
+    lepid_left, lepid_right = 50, 220
+    lepid_height = lepid_lower - lepid_upper
+    lepid_width = lepid_right - lepid_left
 
     rr, cc = draw.polygon(
-        [bfly_upper, bfly_upper, bfly_lower],
-        [bfly_left, bfly_right, (bfly_left + bfly_right) / 2]
+        [lepid_upper, lepid_upper, lepid_lower],
+        [lepid_left, lepid_right, (lepid_left + lepid_right) / 2]
     )
     img_classes[rr, cc] = 3
 
-    return img_classes, (bfly_height, bfly_width)
+    return img_classes, (lepid_height, lepid_width)
 
 
-def test_rescale_image(fake_bfly_layout):
-    """Testing function binarization.binarization.
+def test_rescale_image(fake_lepid_layout):
 
     Summary
     -------
@@ -92,16 +91,16 @@ def test_rescale_image(fake_bfly_layout):
     The input image and its decimated/rescaled version should have the same
     size.
     """
-    bfly, _ = fake_bfly_layout
-    bfly_dec = bfly[::4]
-    bfly_dec_rescaled = binarization._rescale_image(image_refer=bfly,
-                                                    image_to_rescale=bfly_dec)
+    lepid, _ = fake_lepid_layout
+    lepid_dec = lepid[::4]
+    lepid_dec_rescaled = binarization._rescale_image(image_refer=lepid,
+                                                    image_to_rescale=lepid_dec)
 
-    assert (bfly_dec_rescaled.shape == bfly.shape)
+    assert (lepid_dec_rescaled.shape == lepid.shape)
 
 
-def test_find_tags_edge(fake_bfly_layout):
-    """Testing function binarization.binarization.
+def test_find_tags_edge(fake_lepid_layout):
+    """Testing function binarization.find_tags_edge.
 
     Summary
     -------
@@ -113,16 +112,15 @@ def test_find_tags_edge(fake_bfly_layout):
     --------
     Edge of the tags, returned as an X coordinate, is in a proper place.
     """
-    bfly, _ = fake_bfly_layout
+    lepid, _ = fake_lepid_layout
     # returning a binary image containing only tags.
-    bfly_tags = bfly * (bfly == TAGS_LABEL)
+    lepid_tags = lepid * (lepid == TAGS_LABEL)
 
-    result = binarization.find_tags_edge(tags_bin=bfly_tags, top_ruler=230)
+    result = binarization.find_tags_edge(tags_bin=lepid_tags, top_ruler=230)
     assert (250 <= result <= 260)
 
 
-def test_missing_tags(fake_bfly_no_tags):
-    """Testing function binarization.binarization.
+def test_missing_tags(fake_lepid_no_tags):
 
     Summary
     -------
@@ -134,12 +132,12 @@ def test_missing_tags(fake_bfly_no_tags):
     image. That could probably impair the measurement process, but the
     pipeline won't crash.
     """
-    bfly, _ = fake_bfly_no_tags
+    lepid, _ = fake_lepid_no_tags
     # returning a binary image containing no tags.
-    bfly_no_tags = bfly * (bfly == TAGS_LABEL)
-    print(bfly_no_tags, bfly_no_tags.shape)
+    lepid_no_tags = lepid * (lepid == TAGS_LABEL)
+    print(lepid_no_tags, lepid_no_tags.shape)
 
-    result = binarization.find_tags_edge(tags_bin=bfly_no_tags, top_ruler=230)
+    result = binarization.find_tags_edge(tags_bin=lepid_no_tags, top_ruler=230)
 
     assert (result >= 399)
 
