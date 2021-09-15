@@ -184,7 +184,13 @@ def test_binarization():
         weights=WEIGHTS_BIN)
 
     tags_expected = img_as_bool(imread(TAGS_SEG))
+
+    assert (tags_expected.all() == tags_result.all())
+
     ruler_expected = img_as_bool(imread(RULER_SEG))
+
+    assert (ruler_expected.all() == ruler_result.all())
+
     lepid_expected = img_as_bool(imread(LEPID_SEG))
 
     assert (lepid_expected.all() == lepid_result.all())
