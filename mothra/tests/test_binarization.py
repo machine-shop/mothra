@@ -172,12 +172,15 @@ def test_binarization():
 
     Summary
     -------
+    We pass a test image to binarization.binarization and check if its results
+    are equal to the expected.
 
 
     Expected
     --------
+    Expected tags, ruler and lepidopteran are equal to the ones returned by
+    binarization.binarization.
     """
-
     lepid_rgb = imread(IMAGE_RGB)
     tags_result, ruler_result, lepid_result = binarization.binarization(
         image_rgb=lepid_rgb,
