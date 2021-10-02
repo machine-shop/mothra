@@ -99,7 +99,7 @@ def detect_inner_pix(half_binary, outer_pix, side):
 
     markers, _ = ndi.label(focus_inv, ndi.generate_binary_structure(2, 1))
     regions = regionprops(markers)
-    areas = [r.area for r in regions]
+
     # if idx in regions is not 0, downside is considered for inner_pix, instead of upside
     coords = regions[0].coords
     y_max = np.max(coords[:, 0])
