@@ -100,8 +100,8 @@ def detect_inner_pix(half_binary, outer_pix, side):
     markers, _ = ndi.label(focus_inv, ndi.generate_binary_structure(2, 1))
     regions = regionprops(markers)
     areas = [r.area for r in regions]
-    idx_max = np.argmax(areas)
-    coords = regions[idx_max].coords
+    # if idx in regions is not 0, downside is considered for inner_pix, instead of upside
+    coords = regions[0].coords
     y_max = np.max(coords[:, 0])
     mask = (coords[:, 0] == y_max)
     selection = coords[mask]
@@ -110,9 +110,9 @@ def detect_inner_pix(half_binary, outer_pix, side):
     else:
         idx = np.argmin(selection[:, 1])
 
-    outer_pix = selection[idx]
+    inner_pix = selection[idx]
 
-    return outer_pix
+    return inner_pix
 
 
 def split_picture(binary):
