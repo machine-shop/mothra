@@ -87,6 +87,16 @@ def detect_inner_pix(half_binary, outer_pix, side):
     -------
     inner_pix : 2D array
         relative coordinates of the inner pixel (r, c)
+
+    Notes
+    -----
+    This function returns `inner_pix` from the following steps:
+    1. Obtains `focus`, the region where to look for `inner_pix`;
+    2. Gathers `focus_inv`, the inverse of `focus`, and returns the
+       information on its regions;
+    3. From the top region of `focus_inv`, the shoulder of the
+       lepidopteran — the farthest point at the rows — is chosen
+       as `inner_pix`.
     """
     lower_bound = int(half_binary.shape[0]*0.75)
 
@@ -99,9 +109,10 @@ def detect_inner_pix(half_binary, outer_pix, side):
 
     markers, _ = ndi.label(focus_inv, ndi.generate_binary_structure(2, 1))
     regions = regionprops(markers)
-    areas = [r.area for r in regions]
-    idx_max = np.argmax(areas)
-    coords = regions[idx_max].coords
+
+    # if idx in regions is not 0, bottom region is considered for inner_pix,
+    # instead of top region
+    coords = regions[0].coords
     y_max = np.max(coords[:, 0])
     mask = (coords[:, 0] == y_max)
     selection = coords[mask]
@@ -110,9 +121,9 @@ def detect_inner_pix(half_binary, outer_pix, side):
     else:
         idx = np.argmin(selection[:, 1])
 
-    outer_pix = selection[idx]
+    inner_pix = selection[idx]
 
-    return outer_pix
+    return inner_pix
 
 
 def split_picture(binary):
