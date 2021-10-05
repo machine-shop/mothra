@@ -12,7 +12,7 @@ from skimage.io import imread
 from skimage.util import img_as_float
 
 
-PATH_TEST_FILES = 'mothra/tests/test_files/'
+PATH_TEST_FILES = 'mothra/tests/test_files'
 TEST_CSV_FILE = f'{PATH_TEST_FILES}/test_file.csv'
 TEST_INPUT_FILE = f'{PATH_TEST_FILES}/input_file.txt'
 TEST_INPUT_IMAGES = glob(f'{PATH_TEST_FILES}/test_input/*.JPG')
