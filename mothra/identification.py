@@ -81,18 +81,19 @@ def main(image_rgb):
         Gender of the lepidopteran, or N/A if position is `upside_down`.
     """
     print('Identifying position and gender...')
-    pos_and_gender = predict_gender(image_rgb, weights=WEIGHTS_GENDER)
+    try:
+        pos_and_gender = predict_gender(image_rgb, weights=WEIGHTS_GENDER)
 
-    if pos_and_gender == 'upside_down':
-        position = pos_and_gender
+        if pos_and_gender == 'upside_down':
+            position = pos_and_gender
+            gender = 'N/A'
+            print(f'* Position: {position}\n * Gender: {gender}')
+        else:
+            position = 'right-side_up'
+            gender = pos_and_gender
+            print(f'* Position: {position}\n* Gender: {gender}')
+    except AttributeError:  # 'Compose' object has no attribute 'is_check_args'
+        position = 'N/A'
         gender = 'N/A'
-
-        print(f'* Position: {position}\n * Gender: {gender}')
-
-    else:
-        position = 'right-side_up'
-        gender = pos_and_gender
-
-        print(f'* Position: {position}\n* Gender: {gender}')
 
     return position, gender
