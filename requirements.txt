@@ -1,4 +1,4 @@
-albumentations
+albumentations == 1.0.3
 matplotlib
 scikit-image
 numpy
