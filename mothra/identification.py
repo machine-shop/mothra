@@ -95,5 +95,6 @@ def main(image_rgb):
     except AttributeError:  # 'Compose' object has no attribute 'is_check_args'
         position = 'N/A'
         gender = 'N/A'
+        print(f'* Could not calculate position and gender')
 
     return position, gender
