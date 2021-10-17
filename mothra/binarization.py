@@ -7,8 +7,7 @@ from fastai.vision.learner import load_learner
 from pathlib import Path
 from mothra import connection, ruler_detection
 
-location = './cachedir'
-memory = Memory(location, verbose=0)
+from .cache import memory
 
 # Height of extra margin to make sure all of the ruler is cropped out in find_tags_edge.
 # Percent of height of the image
