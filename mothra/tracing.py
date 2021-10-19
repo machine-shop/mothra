@@ -5,8 +5,7 @@ from joblib import Memory
 from scipy.ndimage.morphology import binary_dilation
 
 
-location = './cachedir'
-memory = Memory(location, verbose=0)
+from .cache import memory
 
 
 def remove_antenna(half_binary):

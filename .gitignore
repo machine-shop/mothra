@@ -1,4 +1,5 @@
 .pytest_cache
+\#*
 *~
 pictures/
 **/__pycache__

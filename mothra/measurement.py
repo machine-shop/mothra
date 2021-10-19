@@ -1,8 +1,7 @@
 import numpy as np
 from joblib import Memory
 
-location = './cachedir'
-memory = Memory(location, verbose=0)
+from .cache import memory
 
 
 @memory.cache(ignore=['axes'])

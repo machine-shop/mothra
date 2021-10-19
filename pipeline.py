@@ -4,8 +4,6 @@ import numpy as np
 import os
 import argparse
 import csv
-from mothra import (ruler_detection, tracing, measurement, binarization,
-                    identification)
 import matplotlib.pyplot as plt
 from skimage.io import imread
 from skimage.transform import rotate
@@ -298,6 +296,11 @@ def main():
                         help='Path of the resulting csv file',
                         default='outputs/results.csv')
 
+    # Disable cache
+    parser.add_argument('--cache',
+                        action='store_true',
+                        help='Enable computation cache (useful when developing algorithms)')
+
     args = parser.parse_args()
 
     # Initialization
@@ -333,6 +336,15 @@ def main():
     image_paths = _process_paths_in_input(input_name)
 
     number_of_images = len(image_paths)
+
+    # Set up caching and import motha modules
+    if args.cache:
+        from mothra import cache
+        import joblib
+        cache.memory = joblib.Memory('./cachedir', verbose=0)
+
+    from mothra import (ruler_detection, tracing, measurement, binarization,
+                        identification)
 
     for i, image_path in enumerate(image_paths):
         try:

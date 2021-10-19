@@ -6,8 +6,7 @@ from scipy import ndimage as ndi
 from joblib import Memory
 import matplotlib.patches as patches
 
-location = './cachedir'
-memory = Memory(location, verbose=0)
+from .cache import memory
 
 RULER_TOP = 0.7
 RULER_LEFT = 0.2
