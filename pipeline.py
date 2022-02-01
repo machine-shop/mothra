@@ -379,7 +379,7 @@ def main():
                                                   T_space,
                                                   axes)
                     # measuring position and gender
-                    position, gender = identification.main(image_rgb)
+                    position, gender, probabilities = identification.main(image_rgb)
 
                     with open(args.path_csv, 'a') as csv_file:
                         _write_csv_data(csv_file, image_name, dist_mm, position,

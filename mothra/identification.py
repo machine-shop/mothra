@@ -4,6 +4,7 @@ from mothra import connection
 
 
 WEIGHTS_GENDER = './models/id_gender_test-3classes.pkl'
+CLASSES = {0: 'upside_down', 1: 'female', 2: 'male'}
 
 
 def predict_gender(image_rgb, weights=WEIGHTS_GENDER):
@@ -23,7 +24,8 @@ def predict_gender(image_rgb, weights=WEIGHTS_GENDER):
         Prediction obtained with the given weights, between the classes
         `female`, `male`, or `upside_down`.
     probabilities : 1D array
-        Probabilities of prediction returned by the network for each class.
+        Probabilities for the prediction returned by the network for each
+        class.
 
     Notes
     -----
@@ -57,6 +59,9 @@ def main(image_rgb):
         Position of the lepidopteran: `right-side_up` or `upside_down`.
     gender : str
         Gender of the lepidopteran, or N/A if position is `upside_down`.
+    probabilities : 1D array
+        Probabilities for the prediction returned by the network for each
+        class.
     """
     print('Identifying position and gender...')
     try:
@@ -65,14 +70,17 @@ def main(image_rgb):
         if prediction == 'upside_down':
             position = prediction
             gender = 'N/A'
-            print(f'* Position: {position}\n * Gender: {gender}')
         else:
             position = 'right-side_up'
             gender = prediction
-            print(f'* Position: {position}\n* Gender: {gender}')
+        print(f'* Position: {position}\n* Gender: {gender}')\
+
+        print('Probabilities:')
+        for idx, probability in enumerate(probabilities):
+            print(f'* {CLASSES[idx]}: {probability}')
     except AttributeError:  # 'Compose' object has no attribute 'is_check_args'
         position = 'N/A'
         gender = 'N/A'
         print(f'* Could not calculate position and gender')
 
-    return position, gender
+    return position, gender, probabilities
