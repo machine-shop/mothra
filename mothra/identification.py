@@ -1,3 +1,5 @@
+import numpy as np
+
 from fastai.vision.learner import load_learner
 from pathlib import Path
 from mothra import connection
@@ -65,7 +67,11 @@ def main(image_rgb):
     """
     print('Identifying position and gender...')
     try:
-        prediction, probabilities = predict_gender(image_rgb, weights=WEIGHTS_GENDER)
+        prediction, probabilities = predict_gender(image_rgb,
+                                                   weights=WEIGHTS_GENDER)
+
+        # converting probabilities to numpy array and rounding the result
+        probabilities = np.around(probabilities.numpy(), decimals=4)
 
         if prediction == 'upside_down':
             position = prediction
