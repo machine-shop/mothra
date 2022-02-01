@@ -100,7 +100,8 @@ def initialize_csv_file(csv_fname):
                  'wing_span (mm)',
                  'wing_shoulder (mm)',
                  'position',
-                 'gender']
+                 'gender',
+                 'probabilities']
 
     with open(csv_fname, 'w') as csv_file:
         writer = csv.writer(csv_file)
@@ -217,7 +218,8 @@ def _read_paths_in_file(input_name):
     return list(set(image_paths))  # remove duplicated entries from list
 
 
-def _write_csv_data(csv_file, image_name, dist_mm, position, gender):
+def _write_csv_data(csv_file, image_name, dist_mm, position, gender,
+                    probabilities):
     """Helper function. Writes data on the CSV input file."""
     writer = csv.writer(csv_file)
     writer.writerow([image_name,
@@ -228,7 +230,8 @@ def _write_csv_data(csv_file, image_name, dist_mm, position, gender):
                      dist_mm["dist_span"],
                      dist_mm["dist_shoulder"],
                      position,
-                     gender])
+                     gender,
+                     probabilities])
     return None
 
 
@@ -383,7 +386,7 @@ def main():
 
                     with open(args.path_csv, 'a') as csv_file:
                         _write_csv_data(csv_file, image_name, dist_mm, position,
-                                        gender)
+                                        gender, probabilities)
 
             if plot_level > 0:
                 output_path = os.path.normpath(
