@@ -6,8 +6,9 @@ from mothra import connection
 WEIGHTS_GENDER = './models/id_gender_test-3classes.pkl'
 
 
-def _classification(image_rgb, weights):
-    """Helper function. Classifies the input image according to `weights`.
+def predict_gender(image_rgb, weights=WEIGHTS_GENDER):
+    """Predicts position and gender of the lepidopteran in `image_rgb`,
+    according to `weights`.
 
     Parameters
     ----------
@@ -18,8 +19,11 @@ def _classification(image_rgb, weights):
 
     Returns
     -------
-    prediction : int
-        Prediction obtained with the given weights.
+    prediction : string
+        Prediction obtained with the given weights, between the classes
+        `female`, `male`, or `upside_down`.
+    probabilities : 1D array
+        Probabilities of prediction returned by the network for each class.
 
     Notes
     -----
@@ -34,35 +38,10 @@ def _classification(image_rgb, weights):
     # parameters here were defined when training the networks.
     learner = load_learner(fname=weights)
 
-    _, prediction, _ = learner.predict(image_rgb)
+    prediction, _, probabilities = learner.predict(image_rgb)
+    print(prediction, probabilities)
 
-    return int(prediction)
-
-
-def predict_gender(image_rgb, weights=WEIGHTS_GENDER):
-    """Predicts position and gender of the lepidopteran in `image_rgb`.
-
-    Parameters
-    ----------
-    image_rgb : (M, N, 3) ndarray
-        RGB input image contaning lepidopteran, ruler and tags.
-    weights : str or pathlib.Path, optional
-        Path of the file containing weights.
-
-    Returns
-    -------
-    prediction : str
-        Classification obtained from `image_rgb`, being "female",
-        "male", or "upside_down".
-    """
-    pos_and_gender = {
-        0: 'upside_down',
-        1: 'female',
-        2: 'male'
-    }
-    prediction = _classification(image_rgb, weights)
-
-    return pos_and_gender.get(prediction)
+    return prediction, probabilities
 
 
 def main(image_rgb):
@@ -82,15 +61,15 @@ def main(image_rgb):
     """
     print('Identifying position and gender...')
     try:
-        pos_and_gender = predict_gender(image_rgb, weights=WEIGHTS_GENDER)
+        prediction, probabilities = predict_gender(image_rgb, weights=WEIGHTS_GENDER)
 
-        if pos_and_gender == 'upside_down':
-            position = pos_and_gender
+        if prediction == 'upside_down':
+            position = prediction
             gender = 'N/A'
             print(f'* Position: {position}\n * Gender: {gender}')
         else:
             position = 'right-side_up'
-            gender = pos_and_gender
+            gender = prediction
             print(f'* Position: {position}\n* Gender: {gender}')
     except AttributeError:  # 'Compose' object has no attribute 'is_check_args'
         position = 'N/A'
