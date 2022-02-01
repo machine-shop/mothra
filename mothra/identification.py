@@ -39,7 +39,6 @@ def predict_gender(image_rgb, weights=WEIGHTS_GENDER):
     learner = load_learner(fname=weights)
 
     prediction, _, probabilities = learner.predict(image_rgb)
-    print(prediction, probabilities)
 
     return prediction, probabilities
 
