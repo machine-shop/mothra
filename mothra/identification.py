@@ -71,7 +71,8 @@ def main(image_rgb):
                                                    weights=WEIGHTS_GENDER)
 
         # converting probabilities to numpy array and rounding the result
-        probabilities = np.around(probabilities.numpy(), decimals=4)
+        probabilities = [round(prob, ndigits=4)
+                         for prob in probabilities.tolist()]
 
         if prediction == 'down':
             position = 'upside_down'
