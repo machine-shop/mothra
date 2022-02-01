@@ -210,20 +210,22 @@ def test_write_csv_data():
     }
     position = 'test_pos'
     gender = 'test_gender'
+    probabilities = ['prob_1', 'prob_2', 'prob_3']
 
     expected_lines = [
         ['image_id', 'left_wing (mm)', 'right_wing (mm)',
          'left_wing_center (mm)', 'right_wing_center (mm)',
          'wing_span (mm)', 'wing_shoulder (mm)', 'position',
-         'gender'],
-        ['test_image', 'test_l', 'test_r', 'test_dcl',
-         'test_dcr', 'test_span', 'test_shoulder',
-         'test_pos', 'test_gender']
+         'gender', 'probabilities'],
+        ['test_image', 'test_l', 'test_r', 'test_dcl', 'test_dcr',
+        'test_span', 'test_shoulder', 'test_pos', 'test_gender',
+        'test_probabilities']
         ]
 
     result_csv = pipeline.initialize_csv_file(csv_fname)
     with open(csv_fname, 'a') as csv:
-        pipeline._write_csv_data(csv, image_name, dist_mm, position, gender)
+        pipeline._write_csv_data(csv, image_name, dist_mm, position, gender,
+                                 probabilities)
 
     with open(csv_fname, newline='') as csv:
         for idx, row in enumerate(reader(csv)):
