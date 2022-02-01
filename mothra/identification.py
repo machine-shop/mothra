@@ -73,8 +73,8 @@ def main(image_rgb):
         # converting probabilities to numpy array and rounding the result
         probabilities = np.around(probabilities.numpy(), decimals=4)
 
-        if prediction == 'upside_down':
-            position = prediction
+        if prediction == 'down':
+            position = 'upside_down'
             gender = 'N/A'
         else:
             position = 'right-side_up'
