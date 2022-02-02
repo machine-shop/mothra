@@ -3,11 +3,13 @@ from pathlib import Path
 from mothra import connection
 
 
-WEIGHTS_GENDER = './models/id_gender_test-3classes.pkl'
+WEIGHTS_CLASSES = './models/id_gender_test-3classes.pkl'
+CLASSES = {0: 'upside_down', 1: 'female', 2: 'male'}
 
 
-def _classification(image_rgb, weights):
-    """Helper function. Classifies the input image according to `weights`.
+def predicting_classes(image_rgb, weights=WEIGHTS_CLASSES):
+    """Predicts position and gender of the lepidopteran in `image_rgb`,
+    according to `weights`.
 
     Parameters
     ----------
@@ -18,8 +20,12 @@ def _classification(image_rgb, weights):
 
     Returns
     -------
-    prediction : int
-        Prediction obtained with the given weights.
+    prediction : string
+        Prediction obtained with the given weights, between the classes
+        `female`, `male`, or `upside_down`.
+    probabilities : 1D array
+        Probabilities for the prediction returned by the network for each
+        class.
 
     Notes
     -----
@@ -34,35 +40,9 @@ def _classification(image_rgb, weights):
     # parameters here were defined when training the networks.
     learner = load_learner(fname=weights)
 
-    _, prediction, _ = learner.predict(image_rgb)
+    prediction, _, probabilities = learner.predict(image_rgb)
 
-    return int(prediction)
-
-
-def predict_gender(image_rgb, weights=WEIGHTS_GENDER):
-    """Predicts position and gender of the lepidopteran in `image_rgb`.
-
-    Parameters
-    ----------
-    image_rgb : (M, N, 3) ndarray
-        RGB input image contaning lepidopteran, ruler and tags.
-    weights : str or pathlib.Path, optional
-        Path of the file containing weights.
-
-    Returns
-    -------
-    prediction : str
-        Classification obtained from `image_rgb`, being "female",
-        "male", or "upside_down".
-    """
-    pos_and_gender = {
-        0: 'upside_down',
-        1: 'female',
-        2: 'male'
-    }
-    prediction = _classification(image_rgb, weights)
-
-    return pos_and_gender.get(prediction)
+    return prediction, probabilities
 
 
 def main(image_rgb):
@@ -79,22 +59,33 @@ def main(image_rgb):
         Position of the lepidopteran: `right-side_up` or `upside_down`.
     gender : str
         Gender of the lepidopteran, or N/A if position is `upside_down`.
+    probabilities : 1D array
+        Probabilities for the prediction returned by the network for each
+        class.
     """
     print('Identifying position and gender...')
     try:
-        pos_and_gender = predict_gender(image_rgb, weights=WEIGHTS_GENDER)
+        prediction, probabilities = predicting_classes(image_rgb,
+                                                       weights=WEIGHTS_CLASSES)
 
-        if pos_and_gender == 'upside_down':
-            position = pos_and_gender
+        # converting probabilities to numpy array and rounding the result
+        probabilities = [round(prob, ndigits=4)
+                         for prob in probabilities.tolist()]
+
+        if prediction == 'down':
+            position = 'upside_down'
             gender = 'N/A'
-            print(f'* Position: {position}\n * Gender: {gender}')
         else:
             position = 'right-side_up'
-            gender = pos_and_gender
-            print(f'* Position: {position}\n* Gender: {gender}')
+            gender = prediction
+        print(f'* Position: {position}\n* Gender: {gender}')\
+
+        print('Probabilities:')
+        for idx, probability in enumerate(probabilities):
+            print(f'* {CLASSES[idx]}: {probability}')
     except AttributeError:  # 'Compose' object has no attribute 'is_check_args'
         position = 'N/A'
         gender = 'N/A'
         print(f'* Could not calculate position and gender')
 
-    return position, gender
+    return position, gender, probabilities

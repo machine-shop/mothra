@@ -47,6 +47,9 @@ The file with measurement results (default: `results.csv`), returned by this pip
 * `wing_shoulder (mm)`, distance from the left shoulder to the right shoulder.
 * `position`, position of the lepidopteran being `right-side_up` or `upside_down`.
 * `gender`, gender of the lepidopteran being `female` or `male`, returned if `position` is `right-side_up`.
+* `prob_upside_down`, the probability of the prediction returned by the network to be `upside_down`.
+* `prob_female`, the probability of the prediction returned by the network to be `female`.
+* `prob_male`, the probability of the prediction returned by the network to be `male`.
 
 ## Example
 

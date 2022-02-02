@@ -3,13 +3,11 @@
 import numpy as np
 import os
 import argparse
-import csv
 import matplotlib.pyplot as plt
 from skimage.io import imread
 from skimage.transform import rotate
 from skimage.util import img_as_ubyte
 from exif import Image
-from pathlib import Path
 from fastai.vision.augment import RandTransform
 from fastai.vision.core import PILImage
 from fastcore.basics import store_attr
@@ -75,37 +73,6 @@ def create_layout(n_stages, plot_level):
                     ax_fourier, ax_tags]
 
 
-def initialize_csv_file(csv_fname):
-    """Sets up a CSV file to store the measurement results.
-
-    Parameters
-    ----------
-    csv_fname : str or pathlib.Path
-        The filename of the CSV file.
-
-    Returns
-    -------
-    None
-    """
-    csv_fname = Path(csv_fname)
-    # renaming csv file if it exists on disk already.
-    csv_fname = _check_aux_file(csv_fname)
-
-    # setting up the data columns that will be in the file.
-    DATA_COLS = ['image_id',
-                 'left_wing (mm)',
-                 'right_wing (mm)',
-                 'left_wing_center (mm)',
-                 'right_wing_center (mm)',
-                 'wing_span (mm)',
-                 'wing_shoulder (mm)',
-                 'position',
-                 'gender']
-
-    with open(csv_fname, 'w') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerow(DATA_COLS)
-    return csv_fname
 
 
 # required by fastai while predicting:
@@ -165,19 +132,6 @@ def read_orientation(image_path):
         return None
 
 
-def _check_aux_file(filename):
-    """Helper function. Checks if filename exists; if yes, adds a number to
-    it."""
-    while filename.is_file():
-        try:
-            name, number = filename.stem.split('_')
-            number = int(number) + 1
-            filename = Path(f"{name}_{number}{filename.suffix}")
-        except ValueError:
-            filename = Path(f"{filename.stem}_1{filename.suffix}")
-    return filename
-
-
 def _process_paths_in_input(input_name):
     """Helper function. Process the input argument and returns the images
     in path."""
@@ -215,21 +169,6 @@ def _read_paths_in_file(input_name):
             image_paths.extend(aux_paths)
 
     return list(set(image_paths))  # remove duplicated entries from list
-
-
-def _write_csv_data(csv_file, image_name, dist_mm, position, gender):
-    """Helper function. Writes data on the CSV input file."""
-    writer = csv.writer(csv_file)
-    writer.writerow([image_name,
-                     dist_mm["dist_l"],
-                     dist_mm["dist_r"],
-                     dist_mm["dist_l_center"],
-                     dist_mm["dist_r_center"],
-                     dist_mm["dist_span"],
-                     dist_mm["dist_shoulder"],
-                     position,
-                     gender])
-    return None
 
 
 def _read_filenames_in_folder(folder):
@@ -324,10 +263,6 @@ def main():
     if args.detailed_plot:
         plot_level = 2
 
-    # initializing the csv file.
-    if args.stage == 'measurements':
-        initialize_csv_file(csv_fname=args.path_csv)
-
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
 
@@ -337,14 +272,18 @@ def main():
 
     number_of_images = len(image_paths)
 
-    # Set up caching and import motha modules
+    # Set up caching and import mothra modules
     if args.cache:
         from mothra import cache
         import joblib
         cache.memory = joblib.Memory('./cachedir', verbose=0)
 
     from mothra import (ruler_detection, tracing, measurement, binarization,
-                        identification)
+                        identification, writing)
+
+    # Initializing csv file
+    if args.stage == 'measurements':
+        writing.initialize_csv_file(csv_fname=args.path_csv)
 
     for i, image_path in enumerate(image_paths):
         try:
@@ -379,11 +318,12 @@ def main():
                                                   T_space,
                                                   axes)
                     # measuring position and gender
-                    position, gender = identification.main(image_rgb)
+                    position, gender, probabilities = identification.main(image_rgb)
 
                     with open(args.path_csv, 'a') as csv_file:
-                        _write_csv_data(csv_file, image_name, dist_mm, position,
-                                        gender)
+                        writing.write_csv_data(csv_file, image_name, dist_mm,
+                                               position, gender,
+                                               probabilities)
 
             if plot_level > 0:
                 output_path = os.path.normpath(
