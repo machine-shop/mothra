@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 from skimage.io import imread
 from skimage.transform import rotate
 from skimage.util import img_as_ubyte
+from sys import platform
 from exif import Image
-from pathlib import Path
+from pathlib import Path, PosixPath, WindowsPath
 from fastai.vision.augment import RandTransform
 from fastai.vision.core import PILImage
 from fastcore.basics import store_attr
@@ -87,7 +88,12 @@ def initialize_csv_file(csv_fname):
     -------
     None
     """
+    if platform.startswith('win'):
+        temp = PosixPath
+        PosixPath = WindowsPath
+
     csv_fname = Path(csv_fname)
+
     # renaming csv file if it exists on disk already.
     csv_fname = _check_aux_file(csv_fname)
 
