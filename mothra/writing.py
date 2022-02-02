@@ -1,5 +1,4 @@
-import csv
-
+from csv import writer
 from pathlib import Path
 
 
@@ -29,28 +28,37 @@ def initialize_csv_file(csv_fname):
                  'wing_shoulder (mm)',
                  'position',
                  'gender',
-                 'probabilities']
+                 'prob_upside_down',
+                 'prob_female',
+                 'prob_male']
 
     with open(csv_fname, 'w') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerow(DATA_COLS)
+        write_to_file = writer(csv_file)
+        write_to_file.writerow(DATA_COLS)
     return csv_fname
 
 
 def write_csv_data(csv_file, image_name, dist_mm, position, gender,
                    probabilities):
     """Helper function. Writes data on the CSV input file."""
-    writer = csv.writer(csv_file)
-    writer.writerow([image_name,
-                     dist_mm["dist_l"],
-                     dist_mm["dist_r"],
-                     dist_mm["dist_l_center"],
-                     dist_mm["dist_r_center"],
-                     dist_mm["dist_span"],
-                     dist_mm["dist_shoulder"],
-                     position,
-                     gender,
-                     probabilities])
+    write_to_file = writer(csv_file)
+
+    # Separating probabilities into their own variables,
+    # according to the order defined at the network
+    prob_upside_down, prob_female, prob_male = probabilities
+
+    write_to_file.writerow([image_name,
+                            dist_mm["dist_l"],
+                            dist_mm["dist_r"],
+                            dist_mm["dist_l_center"],
+                            dist_mm["dist_r_center"],
+                            dist_mm["dist_span"],
+                            dist_mm["dist_shoulder"],
+                            position,
+                            gender,
+                            prob_upside_down,
+                            prob_female,
+                            prob_male])
     return None
 
 

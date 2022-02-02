@@ -57,16 +57,16 @@ def test_write_csv_data():
     }
     position = 'test_pos'
     gender = 'test_gender'
-    probabilities = "['testprob_1', 'testprob_2', 'testprob_3']"
+    probabilities = ['test_prob_ud', 'test_prob_f', 'test_prob_m']
 
     expected_lines = [
         ['image_id', 'left_wing (mm)', 'right_wing (mm)',
          'left_wing_center (mm)', 'right_wing_center (mm)',
          'wing_span (mm)', 'wing_shoulder (mm)', 'position',
-         'gender', 'probabilities'],
+         'gender', 'prob_upside_down', 'prob_female', 'prob_male'],
         ['test_image', 'test_l', 'test_r', 'test_dcl', 'test_dcr',
-        'test_span', 'test_shoulder', 'test_pos', 'test_gender',
-        "['testprob_1', 'testprob_2', 'testprob_3']"]
+         'test_span', 'test_shoulder', 'test_pos', 'test_gender',
+         'test_prob_ud', 'test_prob_f', 'test_prob_m']
         ]
 
     result_csv = writing.initialize_csv_file(csv_fname)
