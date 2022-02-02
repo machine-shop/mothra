@@ -3,11 +3,11 @@ from pathlib import Path
 from mothra import connection
 
 
-WEIGHTS_GENDER = './models/id_gender_test-3classes.pkl'
+WEIGHTS_CLASSES = './models/id_gender_test-3classes.pkl'
 CLASSES = {0: 'upside_down', 1: 'female', 2: 'male'}
 
 
-def predict_gender(image_rgb, weights=WEIGHTS_GENDER):
+def predicting_classes(image_rgb, weights=WEIGHTS_CLASSES):
     """Predicts position and gender of the lepidopteran in `image_rgb`,
     according to `weights`.
 
@@ -65,8 +65,8 @@ def main(image_rgb):
     """
     print('Identifying position and gender...')
     try:
-        prediction, probabilities = predict_gender(image_rgb,
-                                                   weights=WEIGHTS_GENDER)
+        prediction, probabilities = predicting_classes(image_rgb,
+                                                       weights=WEIGHTS_CLASSES)
 
         # converting probabilities to numpy array and rounding the result
         probabilities = [round(prob, ndigits=4)
