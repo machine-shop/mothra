@@ -59,7 +59,6 @@ def write_csv_data(csv_file, image_name, dist_mm, position, gender,
                             prob_upside_down,
                             prob_female,
                             prob_male])
-    return None
 
 
 def _check_aux_file(filename):
