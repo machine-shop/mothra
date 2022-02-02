@@ -3,13 +3,11 @@
 import numpy as np
 import os
 import argparse
-import csv
 import matplotlib.pyplot as plt
 from skimage.io import imread
 from skimage.transform import rotate
 from skimage.util import img_as_ubyte
 from exif import Image
-from pathlib import Path
 from fastai.vision.augment import RandTransform
 from fastai.vision.core import PILImage
 from fastcore.basics import store_attr

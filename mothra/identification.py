@@ -1,5 +1,3 @@
-import numpy as np
-
 from fastai.vision.learner import load_learner
 from pathlib import Path
 from mothra import connection
