@@ -1,188 +1,20 @@
 #!/bin/env python
 
-import numpy as np
 import os
 import argparse
 import matplotlib.pyplot as plt
 from skimage.io import imread
 from skimage.transform import rotate
 from skimage.util import img_as_ubyte
-from exif import Image
-from fastai.vision.augment import RandTransform
-from fastai.vision.core import PILImage
-from fastcore.basics import store_attr
+from mothra.misc import AlbumentationsTransform, label_func
+
 
 WSPACE_SUBPLOTS = 0.7
-SUPPORTED_IMAGE_EXT = ('.png', '.jpg', '.jpeg', '.tiff', '.tif')
-SUPPORTED_TEXT_EXT = ('.txt', '.text')
 
 """
 Example :
     $ python pipeline_argparse.py --stage tracing --plot -dpi 400
 """
-
-
-def create_layout(n_stages, plot_level):
-    """Creates Axes to plot figures
-
-    Parameters
-    ----------
-    n_stages : int
-        length of pipeline process
-    plot_level : int
-        0 : no plotting
-        1 : regular plots
-        2 : detailed plots
-
-    Returns
-    -------
-    axes : list of Axes
-    """
-    if plot_level == 0:
-        return None
-
-    elif plot_level == 1:
-        ncols = n_stages
-        fig, ax = plt.subplots(nrows=1, ncols=ncols, figsize=(12, 5))
-        if n_stages == 1:
-            ax = [ax]
-        ax_list = []
-        for ax in ax:
-            ax_list.append(ax)
-        return ax_list + [None] * (7 - n_stages)
-
-    elif plot_level == 2:
-        shape = (3, 3)
-        ax_main = plt.subplot2grid(shape, (0, 0))
-        ax_structure = plt.subplot2grid(shape, (0, 1))
-        ax_signal = plt.subplot2grid(shape, (1, 0), colspan=2)
-        ax_fourier = plt.subplot2grid(shape, (2, 0), colspan=2)
-
-        ax_tags = plt.subplot2grid(shape, (0, 2))
-        ax_bin = plt.subplot2grid(shape, (1, 2))
-        ax_poi = plt.subplot2grid(shape, (2, 2))
-        plt.tight_layout()
-        if n_stages == 1:
-            return [ax_main, None, None, ax_structure, ax_signal, ax_fourier,
-                    None]
-        elif n_stages == 2:
-            return [ax_main, ax_bin, None, ax_structure, ax_signal, ax_fourier,
-                    ax_tags]
-        elif n_stages == 3:
-            return [ax_main, ax_bin, ax_poi, ax_structure, ax_signal,
-                    ax_fourier, ax_tags]
-
-
-
-
-# required by fastai while predicting:
-class AlbumentationsTransform(RandTransform):
-    """A handler for multiple transforms from the package `albumentations`.
-    Required by fastai."""
-    split_idx,order=None,2
-    def __init__(self, train_aug, valid_aug): store_attr()
-
-    def before_call(self, b, split_idx):
-        self.idx = split_idx
-
-    def encodes(self, img: PILImage):
-        if self.idx == 0:
-            aug_img = self.train_aug(image=np.array(img))['image']
-        else:
-            aug_img = self.valid_aug(image=np.array(img))['image']
-        return PILImage.create(aug_img)
-
-
-# required by fastai while predicting:
-def label_func(image):
-    """Function used to label images while training. Required by fastai."""
-    return path/"labels"/f"{image.stem}{LABEL_EXT}"
-
-
-def read_orientation(image_path):
-    """Read orientation from image on path, according to EXIF data.
-
-    Parameters
-    ----------
-    image_path : str
-        Path of the input image.
-
-    Returns
-    -------
-    angle : int or None
-        Current orientation of the image in degrees, or None if EXIF data
-        cannot be read.
-    """
-    metadata = Image(image_path)
-
-    try:
-        if metadata.has_exif:
-            orientation = metadata.orientation.value
-            # checking possible orientations for images.
-            angles = {1: 0,  # (top, left)
-                      6: 90,  # (right, top)
-                      3: 180,  # (bottom, right)
-                      8: 270}  # (left, bottom)
-            return angles.get(orientation, 0)
-        else:
-            print(f'Cannot evaluate orientation for {image_path}.')
-            return None
-    except ValueError:  # ... is not a valid TiffByteOrder
-        print(f'Cannot evaluate orientation for {image_path}.')
-        return None
-
-
-def _process_paths_in_input(input_name):
-    """Helper function. Process the input argument and returns the images
-    in path."""
-    image_paths = []
-    try:
-        if os.path.isfile(input_name):
-            # if input is a text file, reads paths listed in it.
-            if input_name.lower().endswith(SUPPORTED_TEXT_EXT):
-                image_paths = _read_paths_in_file(input_name)
-            # if input is an image, add it to image_paths.
-            elif input_name.lower().endswith(SUPPORTED_IMAGE_EXT):
-                image_paths = [input_name]
-        elif(os.path.isdir(input_name)):
-            image_paths = _read_filenames_in_folder(input_name)
-    except:
-        print(f"Type of input not understood. Please enter path for single\
-                image, folder or text file containing paths.")
-        raise
-    return image_paths
-
-
-def _read_paths_in_file(input_name):
-    """Helper function. Reads image paths in input file."""
-    image_paths, aux_paths = [], []
-    with open(input_name) as txt_file:
-        for item in txt_file:
-            try:
-                item = item.strip()
-                if os.path.isdir(item):
-                    aux_paths = _read_filenames_in_folder(item)
-                elif os.path.isfile(item) and item.lower().endswith(SUPPORTED_IMAGE_EXT):
-                    aux_paths = [item]
-            except FileNotFoundError:
-                continue
-            image_paths.extend(aux_paths)
-
-    return list(set(image_paths))  # remove duplicated entries from list
-
-
-def _read_filenames_in_folder(folder):
-    """Helper function. Reads filenames in folder and appends them into a
-    list."""
-    image_paths = []
-    for path, _, items in os.walk(folder):
-        for item in items:
-            item = os.path.join(path, item)
-            if not item.lower().endswith(SUPPORTED_IMAGE_EXT):
-                continue
-            image_paths.append(item)
-
-    return image_paths
 
 
 def main():
@@ -242,14 +74,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Initialization
-    if os.path.exists(args.output_folder):
-        oldList = os.listdir(args.output_folder)
-        for oldFile in oldList:
-            os.remove(args.output_folder+"/"+oldFile)
-    else:
-        os.mkdir(args.output_folder)
-
     stages = ['ruler_detection', 'binarization', 'measurements']
 
     if args.stage not in stages:
@@ -263,15 +87,6 @@ def main():
     if args.detailed_plot:
         plot_level = 2
 
-    stage_idx = stages.index(args.stage)
-    pipeline_process = stages[:stage_idx + 1]
-
-    # reading and processing input path.
-    input_name = args.input
-    image_paths = _process_paths_in_input(input_name)
-
-    number_of_images = len(image_paths)
-
     # Set up caching and import mothra modules
     if args.cache:
         from mothra import cache
@@ -279,7 +94,19 @@ def main():
         cache.memory = joblib.Memory('./cachedir', verbose=0)
 
     from mothra import (ruler_detection, tracing, measurement, binarization,
-                        identification, writing)
+                        identification, misc, plotting, writing)
+
+    # Initializing output folder
+    misc.initialize_path(args.output_folder)
+
+    stage_idx = stages.index(args.stage)
+    pipeline_process = stages[:stage_idx + 1]
+
+    # reading and processing input path.
+    input_name = args.input
+    image_paths = misc.process_paths_in_input(input_name)
+
+    number_of_images = len(image_paths)
 
     # Initializing csv file
     if args.stage == 'measurements':
@@ -288,7 +115,7 @@ def main():
     for i, image_path in enumerate(image_paths):
         try:
             # creating axes layout for plotting.
-            axes = create_layout(len(pipeline_process), plot_level)
+            axes = plotting.create_layout(len(pipeline_process), plot_level)
 
             image_name = os.path.basename(image_path)
             print(f'Image {i+1}/{number_of_images} : {image_name}')
@@ -296,7 +123,7 @@ def main():
             image_rgb = imread(image_path)
 
             # check image orientation and untilt it, if necessary.
-            angle = read_orientation(image_path)
+            angle = misc.read_orientation(image_path)
 
             if angle not in (None, 0):  # angle == 0 does not need untilting
                 image_rgb = img_as_ubyte(rotate(image_rgb, angle=angle, resize=True))
