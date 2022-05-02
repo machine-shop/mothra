@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import pathlib
 from exif import Image
 from fastai.vision.augment import RandTransform
 from fastai.vision.core import PILImage
@@ -96,6 +97,14 @@ def process_paths_in_input(input_name):
                 image, folder or text file containing paths.")
         raise
     return image_paths
+
+
+def _fix_path_if_windows():
+    """Helper function. Checks if the operating system is Windows-based, and adapts
+    the path accordingly."""
+    if os.name == 'nt':
+        pathlib.PosixPath = pathlib.WindowsPath
+    return None
 
 
 def _read_paths_in_file(input_name):

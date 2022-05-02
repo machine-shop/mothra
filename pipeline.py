@@ -18,6 +18,9 @@ Example :
 
 
 def main():
+    # checking if OS is windows-based; if yes, fixing path accordingly
+    misc._fix_path_if_windows()
+
     # Assign description to the help doc
     parser = argparse.ArgumentParser(
         description='This is mothra, a software to automate different\
