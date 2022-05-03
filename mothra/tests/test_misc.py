@@ -72,7 +72,7 @@ def test_read_angle():
     Summary
     -------
     We provide an input image with known angle and compare its angle
-    read by misc.read_angle.
+    read by `misc.read_angle`.
 
     Expected
     --------
