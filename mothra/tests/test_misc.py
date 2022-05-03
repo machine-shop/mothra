@@ -1,11 +1,32 @@
 from glob import glob
 from mothra import misc
+from skimage.io import imread
 
 
 PATH_TEST_FILES = 'mothra/tests/test_files'
 TEST_INPUT_FILE = f'{PATH_TEST_FILES}/input_file.txt'
 TEST_INPUT_IMAGES = glob(f'{PATH_TEST_FILES}/test_input/*.JPG')
-TEST_TILTED_IMAGE =  f'{PATH_TEST_FILES}/test_input/BMNHE_1105737_17193_6eec94847b4939c6d117429d59829aac7a9fadf9.JPG'
+TEST_IMAGE_0DEG =  f'{PATH_TEST_FILES}/test_input/BMNHE_1105737_angle0.JPG'
+TEST_IMAGE_90DEG =  f'{PATH_TEST_FILES}/test_input/BMNHE_1105737_angle90.JPG'
+
+
+def test_auto_rotate():
+    """Checks if tilted image is rotated correctly. 
+
+    Summary
+    -------
+    We pass a test image and a tilted version of it, and check if
+    misc.auto_rotate fixes the orientation of the tilted one correctly.
+
+    Expected
+    --------
+    image_0deg and image_90deg are equal.
+    """
+    image_0deg = imread(TEST_IMAGE_0DEG)
+    image_90deg = imread(TEST_IMAGE_90DEG)
+    image_90deg = misc.auto_rotate(image_90deg, TEST_IMAGE_90DEG)
+
+    assert (image_0deg.all() == image_90deg.all())
 
 
 def test_process_paths_in_input():
@@ -45,20 +66,20 @@ def test_read_filenames_in_folder():
     assert result_fnames.sort() == TEST_INPUT_IMAGES.sort()
 
 
-def test_read_orientation():
+def test_read_angle():
     """Checks if orientation is extracted correctly from EXIF data.
 
     Summary
     -------
     We provide an input image with known angle and compare its angle
-    read by misc.read_orientation.
+    read by misc.read_angle.
 
     Expected
     --------
     Orientation for the input image is 6, (right, top);
-    misc.read_orientation should return angle equals 90 deg.
+    misc.read_angle should return angle equals 90 deg.
     """
-    angle = misc.read_orientation(TEST_TILTED_IMAGE)
+    angle = misc.read_angle(TEST_IMAGE_90DEG)
 
     assert angle == 90
 
