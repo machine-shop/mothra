@@ -74,7 +74,7 @@ def main():
     # Enable auto-rotation
     parser.add_argument('--auto_rotate',
                         action='store_true',
-                        help='Enable auto-rotation of input images')
+                        help='Enable rotation of input images based on EXIF tag')
 
     args = parser.parse_args()
 
