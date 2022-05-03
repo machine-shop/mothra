@@ -97,7 +97,7 @@ def main():
                         identification, misc, plotting, writing)
 
     # checking if OS is windows-based; if yes, fixing path accordingly
-    misc._fix_path_if_windows()
+    misc._set_platform_path()
 
     # Initializing output folder
     misc.initialize_path(args.output_folder)

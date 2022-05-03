@@ -4,7 +4,7 @@ import pathlib
 from exif import Image
 from fastai.vision.augment import RandTransform
 from fastai.vision.core import PILImage
-
+from sys import platform
 
 SUPPORTED_IMAGE_EXT = ('.png', '.jpg', '.jpeg', '.tiff', '.tif')
 SUPPORTED_TEXT_EXT = ('.txt', '.text')
@@ -99,14 +99,6 @@ def process_paths_in_input(input_name):
     return image_paths
 
 
-def _set_platform_path():
-    """Helper function. Checks if the operating system is Windows-based, and adapts
-    the path accordingly."""
-    if os.name == 'nt':
-        pathlib.PosixPath = pathlib.WindowsPath
-    return None
-
-
 def _read_paths_in_file(input_name):
     """Helper function. Reads image paths in input file."""
     image_paths, aux_paths = [], []
@@ -137,3 +129,11 @@ def _read_filenames_in_folder(folder):
             image_paths.append(item)
 
     return image_paths
+
+
+def _set_platform_path():
+    """Helper function. Checks if the operating system is Windows-based, and adapts
+    the path accordingly."""
+    if platform.startswith('win'):
+        pathlib.PosixPath = pathlib.WindowsPath
+    return None
