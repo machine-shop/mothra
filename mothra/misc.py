@@ -99,7 +99,7 @@ def process_paths_in_input(input_name):
     return image_paths
 
 
-def _fix_path_if_windows():
+def _set_platform_path():
     """Helper function. Checks if the operating system is Windows-based, and adapts
     the path accordingly."""
     if os.name == 'nt':
