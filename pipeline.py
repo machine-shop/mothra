@@ -98,7 +98,7 @@ def main():
         cache.memory = joblib.Memory('./cachedir', verbose=0)
 
     from mothra import (ruler_detection, tracing, measurement, binarization,
-                        identification, misc, plotting, writing)
+                        identification, misc, plotting, preprocessing, writing)
 
     # Initializing output folder
     misc.initialize_path(args.output_folder)
@@ -128,7 +128,7 @@ def main():
 
             # check image orientation and untilt it, if necessary.
             if args.auto_rotate:
-                image_rgb = misc.auto_rotate(image_rgb, image_path)
+                image_rgb = preprocessing.auto_rotate(image_rgb, image_path)
 
             for step in pipeline_process:
                 # first, binarize the input image and return its components.
