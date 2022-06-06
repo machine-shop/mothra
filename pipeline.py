@@ -96,6 +96,9 @@ def main():
     from mothra import (ruler_detection, tracing, measurement, binarization,
                         identification, misc, plotting, writing)
 
+    # checking if OS is windows-based; if yes, fixing path accordingly
+    misc._set_platform_path()
+
     # Initializing output folder
     misc.initialize_path(args.output_folder)
 
