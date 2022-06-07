@@ -4,8 +4,7 @@ import os
 import argparse
 import matplotlib.pyplot as plt
 from skimage.io import imread
-from skimage.transform import rotate
-from skimage.util import img_as_ubyte
+
 from mothra.misc import AlbumentationsTransform, label_func
 
 
@@ -72,6 +71,11 @@ def main():
                         action='store_true',
                         help='Enable computation cache (useful when developing algorithms)')
 
+    # Enable auto-rotation
+    parser.add_argument('--auto_rotate',
+                        action='store_true',
+                        help='Enable rotation of input images based on EXIF tag')
+
     args = parser.parse_args()
 
     stages = ['ruler_detection', 'binarization', 'measurements']
@@ -94,7 +98,7 @@ def main():
         cache.memory = joblib.Memory('./cachedir', verbose=0)
 
     from mothra import (ruler_detection, tracing, measurement, binarization,
-                        identification, misc, plotting, writing)
+                        identification, misc, plotting, preprocessing, writing)
 
     # checking if OS is windows-based; if yes, fixing path accordingly
     misc._set_platform_path()
@@ -126,10 +130,8 @@ def main():
             image_rgb = imread(image_path)
 
             # check image orientation and untilt it, if necessary.
-            angle = misc.read_orientation(image_path)
-
-            if angle not in (None, 0):  # angle == 0 does not need untilting
-                image_rgb = img_as_ubyte(rotate(image_rgb, angle=angle, resize=True))
+            if args.auto_rotate:
+                image_rgb = preprocessing.auto_rotate(image_rgb, image_path)
 
             for step in pipeline_process:
                 # first, binarize the input image and return its components.

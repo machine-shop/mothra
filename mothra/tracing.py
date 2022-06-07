@@ -2,7 +2,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from skimage.measure import regionprops
 from joblib import Memory
-from scipy.ndimage.morphology import binary_dilation
+from scipy.ndimage import binary_dilation
 
 
 from .cache import memory

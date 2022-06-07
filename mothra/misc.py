@@ -44,40 +44,6 @@ def label_func(image):
     return path/"labels"/f"{image.stem}{LABEL_EXT}"
 
 
-
-def read_orientation(image_path):
-    """Read orientation from image on path, according to EXIF data.
-
-    Parameters
-    ----------
-    image_path : str
-        Path of the input image.
-
-    Returns
-    -------
-    angle : int or None
-        Current orientation of the image in degrees, or None if EXIF data
-        cannot be read.
-    """
-    metadata = Image(image_path)
-
-    try:
-        if metadata.has_exif:
-            orientation = metadata.orientation.value
-            # checking possible orientations for images.
-            angles = {1: 0,  # (top, left)
-                      6: 90,  # (right, top)
-                      3: 180,  # (bottom, right)
-                      8: 270}  # (left, bottom)
-            return angles.get(orientation, 0)
-        else:
-            print(f'Cannot evaluate orientation for {image_path}.')
-            return None
-    except ValueError:  # ... is not a valid TiffByteOrder
-        print(f'Cannot evaluate orientation for {image_path}.')
-        return None
-
-
 def process_paths_in_input(input_name):
     """Helper function. Process the input argument and returns the images
     in path."""
