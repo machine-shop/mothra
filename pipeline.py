@@ -59,7 +59,8 @@ def main():
     # Enable auto-rotation
     parser.add_argument('-ar', '--auto_rotate',
                         action='store_true',
-                        help='Enable rotation of input images based on EXIF tag')
+                        help='Enable automatic rotation of input images\
+                        based on EXIF tag')
 
     # Dots per inch
     parser.add_argument('-dpi',
