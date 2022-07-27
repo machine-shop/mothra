@@ -47,6 +47,7 @@ def main():
                         help='Output path for raw image',
                         required=False,
                         default='outputs')
+
     # Stage
     parser.add_argument('-s', '--stage',
                         type=str,
@@ -54,6 +55,12 @@ def main():
                         'measurements'",
                         required=False,
                         default='measurements')
+
+    # Enable auto-rotation
+    parser.add_argument('-ar', '--auto_rotate',
+                        action='store_true',
+                        help='Enable rotation of input images based on EXIF tag')
+
     # Dots per inch
     parser.add_argument('-dpi',
                         type=int,
@@ -70,11 +77,6 @@ def main():
     parser.add_argument('--cache',
                         action='store_true',
                         help='Enable computation cache (useful when developing algorithms)')
-
-    # Enable auto-rotation
-    parser.add_argument('--auto_rotate',
-                        action='store_true',
-                        help='Enable rotation of input images based on EXIF tag')
 
     args = parser.parse_args()
 
