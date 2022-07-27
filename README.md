@@ -31,6 +31,7 @@ The following parameters can be used as input arguments for `pipeline.py`:
 * `-i`, `--input` : A single image input or a directory of images to be analyzed. (Default is `input_images`).
 * `-o`, `--output_folder` : The output directory in which the result images will be outputted. (Default is `outputs`).
 * `-s`, `--stage` : The stage which to run the pipeline until. Options are `'ruler_detection'`, `'binarization'`, and `'measurements'`. Default is `measurement` (running to completion). Running the pipeline and stopping at an earlier stage can be useful for debugging.
+* `-ar`, `--auto_rotate` : Enable automatic rotation of input images, according to the information in the EXIF tag.
 * `-csv`, `--path_csv` :  Path of `.csv` file for the measurement results. (Default is `results.csv`).
 * `-dpi` : Optional argument to specify resolution of the output image. (Default is `300`.)
 
