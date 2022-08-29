@@ -20,10 +20,13 @@ def auto_rotate(image_rgb, image_path):
     """
     angle = read_angle(image_path)
 
-    print(f'Original EXIF image angle: {angle} deg')
+    if angle:
+        print(f'Original EXIF image angle: {angle} deg')
+    else:
+        print(f"Couldn't determine EXIF image angle")
 
     if angle not in (None, 0):  # angle == 0 does not need untilting
-        image_rgb = rotate(image_rgb, angle=angle, resize=True) 
+        image_rgb = rotate(image_rgb, angle=angle, resize=True)
 
     return img_as_ubyte(image_rgb)
 
