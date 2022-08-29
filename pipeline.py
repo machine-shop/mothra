@@ -128,7 +128,7 @@ def main():
             axes = plotting.create_layout(len(pipeline_process), plot_level)
 
             image_name = os.path.basename(image_path)
-            print(f'Image {i+1}/{number_of_images} : {image_name}')
+            print(f'\nImage {i+1}/{number_of_images} : {image_name}')
 
             image_rgb = imread(image_path)
 
