@@ -1,0 +1,5 @@
+Wilson, R. J., de Siqueira, A. F., Brooks, S. J., Price, B. W., Simon, L. M.,
+van der Walt, S. J. & Fenberg, P. B. (2022). Applying computer vision to
+digitised natural history collections for climate change research:
+Temperature-size responses in British butterflies. Methods in Ecology and
+Evolution, 00, 1– 13. https://doi.org/10.1111/2041-210X.13844
