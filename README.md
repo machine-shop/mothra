@@ -173,3 +173,12 @@ File results:
         BMNHE_1354218.JPG (an outlier image)
         ...
 ```
+
+## Citing mothra
+
+If you find mothra useful, please cite:
+
+[Wilson, R. J. et al. (2022). Applying computer vision to digitised natural history collections for climate change research: Temperature-size responses in British butterflies. _Methods in Ecology and Evolution_, 1–13](https://doi.org/10.1111/2041-210X.13844).
+
+Mothra's logo was designed by [Rogério Maroja](https://rogeriomaroja.myportfolio.com/mothra), and is available under the [CC-BY license](https://creativecommons.org/licenses/by/2.0/).
+
