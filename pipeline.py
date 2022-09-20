@@ -1,12 +1,10 @@
 #!/bin/env python
 
 import os
-import argparse
 import matplotlib.pyplot as plt
+
+from mothra.misc import AlbumentationsTransform, label_func, _generate_parser
 from skimage.io import imread
-
-from mothra.misc import AlbumentationsTransform, label_func
-
 
 WSPACE_SUBPLOTS = 0.7
 
@@ -17,69 +15,7 @@ Example :
 
 
 def main():
-    # Assign description to the help doc
-    parser = argparse.ArgumentParser(
-        description='This is mothra, a software to automate different\
-        measurements on images of Lepidopterae.')
-    # Add arguments
-    # Plotting
-    parser.add_argument('-p', '--plot',
-                        action='store_true',
-                        help='If entered images are plotted to the output\
-                        folder')
-
-    parser.add_argument('-pp', '--detailed_plot',
-                        action='store_true',
-                        help='If entered detailed images are plotted to the\
-                        output folder')
-
-    # Input path
-    parser.add_argument('-i', '--input',
-                        type=str,
-                        help='Input path for single image, folder or text\
-                        file (extension txt) containing paths',
-                        required=False,
-                        default='input_images')
-
-    # Output path
-    parser.add_argument('-o', '--output_folder',
-                        type=str,
-                        help='Output path for raw image',
-                        required=False,
-                        default='outputs')
-
-    # Stage
-    parser.add_argument('-s', '--stage',
-                        type=str,
-                        help="Stage name: 'binarization', 'ruler_detection',\
-                        'measurements'",
-                        required=False,
-                        default='measurements')
-
-    # Enable auto-rotation
-    parser.add_argument('-ar', '--auto_rotate',
-                        action='store_true',
-                        help='Enable automatic rotation of input images\
-                        based on EXIF tag')
-
-    # Dots per inch
-    parser.add_argument('-dpi',
-                        type=int,
-                        help='Dots per inch of the saved figures',
-                        default=300)
-
-    # CSV output path
-    parser.add_argument('-csv', '--path_csv',
-                        type=str,
-                        help='Path of the resulting csv file',
-                        default='outputs/results.csv')
-
-    # Disable cache
-    parser.add_argument('--cache',
-                        action='store_true',
-                        help='Enable computation cache (useful when developing algorithms)')
-
-    args = parser.parse_args()
+    args = _generate_parser()
 
     stages = ['ruler_detection', 'binarization', 'measurements']
 
