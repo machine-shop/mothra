@@ -1,13 +1,13 @@
-albumentations == 1.0.3
-matplotlib
+albumentations
+matplotlib>=3.6.1
 scikit-image
 numpy
 scipy
 pandas
 pytest-timeout
 joblib
-fastai == 2.4.1
-torch == 1.8.1
-torchvision == 0.9.1
+fastai
+torch
+torchvision
 pooch
 exif
