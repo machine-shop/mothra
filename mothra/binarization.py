@@ -1,4 +1,5 @@
 import numpy as np
+import scipy as sp
 from skimage.measure import label, regionprops
 from skimage.transform import rescale
 from skimage.util import img_as_bool
@@ -102,12 +103,16 @@ def binarization(image_rgb, weights=WEIGHTS_BIN):
 
     print('Processing U-net...')
     _, _, classes = learner.predict(image_rgb)
-    _, tags_bin, ruler_bin, lepidop_bin = classes[:4]
+    _, tags_bin, ruler_bin, lepidop_bin = np.asarray(classes)[:4]
 
     # rescale the predicted images back up and binarize them.
     tags_bin = img_as_bool(_rescale_image(image_rgb, tags_bin))
     ruler_bin = img_as_bool(_rescale_image(image_rgb, ruler_bin))
     lepidop_bin = img_as_bool(_rescale_image(image_rgb, lepidop_bin))
+
+    tags_bin = sp.ndimage.binary_fill_holes(tags_bin)
+    ruler_bin = sp.ndimage.binary_fill_holes(ruler_bin)
+    lepidop_bin = sp.ndimage.binary_fill_holes(lepidop_bin)
 
     return tags_bin, ruler_bin, lepidop_bin
 

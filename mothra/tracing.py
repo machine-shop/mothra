@@ -1,8 +1,7 @@
 import numpy as np
-from scipy import ndimage as ndi
+import scipy as sp
 from skimage.measure import regionprops
 from joblib import Memory
-from scipy.ndimage import binary_dilation
 
 
 from .cache import memory
@@ -23,15 +22,22 @@ def remove_antenna(half_binary):
         wing)
     """
 
-    markers, _ = ndi.label(1-half_binary, ndi.generate_binary_structure(2, 1))
+    markers, _ = sp.ndimage.label(
+        1 - half_binary,
+        sp.ndimage.generate_binary_structure(2, 1)
+    )
     regions = regionprops(markers)
 
     areas = np.array([r.area for r in regions])
     idx_sorted = 1 + np.argsort(-areas)[:2]
 
     try:
-        dilated_bg = binary_dilation(markers == idx_sorted[0], iterations=35)
-        dilated_hole = binary_dilation(markers == idx_sorted[1], iterations=35)
+        dilated_bg = sp.ndimage.binary_dilation(
+            markers == idx_sorted[0], iterations=35
+        )
+        dilated_hole = sp.ndimage.binary_dilation(
+            markers == idx_sorted[1], iterations=35
+        )
         intersection = np.minimum(dilated_bg, dilated_hole)
         without_antenna = np.copy(half_binary)
         without_antenna[intersection] = 0
@@ -56,8 +62,10 @@ def detect_outer_pix(half_binary, center):
     outer_pix : 1D array
         relative coordinates of the outer pixel (r, c)
     """
-    markers, _ = ndi.label(half_binary,
-                           ndi.generate_binary_structure(2, 1))
+    markers, _ = sp.ndimage.label(
+        half_binary,
+        sp.ndimage.generate_binary_structure(2, 1)
+    )
     regions = regionprops(markers)
     areas = [r.area for r in regions]
     idx_max = np.argmax(areas)
@@ -106,7 +114,9 @@ def detect_inner_pix(half_binary, outer_pix, side):
 
     focus_inv = 1 - focus
 
-    markers, _ = ndi.label(focus_inv, ndi.generate_binary_structure(2, 1))
+    markers, _ = sp.ndimage.label(
+        focus_inv, sp.ndimage.generate_binary_structure(2, 1)
+    )
     regions = regionprops(markers)
 
     # if idx in regions is not 0, bottom region is considered for inner_pix,
@@ -164,13 +174,11 @@ def main(binary, axes=None):
 
     Returns
     -------
-    points_interest : dictionary 
+    points_interest : dictionary
         Dictionary containing the points of interest in the form [y, x],
-        keyed with "outer_pix_l", "inner_pix_l", "outer_pix_r", "inner_pix_r", 
+        keyed with "outer_pix_l", "inner_pix_l", "outer_pix_r", "inner_pix_r",
         "body_center"
     """
-    binary = binary_dilation(binary, iterations=2)
-
     # Split the butterfly
     middle = split_picture(binary)
 
