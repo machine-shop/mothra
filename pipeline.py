@@ -20,8 +20,8 @@ def main():
     stages = ['ruler_detection', 'binarization', 'measurements']
 
     if args.stage not in stages:
-        print((f"* mothra expects stage to be 'ruler_detection', "
-               f"binarization', or 'measurements'. Received '{args.stage}'"))
+        print(f"* mothra expects stage to be 'ruler_detection', "
+               f"binarization', or 'measurements'. Received '{args.stage}'")
         return None
 
     plot_level = 0

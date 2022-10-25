@@ -12,23 +12,23 @@ jobs:
       PYTHON: 3.9
 
     steps:
-    - name: Checkout mothra
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
+      - name: Checkout mothra
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
 
-    - name: Setup Python
-      uses: actions/setup-python@master
-      with:
-        python-version: 3.9
+      - name: Setup Python
+        uses: actions/setup-python@master
+        with:
+          python-version: 3.9
 
-    - name: Generate Report
-      run: |
-        pip install coverage pytest
-        pip install -r requirements.txt
-        PYTHONPATH=. coverage run -m pytest
-        coverage report -m  # showing coverage output
-        coverage xml  # generates file needed for CodeCov
+      - name: Generate Report
+        run: |
+          pip install coverage pytest
+          pip install -r requirements.txt
+          PYTHONPATH=. coverage run -m pytest
+          coverage report -m  # showing coverage output
+          coverage xml  # generates file needed for CodeCov
 
-    - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v2
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v2

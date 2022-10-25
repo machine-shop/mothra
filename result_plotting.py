@@ -147,4 +147,3 @@ if args.copy_outliers:
         shutil.copy(image_path, outliers_folder)
 
     print("done")
-

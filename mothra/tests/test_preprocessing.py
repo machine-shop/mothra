@@ -7,7 +7,7 @@ TEST_IMAGE_90DEG =  f'{PATH_TEST_FILES}/test_input/BMNHE_1105737_angle90.JPG'
 
 
 def test_auto_rotate():
-    """Checks if tilted image is rotated correctly. 
+    """Checks if tilted image is rotated correctly.
 
     Summary
     -------
