@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enrichment-service-mothra
+  labels:
+    app: enrichment-service-mothra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: enrichment-service-mothra
+  template:
+    metadata:
+      labels:
+        app: enrichment-service-mothra
+    spec:
+      containers:
+        - name: enrichment-service-mothra
+          image: public.ecr.aws/dissco/mothra-lepidoptera-measuring
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: KAFKA_CONSUMER_HOST
+              value: kafka.kafka.svc.cluster.local:9092
+            - name: KAFKA_PRODUCER_HOST
+              value: kafka.kafka.svc.cluster.local:9092
+            - name: KAFKA_PRODUCER_TOPIC
+              value: topic-multi
+            - name: KAFKA_CONSUMER_GROUP
+              value: group
+            - name: KAFKA_CONSUMER_TOPIC
+              value: mothra
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: enrichment-service-mothra-scaled-object
+spec:
+  scaleTargetRef:
+    name: enrichment-service-mothra
+  minReplicaCount: 0
+  maxReplicaCount:  1
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: kafka.kafka.svc.cluster.local:9092
+      consumerGroup: group
+      topic: mothra
+      lagThreshold: '5'

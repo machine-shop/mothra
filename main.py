@@ -73,7 +73,7 @@ def mothra(image_uri):
         cache.memory = joblib.Memory('./cachedir', verbose=0)
 
     from mothra import (ruler_detection, tracing, measurement, binarization,
-                        identification, misc, preprocessing, writing)
+                        identification, misc, preprocessing)
 
     stage_idx = stages.index(args.stage)
     pipeline_process = stages[:stage_idx + 1]
